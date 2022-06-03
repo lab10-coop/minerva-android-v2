@@ -10,15 +10,19 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.transition.TransitionManager
+import com.google.gson.Gson
 import minerva.android.R
 import minerva.android.databinding.TokensAndCollectiblesLayoutBinding
 import minerva.android.extension.toggleVisibleOrGone
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
+import minerva.android.main.MainActivity.Companion.ZERO
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.ERCTokensList
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.widget.token.TokenView
 import java.math.BigDecimal
 
@@ -141,6 +145,41 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                     collectiblesHeader.visibleOrGone(visibility)
                     if (isWidgetOpen && collectiblesContainer.isVisible) {
                         removeAllViews()
+                        //list for favorites tokens
+                        val favoriteTokens: MutableList<ERCToken> = mutableListOf()
+                        //filling favoriteTokens list from main account
+                        account.accountTokens.forEach { accountToken ->
+                            val token: ERCToken = accountToken.token
+                            if (token.isFavorite)
+                                if (!favoriteTokens.contains(token)) favoriteTokens.add(token)
+                        }
+                        //create "My Favorites" group(with nft group) like usual item
+                        if (favoriteTokens.size > ZERO) {
+                            //create json array of tokens addresses for send/show it in "NftCollectionFragment"
+                            val favoriteTokenAddresses: MutableList<String> = mutableListOf()
+                            favoriteTokens.forEach { token ->
+                                if (!favoriteTokenAddresses.contains(token.address)) favoriteTokenAddresses.add(token.address)
+                            }
+                            //addresses to json wrapper (json array)
+                            val favoriteTokenAddressesToJson: String = Gson().toJson(favoriteTokenAddresses)
+                            //add "My Favorites" group to token/nft list like usual token/nft item
+                            addView(CollectibleView(context).apply {
+                                initView(
+                                    account,
+                                    collectibleViewCallback,
+                                    //create mock token entity with favorites tokens data(for recognize it latter)
+                                    ERCToken(
+                                        chainId = FAVORITE_GROUP_ID,
+                                        symbol = resources.getString(R.string.my_favorites),
+                                        address = favoriteTokenAddressesToJson,
+                                        collectionName = resources.getString(R.string.my_favorites_item_description),
+                                        type = TokenType.ERC1155),
+                                    favoriteTokens.size.toBigDecimal(), //count of token/nft in items
+                                    TOKEN_LOGO.FAVORITE_GROUP
+                                )
+                            })
+                        }
+
                         collectibles.forEach { collectiblesWithBalance ->
                             addView(CollectibleView(context).apply {
                                 initView(
@@ -163,6 +202,10 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         private const val START_DRAWABLE_INDEX = 0
         private const val START_ROTATION_LEVEL = 10000
         private const val STOP_ROTATION_LEVEL = 0
+        private const val FAVORITE_GROUP_ID = -2
+        enum class TOKEN_LOGO {
+            FAVORITE_GROUP, URI
+        }
     }
 
     //TODO this method is not used, because Asset Manage screen is not implemented yet - ready to use UI

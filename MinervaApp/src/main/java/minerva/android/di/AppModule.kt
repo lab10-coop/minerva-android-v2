@@ -94,14 +94,15 @@ private val appModules = module {
     viewModel { RampViewModel(get(), get()) }
     viewModel { DappsViewModel(get(), get()) }
     viewModel { FiatViewModel(get(), get(), get()) }
-    viewModel { (accountId: Int, collectionAddress: String) ->
+    viewModel { (accountId: Int, collectionAddress: String, isGroup: Boolean) ->
         NftCollectionViewModel(
             get(),
             get(),
             get(),
             get(),
             accountId,
-            collectionAddress
+            collectionAddress,
+            isGroup
         )
     }
 }

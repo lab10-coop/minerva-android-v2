@@ -112,11 +112,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         )
     }
 
-    override fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String) {
+    override fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean) {
         interactor.showNftCollectionScreen(
             viewModel.indexOfRawAccounts(account),
             tokenAddress,
-            collectionName
+            collectionName,
+            isGroup
         )
     }
 

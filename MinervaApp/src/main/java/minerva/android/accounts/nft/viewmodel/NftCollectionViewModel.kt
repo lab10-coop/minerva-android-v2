@@ -3,6 +3,8 @@ package minerva.android.accounts.nft.viewmodel
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.SingleSource
@@ -21,6 +23,7 @@ import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
@@ -40,7 +43,8 @@ class NftCollectionViewModel(
     private val transactionRepository: TransactionRepository,
     private val walletActionsRepository: WalletActionsRepository,
     private val accountId: Int,
-    private val collectionAddress: String
+    private val collectionAddress: String, //json with address(es) of token
+    private val isGroup: Boolean //combine all favorites token like one item
 ) : BaseViewModel() {
 
     private val nftList = mutableListOf<NftItem>()
@@ -259,15 +263,43 @@ class NftCollectionViewModel(
     fun getNftForCollection() {
         _loadingLiveData.value = true
         accountManager.loadAccount(accountId).let { account ->
-            val visibleTokens = account.getVisibleTokens()
-            //clear previous data which is the same as current
-            if (!visibleTokens.isEmpty()) nftList.clear()
+            val visibleTokens: MutableList<AccountToken> = account.getVisibleTokens().toMutableList()
+            //clear previous data which can Zis the same as current
+            nftList.clear()
+            //get type of "List<String>" for decode addresses from json (from "collectionAddress")
+            val listTypeToken = object : TypeToken<List<String>>() {}.type
+            //get list of favorite tokens addresses from json wrapper(json array)
+            val favoriteTokenAddresses: MutableList<String> = Gson()
+                .fromJson<List<String>>(collectionAddress, listTypeToken).toMutableList()
+            //get accountsToken from account according to addresses which came from favoriteTokenAddresses
+            account.accountTokens.forEach { accountToken ->
+                favoriteTokenAddresses.forEach { favTokenAddress ->
+                    if (accountToken.token.address.equals(favTokenAddress)) visibleTokens.add(accountToken)
+                }
+            }
 
-            tokenManager.getNftsPerAccount(account.chainId, account.address, collectionAddress).forEach { token ->
-                with(token) {
-                    visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId }?.let {
-                        nftList.add(NftItem(address, tokenId ?: String.Empty, nftContent, name, type.isERC1155(), decimals, it.currentBalance
-                            , isFavorite = it.token.isFavorite))
+            favoriteTokenAddresses.forEach { favoriteTokenAddress ->
+                tokenManager.getNftsPerAccount(account.chainId, account.address, favoriteTokenAddress).forEach { token ->
+                    with(token) {
+                        val filteredVisibleTokens: AccountToken?
+
+                        if (isGroup) //show only favorite token/nft
+                            filteredVisibleTokens = visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId && isFavorite }
+                        else
+                            filteredVisibleTokens = visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId }
+                        //filling main token/nft list
+                        filteredVisibleTokens?.let {
+                            nftList.add(
+                                NftItem(
+                                    address,
+                                    tokenId ?: String.Empty,
+                                    nftContent,
+                                    name,
+                                    type.isERC1155(),
+                                    decimals,
+                                    it.currentBalance,
+                                    isFavorite = it.token.isFavorite))
+                        }
                     }
                 }
             }
