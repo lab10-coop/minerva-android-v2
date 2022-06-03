@@ -268,7 +268,7 @@
   {
     "name": "Arbitrum One",
     "isActive": true,
-    "token": "AETH",
+    "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://arbitrum.rpc.minerva.digital",
     "wsRpc": "wss://arbitrum.rpc.minerva.digital",
@@ -296,7 +296,7 @@
   {
     "name": "Optimism",
     "isActive": true,
-    "token": "OETH",
+    "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://optimism.rpc.minerva.digital",
     "wsRpc": "wss://optimism.rpc.minerva.digital",
