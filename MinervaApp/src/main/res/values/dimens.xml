@@ -3,12 +3,15 @@
     <dimen name="bottom_navigation_bar_height">64dp</dimen>
     <dimen name="margin_big">20dp</dimen>
     <dimen name="margin_xbig">24dp</dimen>
+    <dimen name="margin_xxbig">28dp</dimen>
     <dimen name="margin_large">32dp</dimen>
     <dimen name="margin_xlarge">40dp</dimen>
     <dimen name="margin_xxlarge">48dp</dimen>
     <dimen name="margin_xxxlarge">64dp</dimen>
     <dimen name="margin_xxxxlarge">56dp</dimen>
     <dimen name="margin_xxxxxxxlarge">96dp</dimen>
+    <dimen name="margin_x_average">18dp</dimen>
+    <dimen name="margin_average">14dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
