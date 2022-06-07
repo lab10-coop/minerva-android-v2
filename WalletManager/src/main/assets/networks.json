@@ -301,7 +301,7 @@
     "httpRpc": "https://optimism.rpc.minerva.digital",
     "wsRpc": "wss://optimism.rpc.minerva.digital",
     "gasPriceOracle": "https://optimism.rpc.minerva.digital",
-    "gasPrice": "20000000000",
+    "gasPrice": "1000000",
     "tokens": [],
     "color": "#ff0420",
     "testNet": false,

@@ -907,6 +907,10 @@ class TokenManagerImpl(
             ATS_SIGMA -> ARTIS_SIGMA_TOKENS_OWNED_URL
             BSC -> BSC_TOKENS_OWNED_URL
             ETH_MAIN -> ETH_TOKENS_OWNED_URL
+            ARB_ONE -> ARB_TOKENS_OWNED_URL
+            OPT -> OPT_TOKENS_OWNED_URL
+            CELO -> CELO_TOKENS_OWNED_URL
+            AVA_C -> AVA_TOKENS_OWNED_URL
             else -> throw NetworkNotFoundThrowable()
         }
 
