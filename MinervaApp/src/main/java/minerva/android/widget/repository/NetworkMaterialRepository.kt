@@ -47,7 +47,7 @@ private fun getMainIcon(chainId: Int): Int =
         ATS_TAU -> R.drawable.ic_artis
         POA_SKL -> R.drawable.ic_poa
         LUKSO_14 -> R.drawable.ic_lukso
-        ETH_KOV, ETH_RIN, ETH_ROP -> R.drawable.ic_polygon_matic
+        ETH_KOV, ETH_RIN, ETH_ROP -> R.drawable.ic_etherium_test
         ETH_GOR -> R.drawable.ic_gorli
         ETH_SEP -> R.drawable.ic_ethereum_l2
         MATIC, MUMBAI -> R.drawable.ic_polygon_matic
