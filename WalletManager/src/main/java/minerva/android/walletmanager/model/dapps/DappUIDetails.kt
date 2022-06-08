@@ -8,5 +8,6 @@ data class DappUIDetails(
     val buttonColor: String,
     val iconLink: String,
     val isSponsored: Boolean,
-    val sponsoredOrder: Int
+    val sponsoredOrder: Int,
+    val chainIds: List<Int> = emptyList()
 )

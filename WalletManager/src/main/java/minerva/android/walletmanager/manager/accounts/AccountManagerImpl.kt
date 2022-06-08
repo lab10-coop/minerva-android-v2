@@ -276,6 +276,21 @@ class AccountManagerImpl(
             add(account)
         }
 
+    override fun changeShowWarning(existedAccount: Account, state: Boolean): Completable {
+        walletManager.getWalletConfig().run {
+            accounts.find { account -> account.id == existedAccount.id && account.chainId == existedAccount.chainId }
+                ?.apply {
+                    showWarning = state
+                }
+            return walletManager.updateWalletConfig(
+                copy(
+                    version = updateVersion,
+                    accounts = accounts
+                )
+            )
+        }
+    }
+
     override fun changeAccountName(existedAccount: Account, newName: String): Completable {
         val accountName = CryptoUtils.prepareName(newName, existedAccount.id)
         walletManager.getWalletConfig().run {
@@ -291,7 +306,6 @@ class AccountManagerImpl(
             )
         }
     }
-
 
     override fun createSafeAccount(account: Account, contract: String): Completable =
         walletManager.getWalletConfig().run {

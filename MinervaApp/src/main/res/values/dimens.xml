@@ -3,21 +3,30 @@
     <dimen name="bottom_navigation_bar_height">64dp</dimen>
     <dimen name="margin_big">20dp</dimen>
     <dimen name="margin_xbig">24dp</dimen>
+    <dimen name="margin_xxbig">28dp</dimen>
     <dimen name="margin_large">32dp</dimen>
     <dimen name="margin_xlarge">40dp</dimen>
     <dimen name="margin_xxlarge">48dp</dimen>
     <dimen name="margin_xxxlarge">64dp</dimen>
+    <dimen name="margin_xxxxlarge">56dp</dimen>
+    <dimen name="margin_xxxxxxxlarge">96dp</dimen>
+    <dimen name="margin_x_average">18dp</dimen>
+    <dimen name="margin_average">14dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
     <dimen name="margin_xxsmall">4dp</dimen>
     <dimen name="margin_xxxsmall">2dp</dimen>
+    <dimen name="margin_xxxxsmall">1dp</dimen>
+
+    <dimen name="ONE">1</dimen>
 
     <dimen name="text_large">24sp</dimen>
     <dimen name="text_big">20sp</dimen>
     <dimen name="text_normal">16sp</dimen>
     <dimen name="text_small">14sp</dimen>
     <dimen name="text_xsmall">12sp</dimen>
+    <dimen name="text_xxxsmall">10sp</dimen>
     <dimen name="text_xxsmall">9sp</dimen>
 
     <dimen name="large_letter_logo_size">128dp</dimen>
@@ -84,4 +93,13 @@
     <dimen name="token_view_margin_end">22dp</dimen>
     <dimen name="accounts_srl_margin_top">6dp</dimen>
     <dimen name="sponsored_label_height">12dp</dimen>
+    <dimen name="services_filter_lin_layout_height">80dp</dimen>
+    <dimen name="services_filter_recycler_view_height">32dp</dimen>
+    <dimen name="services_filter_text_font">800</dimen>
+    <dimen name="servicesFilterStrokeWidth">2dp</dimen>
+    <dimen name="services_filter_ch_gr_layout_height">44dp</dimen>
+    <dimen name="unmaintained_network_exclamation_bark_bg_radios">320dp</dimen>
+    <dimen name="unmaintained_network_flag_container_width">156dp</dimen>
+    <dimen name="unmaintained_network_flag_container_margin_left">156dp</dimen>
+    <dimen name="unmaintained_network_flag_letter_spacing">0.05</dimen>
 </resources>

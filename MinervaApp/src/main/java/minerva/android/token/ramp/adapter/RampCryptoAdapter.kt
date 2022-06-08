@@ -21,7 +21,8 @@ class RampCryptoAdapter(
         when (position) {
             FIRST_PAGE -> holder.setTokens(tokens.subList(0, 4))
             SECOND_PAGE -> holder.setTokens(tokens.subList(4, 8))
-            THIRD_PAGE -> holder.setTokens(tokens.subList(8, 10))
+            THIRD_PAGE -> holder.setTokens(tokens.subList(8, 12))
+            FOURTH_PAGE -> holder.setTokens(tokens.subList(12, 15))
         }
     }
 
@@ -45,7 +46,8 @@ class RampCryptoAdapter(
         private const val FIRST_PAGE = 0
         private const val SECOND_PAGE = 1
         private const val THIRD_PAGE = 2
-        private const val PAGES = 3
+        private const val FOURTH_PAGE = 3
+        private const val PAGES = 4
     }
 }
 

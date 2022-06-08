@@ -401,6 +401,15 @@
     <string name="error_invalid_token_id">Error: Invalid token id</string>
     <string name="token_type">Type</string>
     <string name="you_dont_own_this_token">You do not own this token</string>
+    <string name="default_placeholder">default</string>
+    <string name="services_network_filter_main_color">#6442d1</string>
+    <string name="unmaintained_network">UNMAINTAINED NETWORK</string>
+    <string name="unmaintained_network_warning">WARNING: Unmaintained Network</string>
+    <string name="unmaintained_network_learn_dialog">Learn more</string>
+    <string name="unmaintained_network_message_1">This network is not maintained \nanymore and over time transfers from accounts might be not possible any \nmore.</string>
+    <string name="unmaintained_network_message_2">If you experience such a problem \nyou will have to export the private key and import it to another wallet, which still supports transactions on that network.\n\nFurther assistance can be given on our support channels.</string>
+    <string name="unmaintained_network_message_3">Don’t show this message again</string>
+    <string name="exclamation_mark">!</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

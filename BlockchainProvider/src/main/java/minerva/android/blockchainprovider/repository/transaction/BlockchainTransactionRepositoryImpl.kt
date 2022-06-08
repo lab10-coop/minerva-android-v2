@@ -200,12 +200,7 @@ class BlockchainTransactionRepositoryImpl(
                         val transaction: Transaction = prepareTransaction(count, address, this)
                         web3j.value(chainId).ethEstimateGas(transaction)
                             .flowable()
-                            .zipWith(
-                                web3j.value(chainId)
-                                    .ethCall(transaction, DefaultBlockParameterName.LATEST)
-                                    .flowable()
-                            )
-                            .flatMapSingle { (gas, _) -> handleGasLimit(chainId, gas, gasPrice, txCostData.transferType) }
+                            .flatMapSingle { gas -> handleGasLimit(chainId, gas, gasPrice, txCostData.transferType) }
                     }
                     .firstOrError()
                     .timeout(
