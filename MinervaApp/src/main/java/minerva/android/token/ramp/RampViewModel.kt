@@ -133,7 +133,7 @@ class RampViewModel(
                     getNetworkName(ChainId.BSC)
                 ),
 
-                RampCrypto(
+                /*RampCrypto(
                     ChainId.AVA_C,
                     AVAX_RAMP_SYMBOL,
                     R.drawable.ic_avalanche,
@@ -144,7 +144,7 @@ class RampViewModel(
                     CELO_RAMP_SYMBOL,
                     R.drawable.ic_celo_coin,
                     getNetworkName(ChainId.CELO)
-                ),
+                ),*/
                 RampCrypto(
                     ChainId.ARB_ONE,
                     ARB_ONE_ETH_RAMP_SYMBOL,
@@ -188,8 +188,8 @@ class RampViewModel(
                     ETH_RAMP_SYMBOL,
                     R.drawable.ic_ethereum_token,
                     getNetworkName(ChainId.MATIC)
-                ),
-                RampCrypto(
+                )
+                /*RampCrypto(
                     ChainId.CELO,
                     CELO_CUSD_RAMP_SYMBOL,
                     R.drawable.ic_celo_dollar,
@@ -200,7 +200,7 @@ class RampViewModel(
                     CELO_CEUR_RAMP_SYMBOL,
                     R.drawable.ic_celo_dollar,
                     getNetworkName(ChainId.CELO)
-                )
+                )*/
 
             )
     }
