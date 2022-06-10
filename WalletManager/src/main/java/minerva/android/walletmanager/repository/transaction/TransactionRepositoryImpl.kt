@@ -409,7 +409,11 @@ class TransactionRepositoryImpl(
             shouldGetGasPriceFromApi(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
-                        getTxCosts(txCostPayload, null, gasPrice.result)
+                        var gasPrice = gasPrice.result
+                        if (gasPrice?.toBigInteger()!! < NetworkManager.getNetwork(chainId).minGasPrice) {
+                            gasPrice = NetworkManager.getNetwork(chainId).minGasPrice.toBigDecimal()
+                        }
+                        getTxCosts(txCostPayload, null, gasPrice)
                     }
                     .onErrorResumeNext {
                         getTxCosts(txCostPayload, null, null)

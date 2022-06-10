@@ -208,4 +208,16 @@
         <item name="android:textColor">@color/dappLabelColorGray</item>
         <item name="android:textSize">@dimen/text_normal</item>
     </style>
+
+    <style name="ServicesNetworkFilterChipItemMainStyle" parent="TextAppearance.MaterialComponents.Chip">
+        <item name="chipBackgroundColor">@color/white</item>
+        <item name="chipStrokeColor">@color/servicesFilterNetworkMainColor</item>
+        <item name="chipStrokeWidth">@dimen/margin_xxxxsmall</item>
+        <item name="android:textColor">@color/servicesFilterNetworkMainColor</item>
+        <item name="android:textSize">@dimen/text_normal</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="chipMinTouchTargetSize">0dp</item>
+        <item name="chipMinHeight">26dp</item>
+    </style>
 </resources>

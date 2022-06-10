@@ -23,7 +23,9 @@ data class AccountPayload(
     @SerializedName("isTestNetwork")
     private val _isTestNetwork: Boolean? = false,
     @SerializedName("isHide")
-    private val _isHide: Boolean? = false
+    private val _isHide: Boolean? = false,
+    @SerializedName("showWarning")//show or not dialog when account is deprecated
+    private val _showWarning: Boolean? = true
 ) {
     val index: Int
         get() = _index ?: Int.InvalidId
@@ -43,4 +45,6 @@ data class AccountPayload(
         get() = _isTestNetwork ?: false
     val isHide: Boolean
         get() = _isHide ?: false
+    val showWarning: Boolean
+        get() = _showWarning ?: true
 }

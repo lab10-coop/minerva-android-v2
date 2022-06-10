@@ -15,6 +15,7 @@ object AccountToAccountPayloadMapper : Mapper<Account, AccountPayload> {
             input.contractAddress,
             input.bindedOwner,
             input.isTestNetwork,
-            input.isHide
+            input.isHide,
+            input.showWarning
         )
 }
