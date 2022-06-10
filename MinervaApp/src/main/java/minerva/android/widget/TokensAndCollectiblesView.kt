@@ -17,6 +17,7 @@ import minerva.android.extension.toggleVisibleOrGone
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
+import minerva.android.kotlinUtils.list.toJsonArray
 import minerva.android.main.MainActivity.Companion.ZERO
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
@@ -151,17 +152,19 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                         account.accountTokens.forEach { accountToken ->
                             val token: ERCToken = accountToken.token
                             if (token.isFavorite)
-                                if (!favoriteTokens.contains(token)) favoriteTokens.add(token)
+                                if (!favoriteTokens.contains(token))
+                                    favoriteTokens.add(token)
                         }
                         //create "My Favorites" group(with nft group) like usual item
                         if (favoriteTokens.size > ZERO) {
                             //create json array of tokens addresses for send/show it in "NftCollectionFragment"
                             val favoriteTokenAddresses: MutableList<String> = mutableListOf()
                             favoriteTokens.forEach { token ->
-                                if (!favoriteTokenAddresses.contains(token.address)) favoriteTokenAddresses.add(token.address)
+                                if (!favoriteTokenAddresses.contains(token.address))
+                                    favoriteTokenAddresses.add(token.address)
                             }
-                            //addresses to json wrapper (json array)
-                            val favoriteTokenAddressesToJson: String = Gson().toJson(favoriteTokenAddresses)
+                            //addresses to json array - for transfer it through ERCToken wrapper
+                            val favoriteTokenAddressesToJson: String = favoriteTokenAddresses.toJsonArray()
                             //add "My Favorites" group to token/nft list like usual token/nft item
                             addView(CollectibleView(context).apply {
                                 initView(

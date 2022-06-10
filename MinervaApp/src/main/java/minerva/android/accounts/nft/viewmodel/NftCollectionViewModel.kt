@@ -13,6 +13,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.nft.model.NftItem
 import minerva.android.base.BaseViewModel
+import minerva.android.extension.fromJsonArrayToList
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
@@ -264,17 +265,15 @@ class NftCollectionViewModel(
         _loadingLiveData.value = true
         accountManager.loadAccount(accountId).let { account ->
             val visibleTokens: MutableList<AccountToken> = account.getVisibleTokens().toMutableList()
-            //clear previous data which can Zis the same as current
+            //clear previous data for prevent recurring items
             nftList.clear()
-            //get type of "List<String>" for decode addresses from json (from "collectionAddress")
-            val listTypeToken = object : TypeToken<List<String>>() {}.type
             //get list of favorite tokens addresses from json wrapper(json array)
-            val favoriteTokenAddresses: MutableList<String> = Gson()
-                .fromJson<List<String>>(collectionAddress, listTypeToken).toMutableList()
+            val favoriteTokenAddresses: List<String> = collectionAddress.fromJsonArrayToList()
             //get accountsToken from account according to addresses which came from favoriteTokenAddresses
             account.accountTokens.forEach { accountToken ->
                 favoriteTokenAddresses.forEach { favTokenAddress ->
-                    if (accountToken.token.address.equals(favTokenAddress)) visibleTokens.add(accountToken)
+                    if (accountToken.token.address.equals(favTokenAddress))
+                        visibleTokens.add(accountToken)
                 }
             }
 
@@ -284,9 +283,11 @@ class NftCollectionViewModel(
                         val filteredVisibleTokens: AccountToken?
 
                         if (isGroup) //show only favorite token/nft
-                            filteredVisibleTokens = visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId && isFavorite }
+                            filteredVisibleTokens = visibleTokens
+                                .find { accountToken -> tokenId == accountToken.token.tokenId && isFavorite }
                         else
-                            filteredVisibleTokens = visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId }
+                            filteredVisibleTokens = visibleTokens
+                                .find { accountToken -> tokenId == accountToken.token.tokenId }
                         //filling main token/nft list
                         filteredVisibleTokens?.let {
                             nftList.add(

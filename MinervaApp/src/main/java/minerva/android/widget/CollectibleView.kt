@@ -11,6 +11,7 @@ import coil.transform.RoundedCornersTransformation
 import com.google.gson.Gson
 import minerva.android.R
 import minerva.android.databinding.CollectibleViewBinding
+import minerva.android.extension.toJsonArray
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.ERCToken
@@ -44,7 +45,7 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
         collectibleItem.text = balance.toEngineeringString()
         when (tokenLogo) {
             TOKEN_LOGO.FAVORITE_GROUP ->
-                collectibleLogo.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favorite_gray_star_logo))
+                collectibleLogo.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favorite_group_logo))
             TOKEN_LOGO.URI ->
                 collectible.logoURI?.let { logoUri -> collectibleLogo.loadUrl(logoUri) }
         }
@@ -52,8 +53,8 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
 
     private fun prepareListener(callback: CollectibleViewCallback, account: Account, collectible: ERCToken, isGroup: Boolean = false) {
         setOnClickListener {
-            //if isn't "isGroup" case - packing address to json wrapper(json array); if "isGroup" - address already packed
-            val wrappedAddress: String = if (isGroup) collectible.address else Gson().toJson(listOf(collectible.address))
+            //packing address to json array - for transfer it like string
+            val wrappedAddress: String = if (isGroup) collectible.address else collectible.address.toJsonArray()
             callback.onCollectibleClicked(
                 account,
                 wrappedAddress,
