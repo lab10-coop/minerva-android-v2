@@ -379,10 +379,14 @@ class TransactionRepositoryImpl(
         currentFiatCurrency.let { currentFiat ->
             when (chainId) {
                 ChainId.ETH_MAIN -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
+                ChainId.ARB_ONE -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
+                ChainId.OPT -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 ChainId.POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
                 ChainId.XDAI -> fetchCoinRate(MarketIds.XDAI).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
                 ChainId.MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
                 ChainId.BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
+                ChainId.CELO -> fetchCoinRate(MarketIds.CELO).map { markets -> markets.celoFiatPrice?.getRate(currentFiat) }
+                ChainId.AVA_C -> fetchCoinRate(MarketIds.AVAX).map { markets -> markets.avaxFiatPrice?.getRate(currentFiat) }
                 else -> Single.just(ZERO_FIAT_VALUE)
             }
         }
@@ -405,7 +409,11 @@ class TransactionRepositoryImpl(
             shouldGetGasPriceFromApi(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
-                        getTxCosts(txCostPayload, null, gasPrice.result)
+                        var gasPrice = gasPrice.result
+                        if (gasPrice?.toBigInteger()!! < NetworkManager.getNetwork(chainId).minGasPrice) {
+                            gasPrice = NetworkManager.getNetwork(chainId).minGasPrice.toBigDecimal()
+                        }
+                        getTxCosts(txCostPayload, null, gasPrice)
                     }
                     .onErrorResumeNext {
                         getTxCosts(txCostPayload, null, null)
