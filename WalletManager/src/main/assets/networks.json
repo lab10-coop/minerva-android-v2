@@ -343,7 +343,7 @@
     "chainId": 69
   },
   {
-    "name": "Celo Mainnet",
+    "name": "Celo",
     "isActive": false,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
@@ -388,7 +388,7 @@
     "chainId": 62320
   },
   {
-    "name": "Avalanche C-Chain",
+    "name": "Avalanche",
     "isActive": false,
     "token": "AVAX",
     "isSafeAccountAvailable": "false",
