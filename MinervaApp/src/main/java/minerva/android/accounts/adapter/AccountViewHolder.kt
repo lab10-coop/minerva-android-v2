@@ -44,8 +44,8 @@ class AccountViewHolder(
 
     override fun onSendCoinClicked(account: Account) = listener.onSendCoinClicked(account)
 
-    override fun onCollectibleClicked(account: Account, tokenAddress: String, collectionName: String) =
-        listener.onNftCollectionClicked(account, tokenAddress, collectionName)
+    override fun onCollectibleClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean) =
+        listener.onNftCollectionClicked(account, tokenAddress, collectionName, isGroup)
 
     fun endStreamAnimation() {
         binding.tokensAndCollectibles.endStreamAnimations()

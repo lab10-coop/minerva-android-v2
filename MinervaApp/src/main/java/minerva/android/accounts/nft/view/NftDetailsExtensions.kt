@@ -15,7 +15,6 @@ import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
-import minerva.android.walletmanager.model.ContentType
 import minerva.android.walletmanager.model.NftContent
 import minerva.android.widget.RecyclableViewMoreTextView
 import java.math.BigDecimal
@@ -67,15 +66,24 @@ internal fun NftDetailsBinding.setupContent(nftItem: NftItem) {
     }
 }
 
+/**
+ * Setup Favorite State Flag - set drawable image for "favorite_state_flag" element
+ * @param favoriteState - state of "favorite_state_flag" element
+ */
+internal fun NftDetailsBinding.setupFavoriteStateFlag(isFavorite: Boolean) = if (isFavorite)
+        favoriteStateFlag.setImageResource(R.drawable.ic_favorite_state_chosen_flag)
+    else
+        favoriteStateFlag.setImageResource(R.drawable.ic_favorite_state_flag)
+
 internal fun NftDetailsBinding.setupName(nftItem: NftItem) {
     name.text = nftItem.name
 }
-
 
 internal fun NftDetailsBinding.setup(nftItem: NftItem) {
     setupContent(nftItem)
     setupBalance(nftItem)
     setupName(nftItem)
+    setupFavoriteStateFlag(nftItem.isFavorite)
 }
 
 internal fun ItemNftBinding.setup(

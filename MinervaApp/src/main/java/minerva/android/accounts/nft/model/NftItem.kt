@@ -16,7 +16,8 @@ data class NftItem(
     val decimals: String = String.Empty,
     var balance: BigDecimal = BigDecimal.ZERO,
     var isDescriptionExpanded: Boolean = false,
-    var wasSent: Boolean = false
+    var wasSent: Boolean = false,
+    val isFavorite: Boolean = false //isFavorite - used for nft status
 ) {
     companion object {
         val Invalid = NftItem()

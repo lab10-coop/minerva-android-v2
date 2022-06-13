@@ -42,6 +42,9 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
         btSend.setOnClickListener {
             listener.onSendClicked(item)
         }
+        nftDetails.favoriteStateFlag.setOnClickListener {
+            listener.changeFavoriteState(item)
+        }
     }
 
     private fun ItemNftBinding.setupDescription(nftItem: NftItem) = nftDetails.description.apply {
@@ -61,5 +64,11 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
 
     interface Listener {
         fun onSendClicked(nftItem: NftItem)
+
+        /**
+         * Change Favorite State - method which add selected item to favorite ntf
+         * @param nftItem - instance of NftItem
+         */
+        fun changeFavoriteState(nftItem: NftItem)
     }
 }

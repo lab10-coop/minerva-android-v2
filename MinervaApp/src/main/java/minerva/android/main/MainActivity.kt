@@ -346,11 +346,12 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
         }
     }
 
-    override fun showNftCollectionScreen(index: Int, tokenAddress: String, collectionName: String) {
+    override fun showNftCollectionScreen(index: Int, tokenAddress: String, collectionName: String, isGroup: Boolean) {
         launchActivity<NftCollectionActivity> {
             putExtra(ACCOUNT_INDEX, index)
             putExtra(TOKEN_ADDRESS, tokenAddress)
             putExtra(COLLECTION_NAME, collectionName)
+            putExtra(IS_GROUP, isGroup)
         }
     }
 
@@ -386,6 +387,8 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
     }
 
     companion object {
+        const val ZERO = 0
+        const val ONE = 1
         const val SERVICES_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
@@ -393,5 +396,6 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
         const val TOKEN_ADDRESS = "token_address"
         const val ACCOUNT_INDEX = "account_index"
         const val ACCOUNT_CHAIN_ID = "account_indicator"
+        const val IS_GROUP = "ig_group"
     }
 }
