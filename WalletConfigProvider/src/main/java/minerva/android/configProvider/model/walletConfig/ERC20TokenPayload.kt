@@ -15,5 +15,6 @@ data class ERC20TokenPayload(
     val type: String = String.Empty,
     val tokenId: String? = null,
     val collectionName: String? = null,
-    val nftContentPayload: NftContentPayload? = null
+    val nftContentPayload: NftContentPayload? = null,
+    val isFavorite: Boolean = false //isFavorite - used for nft status
 )

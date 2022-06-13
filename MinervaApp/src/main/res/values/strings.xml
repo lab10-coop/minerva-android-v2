@@ -410,6 +410,8 @@
     <string name="unmaintained_network_message_2">If you experience such a problem \nyou will have to export the private key and import it to another wallet, which still supports transactions on that network.\n\nFurther assistance can be given on our support channels.</string>
     <string name="unmaintained_network_message_3">Don’t show this message again</string>
     <string name="exclamation_mark">!</string>
+    <string name="my_favorites">My Favorites</string>
+    <string name="my_favorites_item_description">"Personal collection of NFTs"</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

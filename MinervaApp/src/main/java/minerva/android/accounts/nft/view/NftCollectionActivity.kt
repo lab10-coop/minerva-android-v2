@@ -12,7 +12,6 @@ import minerva.android.accounts.nft.model.NftItem
 import minerva.android.accounts.nft.viewmodel.NftCollectionViewModel
 import minerva.android.databinding.ActivityNftCollectionBinding
 import minerva.android.extension.addFragment
-import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.replaceFragmentWithBackStack
 import minerva.android.kotlinUtils.Empty
@@ -30,7 +29,8 @@ class NftCollectionActivity : AppCompatActivity(), TransactionListener {
     private val viewModel: NftCollectionViewModel by viewModel {
         parametersOf(
             intent.getIntExtra(MainActivity.ACCOUNT_INDEX, Int.InvalidId),
-            intent.getStringExtra(MainActivity.TOKEN_ADDRESS) ?: String.Empty
+            intent.getStringExtra(MainActivity.TOKEN_ADDRESS) ?: String.Empty,
+            intent.getBooleanExtra(MainActivity.IS_GROUP, false)
         )
     }
 

@@ -291,6 +291,27 @@ class AccountManagerImpl(
         }
     }
 
+    override fun changeFavoriteState(existedAccount: Account, tokenId: String, isFavoriteState: Boolean): Completable {
+        walletManager.getWalletConfig().run {
+            accounts.find { account -> account.id == existedAccount.id && account.chainId == existedAccount.chainId }?.apply {
+                accountTokens.find { it.token.tokenId == tokenId }?.apply {
+                    token.isFavorite = isFavoriteState
+                }
+            }
+            erc20Tokens.values.forEach { erc20TokenList ->
+                erc20TokenList.find { it.tokenId == tokenId }?.apply {
+                    isFavorite = isFavoriteState
+                }
+            }
+            return walletManager.updateWalletConfig(
+                copy(
+                    version = updateVersion,
+                    accounts = accounts
+                )
+            )
+        }
+    }
+
     override fun changeAccountName(existedAccount: Account, newName: String): Completable {
         val accountName = CryptoUtils.prepareName(newName, existedAccount.id)
         walletManager.getWalletConfig().run {
