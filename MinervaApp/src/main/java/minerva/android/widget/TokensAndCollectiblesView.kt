@@ -151,9 +151,12 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                         //filling favoriteTokens list from main account
                         account.accountTokens.forEach { accountToken ->
                             val token: ERCToken = accountToken.token
-                            if (token.isFavorite)
-                                if (!favoriteTokens.contains(token))
+                            if (token.isFavorite) {
+                                //check token list already has this token
+                                val isTokenInList: ERCToken? = favoriteTokens.find { it.tokenId == token.tokenId }
+                                if (null == isTokenInList)
                                     favoriteTokens.add(token)
+                            }
                         }
                         //create "My Favorites" group(with nft group) like usual item
                         if (favoriteTokens.size > ZERO) {
@@ -166,7 +169,9 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                             //addresses to json array - for transfer it through ERCToken wrapper
                             val favoriteTokenAddressesToJson: String = favoriteTokenAddresses.toJsonArray()
                             //add "My Favorites" group to token/nft list like usual token/nft item
-                            addView(CollectibleView(context).apply {
+
+                            //HIDE FAVORITE COLLECTION ITEM
+                            /*addView(CollectibleView(context).apply {
                                 initView(
                                     account,
                                     collectibleViewCallback,
@@ -180,7 +185,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                                     favoriteTokens.size.toBigDecimal(), //count of token/nft in items
                                     TOKEN_LOGO.FAVORITE_GROUP
                                 )
-                            })
+                            })*/
                         }
 
                         collectibles.forEach { collectiblesWithBalance ->
