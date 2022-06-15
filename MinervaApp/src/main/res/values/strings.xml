@@ -466,7 +466,6 @@
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
         <item>1.7.5</item>
-        <item>* NFT personal favorites collection</item>
         <item>* Added Optimism network support</item>
         <item>* Added Arbitrum network support</item>
         <item>* Added Sepolia testnet support</item>
