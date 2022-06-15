@@ -73,6 +73,9 @@ class NftCollectionViewModel(
 
     private val _nftListLiveData = MutableLiveData<List<NftItem>>(nftList)
     val nftListLiveData: LiveData<List<NftItem>> get() = _nftListLiveData
+    //nft item which will be updated
+    private val _updatedNftItem = MutableLiveData<NftItem>(NftItem())
+    val updatedNftItem: LiveData<NftItem> get() = _updatedNftItem
 
     private val _loadingLiveData = MutableLiveData<Boolean>()
     val loadingLiveData: LiveData<Boolean> get() = _loadingLiveData
@@ -393,11 +396,12 @@ class NftCollectionViewModel(
      * @param nftItem - item which value will be changed
      */
     fun changeFavoriteState(nftItem: NftItem) = launchDisposable {
-            accountManager.changeFavoriteState(account, nftItem.tokenId, !nftItem.isFavorite)
+            accountManager.changeFavoriteState(account, nftItem.tokenId, nftItem.isFavorite)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    getNftForCollection()
+                    //update item in adapter
+                    _updatedNftItem.value = nftItem
                 }
         }
 

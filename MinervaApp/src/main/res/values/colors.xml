@@ -80,6 +80,5 @@
     <color name="advancedTitleColor">#5C5D6D</color>
     <color name="advancedActionColor">#908F9D</color>
     <color name="servicesFilterNetworkMainColor">#5858ED</color>
-    <color name="warningOrangeLight">#FFE4B9</color>ic_favorite_group_logo.xml
-    <color name="favorite_group_logo_star_gray">#C9C8D4</color>
+    <color name="warningOrangeLight">#FFE4B9</color>
 </resources>

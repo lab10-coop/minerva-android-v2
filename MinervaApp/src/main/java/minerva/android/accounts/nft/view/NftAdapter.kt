@@ -11,12 +11,29 @@ import minerva.android.widget.RecyclableViewMoreTextView
 
 class NftAdapter : RecyclerView.Adapter<NftViewHolder>() {
 
-    private var nftList: List<NftItem> = emptyList()
+    private var nftList: MutableList<NftItem> = mutableListOf()
     lateinit var listener: NftViewHolder.Listener
 
     fun updateList(newNftList: List<NftItem>) {
-        nftList = newNftList
+        nftList = newNftList.toMutableList()
         notifyDataSetChanged()
+    }
+
+    /**
+     * Update Item - method for update item which were specified
+     * @param nftItem - updated instance of NftItem
+     */
+    fun updateItem(nftItem: NftItem) {
+        //find item by id in main list; can't find by object instance because specified nftItem already changed
+        val itemWhichWillBeChanged: NftItem? = nftList.find { it.tokenId == nftItem.tokenId }
+        itemWhichWillBeChanged?.let { nft ->
+            val position: Int = nftList.indexOf(nft)
+            if (position != RecyclerView.NO_POSITION) {
+                nftList[position] = nftItem
+                if (position != RecyclerView.NO_POSITION)
+                    notifyItemChanged(position)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NftViewHolder {
@@ -43,7 +60,9 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
             listener.onSendClicked(item)
         }
         nftDetails.favoriteStateFlag.setOnClickListener {
-            listener.changeFavoriteState(item)
+            //changing "isFavorite" state to opposite value
+            val nftItem: NftItem = item.copy(isFavorite = !item.isFavorite)
+            listener.changeFavoriteState(nftItem)
         }
     }
 

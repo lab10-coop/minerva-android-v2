@@ -43,9 +43,10 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
         collectibleName.text = collectible.symbol
         collectibleDesc.text = collectible.collectionName
         collectibleItem.text = balance.toEngineeringString()
+        //if is group case - paste the logo of specified group
         when (tokenLogo) {
             TOKEN_LOGO.FAVORITE_GROUP ->
-                collectibleLogo.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favorite_group_logo))
+                collectibleLogo.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favorite_star_logo))
             TOKEN_LOGO.URI ->
                 collectible.logoURI?.let { logoUri -> collectibleLogo.loadUrl(logoUri) }
         }
