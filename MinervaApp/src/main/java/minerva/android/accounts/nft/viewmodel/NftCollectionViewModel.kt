@@ -3,8 +3,6 @@ package minerva.android.accounts.nft.viewmodel
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.SingleSource
@@ -76,6 +74,9 @@ class NftCollectionViewModel(
     //nft item which will be updated
     private val _updatedNftItem = MutableLiveData<NftItem>(NftItem())
     val updatedNftItem: LiveData<NftItem> get() = _updatedNftItem
+    //value for showing popap with specified error
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> = _errorLiveData
 
     private val _loadingLiveData = MutableLiveData<Boolean>()
     val loadingLiveData: LiveData<Boolean> get() = _loadingLiveData
@@ -396,13 +397,22 @@ class NftCollectionViewModel(
      * @param nftItem - item which value will be changed
      */
     fun changeFavoriteState(nftItem: NftItem) = launchDisposable {
+            _loadingLiveData.value = true
             accountManager.changeFavoriteState(account, nftItem.tokenId, nftItem.isFavorite)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    //update item in adapter
-                    _updatedNftItem.value = nftItem
-                }
+                .subscribeBy(
+                    onComplete = {
+                        _updatedNftItem.value = nftItem
+                        _loadingLiveData.value = false
+                    },
+                    onError = {
+                        Timber.e(it)
+                        //update error state for showing popap with current error
+                        _errorLiveData.value = Event(it)
+                        _loadingLiveData.value = false
+                    }
+                )
         }
 
     fun isAmountAvailable() = selectedItem.isERC1155 && selectedItem.balance > BigDecimal.ONE

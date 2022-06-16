@@ -20,8 +20,8 @@ class NftAdapter : RecyclerView.Adapter<NftViewHolder>() {
     }
 
     /**
-     * Update Item - method for update item which were specified
-     * @param nftItem - updated instance of NftItem
+     * Update Item - method for update specified item
+     * @param nftItem - instance of minerva.android.accounts.nft.model.NftItem
      */
     fun updateItem(nftItem: NftItem) {
         //find item by id in main list; can't find by object instance because specified nftItem already changed
