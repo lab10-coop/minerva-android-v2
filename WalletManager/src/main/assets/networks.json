@@ -288,7 +288,7 @@
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://arbitrum.rpc.minerva.digital",
-    "wsRpc": "",
+    "wsRpc": "wss://arbitrum-mainnet.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "https://arbitrum.rpc.minerva.digital",
     "gasPrice": "20000000000",
     "minGasPrice": "0",
