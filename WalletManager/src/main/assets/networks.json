@@ -295,7 +295,11 @@
     "tokens": [],
     "color": "#28a0f0",
     "testNet": false,
-    "chainId": 42161
+    "chainId": 42161,
+    "superfluid": {
+      "host": "0xCf8Acb4eF033efF16E8080aed4c7D5B9285D2192",
+      "cfav1": "0x731FdBB12944973B500518aea61942381d7e240D"
+    }
   },
   {
     "name": "Arbitrum Rinkeby",
@@ -310,7 +314,11 @@
     "tokens": [],
     "color": "#28a0f0",
     "testNet": true,
-    "chainId": 421611
+    "chainId": 421611,
+    "superfluid": {
+      "host": "0xE01F8743677Da897F4e7De9073b57Bf034FC2433",
+      "cfav1": "0xcA0569223e56B479FaC6d554FA0D3867A4384657"
+    }
   },
   {
     "name": "Optimism",
@@ -325,7 +333,11 @@
     "tokens": [],
     "color": "#ff0420",
     "testNet": false,
-    "chainId": 10
+    "chainId": 10,
+    "superfluid": {
+      "host": "0x567c4B141ED61923967cA25Ef4906C8781069a10",
+      "cfav1": "0x204C6f131bb7F258b2Ea1593f5309911d8E458eD"
+    }
   },
   {
     "name": "Optimism Kovan",
@@ -340,7 +352,11 @@
     "tokens": [],
     "color": "#ff0420",
     "testNet": true,
-    "chainId": 69
+    "chainId": 69,
+    "superfluid": {
+      "host": "0x74b57883f8ce9F2BD330286E884CfD8BB24AC4ED",
+      "cfav1": "0x523481a8a5455efB1F301C6e00B5525Eb12a51da"
+    }
   },
   {
     "name": "Celo",
@@ -400,7 +416,11 @@
     "tokens": [],
     "color": "#ff0420",
     "testNet": false,
-    "chainId": 43114
+    "chainId": 43114,
+    "superfluid": {
+      "host": "0x60377C7016E4cdB03C87EF474896C11cB560752C",
+      "cfav1": "0x6946c5B38Ffea373b0a2340b4AEf0De8F6782e58"
+    }
   },
   {
     "name": "Avalanche Fuji Testnet",
@@ -415,7 +435,11 @@
     "tokens": [],
     "color": "#ff0420",
     "testNet": true,
-    "chainId": 43113
+    "chainId": 43113,
+    "superfluid": {
+      "host": "0xf04F2C525819691ed9ABD3D2B7109E1633795e68",
+      "cfav1": "0xED74d30B8034152b0638CB03cc5c3c906dd1c482"
+    }
   },
   {
     "name": "Sepolia Test Network",
