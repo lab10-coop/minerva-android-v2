@@ -471,7 +471,7 @@
         <item>* Added Sepolia testnet support</item>
         <item>* Added Optimism Kovan testnet support</item>
         <item>* Added Arbitrum Rinkeby testnet support</item>
-        <item>* ETH on Optimism direct purchase via ramp.network</item>
+        <item>* ETH on Arbitrum direct purchase via ramp.network</item>
         <item>* Filter DApps for different networks</item>
         <item>* Improved gas price calculation</item>
         <item>* Preparations to handle unmaintained networks</item>
