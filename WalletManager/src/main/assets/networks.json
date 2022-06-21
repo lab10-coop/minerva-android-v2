@@ -92,7 +92,7 @@
   },
   {
     "name": "Avalanche",
-    "isActive": false,
+    "isActive": true,
     "token": "AVAX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://avalanche.rpc.minerva.digital",
@@ -126,7 +126,7 @@
   },
   {
     "name": "Celo",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://celo.rpc.minerva.digital",
@@ -334,7 +334,7 @@
   },
   {
     "name": "Avalanche Fuji Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "AVAX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://api.avax-test.network/ext/bc/C/rpc",
@@ -368,7 +368,7 @@
   },
   {
     "name": "Celo Alfajores Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://alfajores-forno.celo-testnet.org",
@@ -383,7 +383,7 @@
   },
   {
     "name": "Celo Baklava Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://baklava-forno.celo-testnet.org",
