@@ -16,5 +16,5 @@ interface FragmentInteractorListener {
     fun changeActionBarColor(color: Int)
     fun removeSettingsBadgeIcon()
     fun showWalletConnectScanner(index: Int)
-    fun showNftCollectionScreen(index: Int, tokenAddress: String, collectionName: String)
+    fun showNftCollectionScreen(index: Int, tokenAddress: String, collectionName: String, isGroup: Boolean = false)
 }

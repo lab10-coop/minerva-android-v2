@@ -7,10 +7,7 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
-import minerva.android.apiProvider.model.GasPricesMatic
 import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.gaswatch.GasPrices
-import minerva.android.apiProvider.model.gaswatch.TransactionSpeedStats
 import minerva.android.blockchainprovider.model.*
 import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenRepository
@@ -582,69 +579,6 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
-    fun `get transaction costs success when there is gas price from oracle available`() {
-        NetworkManager.initialize(
-            listOf(
-                Network(
-                    chainId = 1,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri",
-                    gasPriceOracle = "url"
-                )
-            )
-        )
-        val transactionSpeedStats = TransactionSpeedStats(BigDecimal.TEN)
-
-        whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(
-            Single.just(
-                GasPrices(transactionSpeedStats, transactionSpeedStats, transactionSpeedStats, transactionSpeedStats)
-            )
-        )
-        whenever(
-            blockchainTransactionRepository.getTransactionCosts(any(), any())
-        ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
-        whenever(unitConverter.toGwei(BigDecimal.TEN)).thenReturn(BigDecimal.valueOf(10000000000))
-        whenever(unitConverter.fromWei(BigDecimal.valueOf(10000000000))).thenReturn(BigDecimal.TEN)
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.gasPrice == BigDecimal.TEN
-            }
-    }
-
-    @Test
-    fun `get transaction costs success when there is gas price from oracle available and it is Matic network`() {
-        NetworkManager.initialize(
-            listOf(
-                Network(
-                    chainId = 137,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri",
-                    gasPriceOracle = "url"
-                )
-            )
-        )
-        whenever(cryptoApi.getGasPriceForMatic(any())).thenReturn(
-            Single.just(
-                GasPricesMatic(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)
-            )
-        )
-        whenever(
-            blockchainTransactionRepository.getTransactionCosts(any(), any())
-        ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
-        whenever(unitConverter.toGwei(BigDecimal.TEN)).thenReturn(BigDecimal.valueOf(10000000000))
-        whenever(unitConverter.fromWei(BigDecimal.valueOf(10000000000))).thenReturn(BigDecimal.TEN)
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 137))
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.gasPrice == BigDecimal.TEN
-            }
-    }
-
-
-    @Test
     fun `get transaction costs success when there is gas price from node available`() {
         NetworkManager.initialize(
             listOf(
@@ -696,38 +630,6 @@ class TransactionRepositoryTest : RxTest() {
         repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertError(error)
-    }
-
-    @Test
-    fun `get transaction costs error when there is gas price from oracle available`() {
-        val error = Throwable()
-        NetworkManager.initialize(
-            listOf(
-                Network(
-                    chainId = 1,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri",
-                    gasPriceOracle = "url"
-                )
-            )
-        )
-        whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(Single.error(error))
-        whenever(blockchainTransactionRepository.getTransactionCosts(any(), eq(null)))
-            .doReturn(
-                Single.just(
-                    TransactionCostPayload(
-                        BigDecimal.ONE,
-                        BigInteger.ONE,
-                        BigDecimal.TEN
-                    )
-                )
-            )
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.gasPrice == BigDecimal.ONE
-            }
     }
 
     @Test

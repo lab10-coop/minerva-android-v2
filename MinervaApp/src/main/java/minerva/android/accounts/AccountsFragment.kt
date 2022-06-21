@@ -27,10 +27,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.widget.MinervaFlashbar
-import minerva.android.widget.dialog.EditAccountNameDialog
-import minerva.android.widget.dialog.ExportPrivateKeyDialog
-import minerva.android.widget.dialog.HideAccountDialog
-import minerva.android.widget.dialog.SelectPredefinedAccountDialog
+import minerva.android.widget.dialog.*
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
 import minerva.android.wrapped.startManageTokensWrappedActivity
@@ -83,11 +80,25 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     fun stopPendingTransactions() = accountAdapter.stopPendingTransactions()
 
-    override fun onSendTransaction(account: Account) =
-        interactor.showTransactionScreen(
-            viewModel.indexOfRawAccounts(account),
-            isCoinBalanceError = account.isError
-        )
+    override fun onSendTransaction(account: Account) {
+        //show "ShowWarningDialog" if account/network has "Unmaintained Network" status
+        if (!account.isActiveNetwork && account.showWarning) {
+            ShowWarningDialog(requireContext(), true) { state: Boolean ->
+                //prevent showing "ShowWarningDialog" dialog in future(set Account::showWarning to false)
+                if (state) viewModel.changeShowWarning(account, !state)
+
+                interactor.showTransactionScreen(
+                    viewModel.indexOfRawAccounts(account),
+                    isCoinBalanceError = account.isError
+                )
+            }.show()
+        } else {
+            interactor.showTransactionScreen(
+                viewModel.indexOfRawAccounts(account),
+                isCoinBalanceError = account.isError
+            )
+        }
+    }
 
     override fun onSendTokenTransaction(
         account: Account,
@@ -101,11 +112,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         )
     }
 
-    override fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String) {
+    override fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean) {
         interactor.showNftCollectionScreen(
             viewModel.indexOfRawAccounts(account),
             tokenAddress,
-            collectionName
+            collectionName,
+            isGroup
         )
     }
 
@@ -143,7 +155,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun updateAccountsList(accounts: List<Account> = viewModel.activeAccounts) = accountAdapter.updateList(accounts)
-
 
     private fun changeAccountName(account: Account, newName: String) {
         viewModel.changeAccountName(account, newName)
@@ -255,8 +266,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun getRecyclerViewItemDecorator(): VerticalMarginItemDecoration {
-        val margin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
-        val bottomMargin = requireContext().resources.getDimension(R.dimen.margin_xbig).toInt()
+        val margin = requireContext().resources.getDimension(R.dimen.margin_xxsmall).toInt()
+        val bottomMargin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
         return VerticalMarginItemDecoration(margin, Int.NO_MARGIN, bottomMargin)
     }
 

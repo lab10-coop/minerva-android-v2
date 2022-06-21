@@ -44,8 +44,8 @@ class AccountViewHolder(
 
     override fun onSendCoinClicked(account: Account) = listener.onSendCoinClicked(account)
 
-    override fun onCollectibleClicked(account: Account, tokenAddress: String, collectionName: String) =
-        listener.onNftCollectionClicked(account, tokenAddress, collectionName)
+    override fun onCollectibleClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean) =
+        listener.onNftCollectionClicked(account, tokenAddress, collectionName, isGroup)
 
     fun endStreamAnimation() {
         binding.tokensAndCollectibles.endStreamAnimations()
@@ -76,7 +76,14 @@ class AccountViewHolder(
     private fun View.bindData(account: Account, fiatSymbol: String) {
         with(account) {
             binding.apply {
-                card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
+                //show "unmaintained network" flag
+                if (!account.isActiveNetwork) unmaintainedNetworkFlag.visibility = View.VISIBLE
+                else unmaintainedNetworkFlag.visibility = View.GONE
+
+                card.setCardBackgroundColor(Color.parseColor(
+                    if (!account.isActiveNetwork) UNMAINTAINED_NETWORK_BG_COLOR
+                    else NetworkManager.getStringColor(network, isPending)
+                ))
                 progress.apply {
                     visibleOrGone(isPending)
                     DrawableCompat.setTint(indeterminateDrawable, Color.parseColor(network.color))
@@ -225,5 +232,6 @@ class AccountViewHolder(
         private const val FRAME_TOP_WIDTH = 3f
         private const val NO_FRAME = 0f
         private const val FRAME_WIDTH = 1.5f
+        private const val UNMAINTAINED_NETWORK_BG_COLOR = "#C9C8D3"
     }
 }

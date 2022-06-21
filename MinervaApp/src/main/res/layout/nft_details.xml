@@ -68,22 +68,32 @@
         android:layout_width="0dp"
         android:textColor="@color/nftNameGray"
         android:textSize="@dimen/text_big"
-        app:layout_constraintEnd_toStartOf="@id/balance"
+        app:layout_constraintEnd_toStartOf="@id/favorite_state_flag"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/content"
         tools:text="Intercom Dreamer" />
 
+    <ImageView
+        android:src="@drawable/ic_favorite_state_flag"
+        android:id="@+id/favorite_state_flag"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/content"
+        app:layout_constraintTop_toTopOf="@id/name"
+        tools:visibility="gone" />
+
     <TextView
         android:fontFamily="@font/rubik_medium"
         android:id="@+id/balance"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xsmall"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_normal"
         android:layout_width="0dp"
         android:textColor="@color/nftBalanceGray"
         android:textSize="@dimen/text_small"
-        app:layout_constraintBottom_toBottomOf="@+id/name"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/name"
         tools:text="Amount: 5"
         tools:visibility="visible" />
 
@@ -93,7 +103,7 @@
         android:layout_marginBottom="@dimen/margin_normal"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginTop="@dimen/margin_xsmall"
         android:layout_width="match_parent"
         android:lineSpacingExtra="6sp"
         android:textColor="@color/nftDescriptionGray"
@@ -103,7 +113,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/name"
+        app:layout_constraintTop_toBottomOf="@id/balance"
         app:maxDuration="300"
         app:visibleLines="1"
         tools:text="description" />

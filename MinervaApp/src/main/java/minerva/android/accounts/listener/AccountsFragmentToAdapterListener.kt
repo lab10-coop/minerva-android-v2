@@ -8,7 +8,7 @@ import minerva.android.widget.state.AccountWidgetState
 interface AccountsFragmentToAdapterListener {
     fun onSendTransaction(account: Account)
     fun onSendTokenTransaction(account: Account, tokenAddress: String, isTokenError: Boolean)
-    fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String)
+    fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean = false)
     fun onCreateSafeAccount(account: Account)
     fun onAccountHide(index: Int)
     fun onShowAddress(account: Account)

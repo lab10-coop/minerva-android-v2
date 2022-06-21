@@ -52,5 +52,22 @@ interface AccountManager : Manager {
     fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable
     fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance>
     fun getCachedTokenBalance(address: String, accountAddress: String): Single<CoinBalance>
+
+    /**
+    * Change Show Warning - change value for "showWarning" property (Account::showWarning)
+    * @param existedAccount - instance of minerva.android.walletmanager.model.minervaprimitives.account.Accont
+     * item which value will be changed
+    * @param state - new state for Account::showWarning
+    */
+    fun changeShowWarning(existedAccount: Account, state: Boolean): Completable
+
+    /**
+     * Change Favorite State - change favorite state of selected nft
+     * @param existedAccount - current Account
+     * @param tokenId - id of token which must be changed
+     * @param isFavoriteState - new state for token
+     * @return Completable
+     */
+    fun changeFavoriteState(existedAccount: Account, tokenId: String, isFavoriteState: Boolean): Completable
     val balancesInsertLiveData: LiveData<Event<Unit>>
 }

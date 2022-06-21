@@ -25,6 +25,25 @@ android {
         }
     }
 
+    flavorDimensions 'enviroment'
+
+    productFlavors {
+        flavorDimensions 'enviroment'
+        staging {
+            dimension 'enviroment'
+            matchingFallbacks = ["staging"]
+            buildConfigField "String", "DAPPS_DETAILS_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-dapplist/main/dapplist_staging.json"'
+            buildConfigField "String", "DAPPS_DETAILS_LAST_COMMIT", '"https://api.github.com/repos/lab10-coop/minerva-dapplist/commits?path=dapplist_staging.json&page=1&per_page=1"'
+        }
+
+        production {
+            dimension 'enviroment'
+            matchingFallbacks = ["production"]
+            buildConfigField "String", "DAPPS_DETAILS_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-dapplist/main/dapplist.json"'
+            buildConfigField "String", "DAPPS_DETAILS_LAST_COMMIT", '"https://api.github.com/repos/lab10-coop/minerva-dapplist/commits?path=dapplist.json&page=1&per_page=1"'
+        }
+    }
+
 }
 
 dependencies {

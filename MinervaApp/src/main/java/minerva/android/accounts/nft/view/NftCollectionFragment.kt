@@ -1,6 +1,7 @@
 package minerva.android.accounts.nft.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -25,6 +26,8 @@ class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
                 override fun onSendClicked(nftItem: NftItem) {
                     viewModel.selectItem(nftItem)
                 }
+
+                override fun changeFavoriteState(nftItem: NftItem) = viewModel.changeFavoriteState(nftItem)
             }
         }
     }
@@ -55,6 +58,9 @@ class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
             nftAdapter.updateList(list)
         })
         loadingLiveData.observe(viewLifecycleOwner, Observer { handleLoadingState(it) })
+        updatedNftItem.observe(viewLifecycleOwner, Observer { updatedItem ->
+            nftAdapter.updateItem(updatedItem)
+        })
     }
 
     private fun handleLoadingState(isVisible: Boolean) = with(binding.progress) {

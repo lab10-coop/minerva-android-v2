@@ -43,6 +43,17 @@ class NetworkManagerTest {
     }
 
     @Test
+    fun `Check if account is active`() {
+        NetworkManager.initialize(testNetworks1)
+        NetworkManager.networks[0].isActive shouldBeEqualTo true
+        NetworkManager.networks[1].isActive shouldBeEqualTo true
+        NetworkManager.networks[2].isActive shouldBeEqualTo true
+        NetworkManager.networks[3].isActive shouldBeEqualTo false
+        NetworkManager.networks[4].isActive shouldBeEqualTo false
+    }
+
+
+    @Test
     fun `Check getting first default Account network correctly`() {
         NetworkManager.initialize(testNetworks1)
         NetworkManager.firstDefaultValueNetwork().name shouldBeEqualTo "FullName1"
@@ -104,27 +115,27 @@ class NetworkManagerTest {
     )
 
     private val testNetworks1 = listOf(
-        Network("FullName1", "WT1", "someAddress1", "someAddress1", false, BigInteger.TEN, "", tokenSet1, "#FF223344", chainId = 1),
-        Network("FullName2", "WT2", "", "someAddress2", false, BigInteger.TEN, "", tokenSet2, "#223344", chainId = 2),
-        Network("FullName3", "WT3", "someAddress3", "someAddress3", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 3),
-        Network("FullName4", "WT4", "", "someAddress4", true, BigInteger.TEN, "", listOf(), "#223344", false, chainId = 4),
-        Network("FullName5", "WT5", "someAddress5", "someAddress5", true, BigInteger.TEN, "", listOf(), "#FF223344", false, chainId = 5)
+        Network("FullName1", true, "WT1", "someAddress1", "someAddress1", false, BigInteger.TEN, BigInteger.TEN, "", tokenSet1, "#FF223344", chainId = 1),
+        Network("FullName2", false, "WT2", "", "someAddress2", false, BigInteger.TEN, BigInteger.TEN, "", tokenSet2, "#223344", chainId = 2),
+        Network("FullName3", true, "WT3", "someAddress3", "someAddress3", false, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 3),
+        Network("FullName4", false, "WT4", "", "someAddress4", true, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", false, chainId = 4),
+        Network("FullName5", true, "WT5", "someAddress5", "someAddress5", true, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#FF223344", false, chainId = 5)
     )
 
     private val testNetworks2 = listOf(
-        Network("FullName1", "WT1", "", "", false, BigInteger.TEN, "", listOf(), "#223344", chainId = 1),
-        Network("FullName2", "WT2", "", "", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 2),
-        Network("FullName3", "WT3", "someAddress3", "someAddress4", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 3),
-        Network("FullName4", "WT4", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 4),
-        Network("FullName5", "WT5", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 5)
+        Network("FullName1", true, "WT1", "", "", false, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", chainId = 1),
+        Network("FullName2", true, "WT2", "", "", false, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 2),
+        Network("FullName3", true, "WT3", "someAddress3", "someAddress4", false, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 3),
+        Network("FullName4", true, "WT4", "", "", true, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", chainId = 4),
+        Network("FullName5", true, "WT5", "", "", true, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", chainId = 5)
     )
 
     private val testNetworks3 = listOf(
-        Network("FullName1", "WT1", "", "", false, BigInteger.TEN, "", listOf(), "#223344", chainId = 1),
-        Network("FullName2", "WT2", "", "", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 2),
-        Network("FullName3", "WT3", "", "", false, BigInteger.TEN, "", listOf(), "#223344", chainId = 3),
-        Network("FullName4", "WT4", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 4),
-        Network("FullName5", "WT5", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 5)
+        Network("FullName1", true, "WT1", "", "", false, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", chainId = 1),
+        Network("FullName2", true, "WT2", "", "", false, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 2),
+        Network("FullName3", true, "WT3", "", "", false, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", chainId = 3),
+        Network("FullName4", true, "WT4", "", "", true, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", chainId = 4),
+        Network("FullName5", true, "WT5", "", "", true, BigInteger.TEN, BigInteger.TEN, "", listOf(), "#223344", chainId = 5)
     )
 
     private val testNetworks4 = listOf<Network>()

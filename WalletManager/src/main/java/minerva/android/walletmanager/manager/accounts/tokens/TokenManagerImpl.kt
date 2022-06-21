@@ -34,18 +34,28 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.ContentType
 import minerva.android.walletmanager.model.NftContent
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_FUJ
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_ALF
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_BAK
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
@@ -597,9 +607,9 @@ class TokenManagerImpl(
 
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
-            ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, BSC_TESTNET -> getTokensFromTx(account)
-            MUMBAI, RSK_TEST, RSK_MAIN -> Single.just(emptyList()) // Networks without token explorer urls
-            XDAI, MATIC, ATS_SIGMA, BSC, ETH_MAIN -> getTokensOwned(account)
+            ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, BSC_TESTNET -> getTokensFromTx(account)
+            MUMBAI, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
+            XDAI, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
@@ -855,7 +865,7 @@ class TokenManagerImpl(
 
     private fun getAPIKey(chainId: Int) =
         when (chainId) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHERSCAN_KEY
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP -> ETHERSCAN_KEY
             MATIC -> POLYGONSCAN_KEY
             BSC, BSC_TESTNET -> BSCSCAN_KEY
             else -> throw NetworkNotFoundThrowable()
@@ -876,6 +886,7 @@ class TokenManagerImpl(
             ETH_ROP -> ETHEREUM_ROPSTEN_TOKEN_BALANCE_URL
             ETH_KOV -> ETHEREUM_KOVAN_TOKEN_BALANCE_URL
             ETH_GOR -> ETHEREUM_GOERLI_TOKEN_BALANCE_URL
+            ETH_SEP -> ETHEREUM_SEPOLIA_TOKEN_BALANCE_URL
             ATS_TAU -> ARTIS_TAU_TOKEN_BALANCE_URL
             ATS_SIGMA -> ARTIS_SIGMA_TOKEN_BALANCE_URL
             POA_SKL -> POA_SOKOL_TOKEN_BALANCE_URL
@@ -896,6 +907,10 @@ class TokenManagerImpl(
             ATS_SIGMA -> ARTIS_SIGMA_TOKENS_OWNED_URL
             BSC -> BSC_TOKENS_OWNED_URL
             ETH_MAIN -> ETH_TOKENS_OWNED_URL
+            ARB_ONE -> ARB_TOKENS_OWNED_URL
+            OPT -> OPT_TOKENS_OWNED_URL
+            CELO -> CELO_TOKENS_OWNED_URL
+            AVA_C -> AVA_TOKENS_OWNED_URL
             else -> throw NetworkNotFoundThrowable()
         }
 
