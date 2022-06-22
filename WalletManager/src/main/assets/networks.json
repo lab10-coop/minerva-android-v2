@@ -92,7 +92,7 @@
   },
   {
     "name": "Avalanche",
-    "isActive": false,
+    "isActive": true,
     "token": "AVAX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://avalanche.rpc.minerva.digital",
@@ -126,7 +126,7 @@
   },
   {
     "name": "Celo",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://celo.rpc.minerva.digital",
@@ -141,7 +141,7 @@
   },
   {
     "name": "ARTIS Σ1",
-    "isActive": true,
+    "isActive": false,
     "token": "ATS",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.sigma1.artis.network",
@@ -156,7 +156,7 @@
   },
   {
     "name": "POA Core",
-    "isActive": true,
+    "isActive": false,
     "token": "POA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://core.poanetwork.dev",
@@ -334,7 +334,7 @@
   },
   {
     "name": "Avalanche Fuji Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "AVAX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://api.avax-test.network/ext/bc/C/rpc",
@@ -368,7 +368,7 @@
   },
   {
     "name": "Celo Alfajores Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://alfajores-forno.celo-testnet.org",
@@ -383,7 +383,7 @@
   },
   {
     "name": "Celo Baklava Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://baklava-forno.celo-testnet.org",
@@ -413,7 +413,7 @@
   },
   {
     "name": "ARTIS (τ1)",
-    "isActive": true,
+    "isActive": false,
     "token": "tATS",
     "isSafeAccountAvailable": "true",
     "httpRpc": "https://rpc.tau1.artis.network",
@@ -428,7 +428,7 @@
   },
   {
     "name": "POA Sokol",
-    "isActive": true,
+    "isActive": false,
     "token": "tPOA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://sokol.poa.network",
