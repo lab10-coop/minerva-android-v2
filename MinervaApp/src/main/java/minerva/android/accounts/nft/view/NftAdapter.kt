@@ -22,18 +22,24 @@ class NftAdapter : RecyclerView.Adapter<NftViewHolder>() {
     }
 
     /**
-     * Update Item - method for update specified item
+     * Update Item - method for update/remove specified item
      * @param nftItem - instance of minerva.android.accounts.nft.model.NftItem
+     * @param isGroup Boolean - delete item from group (for favorite group case)
      */
-    fun updateItem(nftItem: NftItem) {
+    fun updateItem(nftItem: NftItem, isGroup: Boolean) {
         //find item by id in main list; can't find by object instance because specified nftItem already changed
         val itemWhichWillBeChanged: NftItem? = nftList.find { it.tokenId == nftItem.tokenId }
         itemWhichWillBeChanged?.let { nft ->
             val position: Int = nftList.indexOf(nft)
             if (position != RecyclerView.NO_POSITION) {
                 nftList[position] = nftItem
-                //don't update itens in usually way; use Observer for it - because of WebView flicked while redraw
-                //if (position != RecyclerView.NO_POSITION) notifyItemChanged(position)
+                //delete item from group (like favorite group)
+                if (isGroup) {
+                    if (position != RecyclerView.NO_POSITION) {
+                        nftList.removeAt(position)
+                        notifyItemRemoved(position)
+                    }
+                }
             }
         }
     }

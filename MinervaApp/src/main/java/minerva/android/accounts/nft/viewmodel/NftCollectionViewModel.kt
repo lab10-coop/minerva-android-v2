@@ -108,6 +108,12 @@ class NftCollectionViewModel(
     private val _transactionCostLoadingErrorLiveData = MutableLiveData<Event<Throwable>>()
     val transactionCostLoadingErrorLiveData: LiveData<Event<Throwable>> get() = _transactionCostLoadingErrorLiveData
 
+    /**
+     * Get Is Group - getter for isGroup variable
+     * @return Boolean
+     */
+    fun getIsGroupState() = isGroup
+
     fun setGasLimit(gasLimit: BigInteger) {
         transactionCost = transactionCost.copy(gasLimit = gasLimit)
     }

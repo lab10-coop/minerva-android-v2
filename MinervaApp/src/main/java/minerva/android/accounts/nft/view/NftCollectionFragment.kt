@@ -60,7 +60,7 @@ class NftCollectionFragment : BaseFragment(R.layout.fragment_nft_collection) {
         })
         loadingLiveData.observe(viewLifecycleOwner, Observer { handleLoadingState(it) })
         updatedNftItem.observe(viewLifecycleOwner, Observer { updatedItem ->
-            nftAdapter.updateItem(updatedItem)
+            nftAdapter.updateItem(updatedItem, getIsGroupState())
             //update nft Observable for showing right favorite state
             nftUpdateObservable.onNext(updatedItem)
         })
