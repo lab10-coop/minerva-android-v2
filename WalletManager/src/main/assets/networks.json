@@ -115,7 +115,7 @@
     "token": "BNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://bsc.rpc.minerva.digital",
-    "wsRpc": "",
+    "wsRpc": "wss://speedy-nodes-nyc.moralis.io/1a2b3c4d5e6f1a2b3c4d5e6f/bsc/mainnet/ws",
     "gasPriceOracle": "https://bsc.rpc.minerva.digital",
     "gasPrice": "10000000000",
     "minGasPrice": "0",
