@@ -115,14 +115,18 @@
     "token": "BNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://bsc.rpc.minerva.digital",
-    "wsRpc": "",
+    "wsRpc": "wss://speedy-nodes-nyc.moralis.io/368f5973bec9aa708b0b18b8/bsc/mainnet/ws",
     "gasPriceOracle": "https://bsc.rpc.minerva.digital",
     "gasPrice": "10000000000",
     "minGasPrice": "0",
     "tokens": [],
     "color": "#f3ba2f",
     "testNet": false,
-    "chainId": 56
+    "chainId": 56,
+    "superfluid": {
+      "host": "0xd1e2cFb6441680002Eb7A44223160aB9B67d7E6E",
+      "cfav1": "0x49c38108870e74Cb9420C0991a85D3edd6363F75"
+    }
   },
   {
     "name": "Celo",
@@ -338,7 +342,7 @@
     "token": "AVAX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://api.avax-test.network/ext/bc/C/rpc",
-    "wsRpc": "",
+    "wsRpc": "wss://speedy-nodes-nyc.moralis.io/368f5973bec9aa708b0b18b8/avalanche/mainnet/ws",
     "gasPriceOracle": "https://api.avax-test.network/ext/bc/C/rpc",
     "gasPrice": "20000000000",
     "minGasPrice": "0",
