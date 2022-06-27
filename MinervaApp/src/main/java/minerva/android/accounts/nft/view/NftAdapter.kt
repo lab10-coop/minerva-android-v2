@@ -59,20 +59,19 @@ class NftAdapter : RecyclerView.Adapter<NftViewHolder>() {
 
 @SuppressLint("CheckResult")
 class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener) : RecyclerView.ViewHolder(binding.root) {
-    //identity for item
+    //identity for item for prevent Observer changed on another items
     private var _id: String? = null
-    //calculate and caches favorite state(changed state from first model\data(item: NftItem) which got from server)
-    private var localFavoriteState: Boolean = false
+    //calculate favorite state
+    //if localFavoriteState = null - this means view\item not initialized yet and must use last received value from ::bind
+    private var localFavoriteState: Boolean? = null
 
     init {
         //update favorite state flag after got answer from ViewModel (after data changed)
         NftCollectionFragment.nftUpdateObservable.subscribe { updatedItem ->
             if (_id != null && _id == updatedItem.tokenId) {
                 binding.nftDetails.apply {
-                    //change state to opposite because we work with old(not updated) data that's why need calculate it our self
-                    localFavoriteState = !localFavoriteState
                     //set favorite state image
-                    if (localFavoriteState)
+                    if (updatedItem.isFavorite)
                         favoriteStateFlag.setImageResource(R.drawable.ic_favorite_state_chosen_flag)
                     else
                         favoriteStateFlag.setImageResource(R.drawable.ic_favorite_state_flag)
@@ -86,7 +85,6 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
     fun bind(item: NftItem) = with(binding) {
         //set id for item for prevent Observer changed on another items
         _id = item.tokenId
-        localFavoriteState = item.isFavorite
         setup(item) { nftItem ->
             setupDescription(nftItem)
         }
@@ -94,11 +92,21 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
             listener.onSendClicked(item)
         }
         nftDetails.favoriteStateFlag.setOnClickListener {
-            //set element unclickable for prevent multiple click while data send/update/get
+            //set element to unclickable for prevent multiple click while data send/update/get
             it.isClickable = false
-            //changing "isFavorite" state to opposite value
-            val nftItem: NftItem = item.copy(isFavorite = !item.isFavorite)
-            listener.changeFavoriteState(nftItem)
+
+            //if null - init it with last data we received
+            if (null == localFavoriteState) {
+                localFavoriteState = !item.isFavorite //change state to opposite
+            } else {
+                localFavoriteState = !localFavoriteState!! //change state to opposite
+            }
+
+            //set specified favorite state for item
+            localFavoriteState?.let { favState ->
+                val nftItem: NftItem = item.copy(isFavorite = favState)
+                listener.changeFavoriteState(nftItem)
+            }
         }
     }
 

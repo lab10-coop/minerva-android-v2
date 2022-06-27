@@ -77,6 +77,8 @@ class NftCollectionFragment : BaseFragment(R.layout.fragment_nft_collection) {
     companion object {
         @JvmStatic
         fun newInstance() = NftCollectionFragment()
+
+        //TODO change for best solution
         //Observable for change nft ViewHolder elements without adapter.notifyItemChanged(position)
         val nftUpdateObservable: PublishSubject<NftItem> = PublishSubject.create()
     }
