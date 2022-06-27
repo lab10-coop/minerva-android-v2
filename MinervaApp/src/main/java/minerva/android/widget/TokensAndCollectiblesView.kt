@@ -169,9 +169,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                             //addresses to json array - for transfer it through ERCToken wrapper
                             val favoriteTokenAddressesToJson: String = favoriteTokenAddresses.toJsonArray()
                             //add "My Favorites" group to token/nft list like usual token/nft item
-
-                            //HIDE FAVORITE COLLECTION ITEM
-                            /*addView(CollectibleView(context).apply {
+                            addView(CollectibleView(context).apply {
                                 initView(
                                     account,
                                     collectibleViewCallback,
@@ -185,7 +183,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                                     favoriteTokens.size.toBigDecimal(), //count of token/nft in items
                                     TOKEN_LOGO.FAVORITE_GROUP
                                 )
-                            })*/
+                            })
                         }
 
                         collectibles.forEach { collectiblesWithBalance ->

@@ -1,20 +1,21 @@
 package minerva.android.accounts.nft.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import io.reactivex.subjects.PublishSubject
 import minerva.android.R
 import minerva.android.accounts.nft.model.NftItem
 import minerva.android.accounts.nft.viewmodel.NftCollectionViewModel
 import minerva.android.databinding.FragmentNftCollectionBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_MARGIN
+import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.main.base.BaseFragment
 import minerva.android.utils.VerticalMarginItemDecoration
 
-class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
+class NftCollectionFragment : BaseFragment(R.layout.fragment_nft_collection) {
 
     private val viewModel: NftCollectionViewModel by activityViewModels()
 
@@ -59,8 +60,13 @@ class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
         })
         loadingLiveData.observe(viewLifecycleOwner, Observer { handleLoadingState(it) })
         updatedNftItem.observe(viewLifecycleOwner, Observer { updatedItem ->
-            nftAdapter.updateItem(updatedItem)
+            nftAdapter.updateItem(updatedItem, getIsGroupState())
+            //update nft Observable for showing right favorite state
+            nftUpdateObservable.onNext(updatedItem)
         })
+        errorLiveData.observe(
+            viewLifecycleOwner,
+            EventObserver { handleAutomaticBackupError(it, noAutomaticBackupErrorAction = { activity?.finish() }) })
     }
 
     private fun handleLoadingState(isVisible: Boolean) = with(binding.progress) {
@@ -71,5 +77,9 @@ class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
     companion object {
         @JvmStatic
         fun newInstance() = NftCollectionFragment()
+
+        //TODO change for best solution
+        //Observable for change nft ViewHolder elements without adapter.notifyItemChanged(position)
+        val nftUpdateObservable: PublishSubject<NftItem> = PublishSubject.create()
     }
 }
