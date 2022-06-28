@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import minerva.android.R
 import minerva.android.accounts.nft.model.NftItem
 import minerva.android.databinding.ItemNftBinding
 import minerva.android.widget.RecyclableViewMoreTextView
@@ -70,11 +70,7 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
         NftCollectionFragment.nftUpdateObservable.subscribe { updatedItem ->
             if (_id != null && _id == updatedItem.tokenId) {
                 binding.nftDetails.apply {
-                    //set favorite state image
-                    if (updatedItem.isFavorite)
-                        favoriteStateFlag.setImageResource(R.drawable.ic_favorite_state_chosen_flag)
-                    else
-                        favoriteStateFlag.setImageResource(R.drawable.ic_favorite_state_flag)
+                    changeFavoriteStateIcon(favoriteStateFlag, updatedItem.isFavorite)
                     //set element clickable after new state was set
                     favoriteStateFlag.isClickable = true
                 }
@@ -94,21 +90,31 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
         nftDetails.favoriteStateFlag.setOnClickListener {
             //set element to unclickable for prevent multiple click while data send/update/get
             it.isClickable = false
-
             //if null - init it with last data we received
             if (null == localFavoriteState) {
                 localFavoriteState = !item.isFavorite //change state to opposite
             } else {
                 localFavoriteState = !localFavoriteState!! //change state to opposite
             }
-
             //set specified favorite state for item
             localFavoriteState?.let { favState ->
+                changeFavoriteStateIcon(it as ImageView, favState)
+                //create model with updated state
                 val nftItem: NftItem = item.copy(isFavorite = favState)
                 listener.changeFavoriteState(nftItem)
             }
         }
     }
+
+    /**
+     * Change Favorite Icon - set favorite state icon
+     * @param view - ImageView for set favorite state
+     * @param state - Boolean shows which state need to be install
+     */
+    private fun changeFavoriteStateIcon(view: ImageView, state: Boolean) = if (state)
+            view.setImageResource(NftCollectionFragment.FAVORITE_STATE_ENABLE)
+        else
+            view.setImageResource(NftCollectionFragment.FAVORITE_STATE_DISABLED)
 
     private fun ItemNftBinding.setupDescription(nftItem: NftItem) = nftDetails.description.apply {
         listener = object : RecyclableViewMoreTextView.Listener {

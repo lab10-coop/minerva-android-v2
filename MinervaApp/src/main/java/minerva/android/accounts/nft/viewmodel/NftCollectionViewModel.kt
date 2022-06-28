@@ -403,20 +403,17 @@ class NftCollectionViewModel(
      * @param nftItem - item which value will be changed
      */
     fun changeFavoriteState(nftItem: NftItem) = launchDisposable {
-            _loadingLiveData.value = true
             accountManager.changeFavoriteState(account, nftItem.tokenId, nftItem.isFavorite)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = {
                         _updatedNftItem.value = nftItem
-                        _loadingLiveData.value = false
                     },
                     onError = {
                         Timber.e(it)
                         //update error state for showing popap with current error
-                        _errorLiveData.value = Event(it)
-                        _loadingLiveData.value = false
+//                        _errorLiveData.value = Event(it)
                     }
                 )
         }
