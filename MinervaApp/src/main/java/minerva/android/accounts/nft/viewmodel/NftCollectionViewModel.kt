@@ -413,7 +413,7 @@ class NftCollectionViewModel(
                     onError = {
                         Timber.e(it)
                         //update error state for showing popap with current error
-//                        _errorLiveData.value = Event(it)
+                        _errorLiveData.value = Event(it)
                     }
                 )
         }
