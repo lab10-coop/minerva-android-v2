@@ -66,10 +66,17 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         return DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
     }
 
-    override fun restoreMasterSeed(mnemonic: String): Seed =
+    override fun restoreMasterSeed(mnemonicAndPassword: String): Seed =
         try {
-            val seed: String = mnemonicToEntropy(mnemonic, WORDLIST_ENGLISH).toNoPrefixHexString()
-            val keys: ECKeyPair = MnemonicWords(mnemonic).toKey(MASTER_KEYS_PATH).keyPair
+            var password = ""
+            var mnemonic = MnemonicWords(mnemonicAndPassword)
+            // if not a multiple of 3, try to use last word as password.
+            if (mnemonic.words.size % 3 > 0) {
+                password = mnemonic.words.last()
+                mnemonic = MnemonicWords(mnemonicAndPassword.substringBeforeLast(" "))
+            }
+            val seed: String = mnemonic.mnemonicToEntropy(WORDLIST_ENGLISH).toNoPrefixHexString()
+            val keys: ECKeyPair = mnemonic.toKey(MASTER_KEYS_PATH, password).keyPair
             SeedWithKeys(seed, keys.getPublicKey(), keys.getPrivateKey())
         } catch (exception: Exception) {
             Timber.e(exception)
@@ -111,11 +118,15 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
     override fun areMnemonicWordsValid(mnemonic: String): Boolean =
         mutableListOf<String>().apply { collectInvalidWords(StringTokenizer(mnemonic), this) }.isEmpty()
 
-    private fun collectInvalidWords(phase: StringTokenizer, list: MutableList<String>) {
-        while (phase.hasMoreTokens()) {
-            val word = phase.nextToken()
-            if (!WORDLIST_ENGLISH.contains(word)) {
-                list.add(word)
+    private fun collectInvalidWords(phrase: StringTokenizer, list: MutableList<String>) {
+        val multipleOfThree = phrase.countTokens() % 3 <= 0
+        while (phrase.hasMoreTokens()) {
+            val word = phrase.nextToken()
+            // Don't check the last word against the wordlist as it might be a password
+            if (!(!multipleOfThree && !phrase.hasMoreTokens())) {
+                if (!WORDLIST_ENGLISH.contains(word)) {
+                    list.add(word)
+                }
             }
         }
     }

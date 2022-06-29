@@ -84,7 +84,7 @@ class CryptographyRepositoryTest {
     }
 
     @Test
-    fun `crate master seed test`() {
+    fun `create master seed test`() {
         val test = repository.createMasterSeed().test()
         test.assertValue { it.first.isNotEmpty() && it.second.isNotEmpty() && it.third.isNotEmpty() }
     }
@@ -108,6 +108,15 @@ class CryptographyRepositoryTest {
     }
 
     @Test
+    fun `restore master seed with password test`() {
+        val result =
+            repository.restoreMasterSeed("winter wear license spatial history oxygen spell leg wealth stay tornado olympic supersecretpassword")
+        (result as SeedWithKeys).apply {
+            seed shouldBeEqualTo "fc1f0e04e846c33cb44bfaf83a9f95cd"
+        }
+    }
+
+    @Test
     fun `test mnemonic validator`() {
         val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture"
         val validation = repository.areMnemonicWordsValid(mnemonic)
@@ -115,8 +124,22 @@ class CryptographyRepositoryTest {
     }
 
     @Test
+    fun `test mnemonic validator with password`() {
+        val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture thisisapassword"
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, true)
+    }
+
+    @Test
     fun `test mnemonic validator collecting invalid words`() {
         val mnemonic = "vessel *$ alter error federal HEHE chat ability sun Test valve picture"
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, false)
+    }
+
+    @Test
+    fun `test mnemonic validator collecting invalid words and password`() {
+        val mnemonic = "vessel *$ alter error federal HEHE chat ability sun Test valve picture anotherpassword"
         val validation = repository.areMnemonicWordsValid(mnemonic)
         assertEquals(validation, false)
     }
