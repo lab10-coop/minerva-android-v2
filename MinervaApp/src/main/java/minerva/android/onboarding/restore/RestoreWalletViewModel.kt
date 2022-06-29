@@ -26,7 +26,8 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
         val mnemonic: String = content.toString()
         val mnemonicSize: Int = StringTokenizer(mnemonic, String.Space).countTokens()
         val isMnemonicSizeValid: Boolean =
-            mnemonicSize.rem(DIVIDER) == 0 && (mnemonicSize in MIN_MNEMONIC_SIZE..MAX_MNEMONIC_SIZE)
+            (mnemonicSize.rem(DIVIDER) == 0 || mnemonicSize.dec().rem(DIVIDER) == 0 ) &&
+                    (mnemonicSize in MIN_MNEMONIC_SIZE..MAX_MNEMONIC_SIZE)
         if (isMnemonicSizeValid) {
             checkMnemonicWords(mnemonic)
         } else {
@@ -98,6 +99,6 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
     companion object {
         private const val DIVIDER = 3
         private const val MIN_MNEMONIC_SIZE = 12
-        private const val MAX_MNEMONIC_SIZE = 24
+        private const val MAX_MNEMONIC_SIZE = 25
     }
 }
