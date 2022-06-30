@@ -21,11 +21,21 @@ object BalanceUtils {
             }
         }
 
-    fun getFiatBalance(fiatBalance: BigDecimal, fiatSymbol: String): String =
+    fun getFiatBalance(
+        fiatBalance: BigDecimal,
+        fiatSymbol: String,
+        //using for showing balance only(from "$ 0.00...." to "< $ 0.01") - !not using for explicit calculation
+        rounding: Boolean = false
+    ): String =
         when {
             fiatBalance < BigDecimal.ZERO -> String.format(Locale.ROOT, NO_FIAT_VALUE, fiatSymbol)
-            fiatBalance != Double.InvalidValue.toBigDecimal() ->
-                String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+            fiatBalance != Double.InvalidValue.toBigDecimal() -> {
+                if (rounding) {
+                    if (fiatBalance > BIG_DECIMAL_ZERO && fiatBalance < ROUNDING_TO) {//rounding value
+                        String.format(Locale.ROOT, CURRENCY_FORMAT, "< $fiatSymbol", ROUNDING_TO)
+                    } else String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+                } else String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+            }
             fiatBalance == BigDecimal.ZERO -> ZERO
             else -> String.format(Locale.ROOT, NO_FIAT_VALUE, fiatSymbol)
         }
@@ -52,5 +62,6 @@ object BalanceUtils {
     private val MINIMAL_VALUE = 0.0000000001.toBigDecimal()
     private const val SUPER_TOKEN_CRYPTO_SCALE = 14
     private const val SUPER_TOKEN_CRYPTO_FORMAT = "0.00000000000000"
-
+    private val ROUNDING_TO = BigDecimal(0.01) //value which we will get instead of "0.00......"
+    private val BIG_DECIMAL_ZERO = BigDecimal(0)
 }

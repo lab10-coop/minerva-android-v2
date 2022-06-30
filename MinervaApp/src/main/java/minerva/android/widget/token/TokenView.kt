@@ -5,18 +5,13 @@ import android.util.AttributeSet
 import android.widget.RelativeLayout
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.NativeToken
-import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.utils.BalanceUtils.getCryptoBalance
 import minerva.android.walletmanager.utils.BalanceUtils.getFiatBalance
 import minerva.android.widget.CryptoAmountView
-import minerva.android.widget.CryptoAmountView.Companion.NEGATIVE
 import minerva.android.widget.repository.getMainTokenIconRes
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -51,7 +46,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
                         setErrorColor()
                     }
                 }
-                setFiat(getFiatBalance(fiatBalance, fiatSymbol))
+                setFiat(getFiatBalance(fiatBalance, fiatSymbol, rounding = true))
             }
         }
     }

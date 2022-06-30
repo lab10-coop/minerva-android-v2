@@ -46,7 +46,7 @@ class TokenAdapter(
                 }
                 amountView.apply {
                     setCryptoBalance(getCryptoBalance(item.currentBalance))
-                    setFiat(getFiatBalance(item.fiatBalance, fiatSymbol))
+                    setFiat(getFiatBalance(item.fiatBalance, fiatSymbol, rounding = true))
                 }
             }
         }
