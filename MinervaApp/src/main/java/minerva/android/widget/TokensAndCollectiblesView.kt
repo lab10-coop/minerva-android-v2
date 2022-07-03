@@ -10,8 +10,8 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.transition.TransitionManager
-import com.google.gson.Gson
 import minerva.android.R
+import minerva.android.accounts.nft.view.NftCollectionFragment
 import minerva.android.databinding.TokensAndCollectiblesLayoutBinding
 import minerva.android.extension.toggleVisibleOrGone
 import minerva.android.extension.visible
@@ -173,15 +173,16 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                                 initView(
                                     account,
                                     collectibleViewCallback,
-                                    //create mock token entity with favorites tokens data(for recognize it latter)
+                                    //create mock token entity with favorites tokens data(for recognize it latter like group item case)
                                     ERCToken(
                                         chainId = FAVORITE_GROUP_ID,
                                         symbol = resources.getString(R.string.my_favorites),
                                         address = favoriteTokenAddressesToJson,
                                         collectionName = resources.getString(R.string.my_favorites_item_description),
-                                        type = TokenType.ERC1155),
+                                        type = TokenType.ERC1155,
+                                        logoURI = NftCollectionFragment.favoriteLogoUrl),
                                     favoriteTokens.size.toBigDecimal(), //count of token/nft in items
-                                    TOKEN_LOGO.FAVORITE_GROUP
+                                    isGroup = true
                                 )
                             })
                         }
@@ -209,9 +210,6 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         private const val START_ROTATION_LEVEL = 10000
         private const val STOP_ROTATION_LEVEL = 0
         private const val FAVORITE_GROUP_ID = -2
-        enum class TOKEN_LOGO {
-            FAVORITE_GROUP, URI
-        }
     }
 
     //TODO this method is not used, because Asset Manage screen is not implemented yet - ready to use UI

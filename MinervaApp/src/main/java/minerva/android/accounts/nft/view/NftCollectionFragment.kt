@@ -77,9 +77,12 @@ class NftCollectionFragment : BaseFragment(R.layout.fragment_nft_collection) {
     companion object {
         @JvmStatic
         fun newInstance() = NftCollectionFragment()
-
         //TODO change for best solution
         //Observable for change nft ViewHolder elements without adapter.notifyItemChanged(position)
         val nftUpdateObservable: PublishSubject<NftItem> = PublishSubject.create()
+        //favorite logo url
+        val favoriteLogoUrl = "https://raw.githubusercontent.com/lab10-coop/minerva-nft-list/main/images/favorite.svg"
+        val FAVORITE_STATE_ENABLE: Int = R.drawable.ic_favorite_state_chosen_flag
+        val FAVORITE_STATE_DISABLED: Int = R.drawable.ic_favorite_state_flag
     }
 }
