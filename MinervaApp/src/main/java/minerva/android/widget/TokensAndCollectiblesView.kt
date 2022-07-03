@@ -10,7 +10,6 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.transition.TransitionManager
-import com.google.gson.Gson
 import minerva.android.R
 import minerva.android.accounts.nft.view.NftCollectionFragment
 import minerva.android.databinding.TokensAndCollectiblesLayoutBinding

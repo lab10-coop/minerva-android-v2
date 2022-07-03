@@ -175,10 +175,10 @@ class WalletConnectInteractionsViewModel(
         }
 
     private fun getFiatTransactionCost(transactionCost: TransactionCost) =
-        BalanceUtils.getFiatBalance(getCostInFiat(transactionCost.cost), transactionRepository.getFiatSymbol())
+        BalanceUtils.getFiatBalance(getCostInFiat(transactionCost.cost), transactionRepository.getFiatSymbol(), rounding = true)
 
     private fun getFiatTransactionValue(transferType: TransferType, status: OnEthSendTransaction) =
-        BalanceUtils.getFiatBalance(getValueInFiat(transferType, status), transactionRepository.getFiatSymbol())
+        BalanceUtils.getFiatBalance(getValueInFiat(transferType, status), transactionRepository.getFiatSymbol(), rounding = true)
 
     private fun getValueInFiat(transferType: TransferType, status: OnEthSendTransaction): BigDecimal =
         status.transaction.run {
