@@ -135,7 +135,7 @@ class AccountViewHolder(
     private fun PopupMenu.setMenuItems(account: Account) {
         with(menu) {
             findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
-            findItem(R.id.openInExplorer).isVisible = if (account.network.explore.isEmpty()) false else true
+            findItem(R.id.openInExplorer).isVisible = !account.network.explore.isEmpty()
             findItem(R.id.exportPrivateKey).isVisible = isExportSafeAccountAvailable(account)
             findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
             if (account.dappSessionCount != 0) {
