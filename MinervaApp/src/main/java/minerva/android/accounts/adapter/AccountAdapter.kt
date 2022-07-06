@@ -101,5 +101,7 @@ class AccountAdapter(
     override fun getAccountWidgetState(index: Int): AccountWidgetState = listener.getAccountWidgetState(index)
 
     override fun onEditName(account: Account) = listener.onEditName(account)
+
+    override fun openInExplorer(account: Account) = listener.openInExplorer(account)
 }
 
