@@ -469,13 +469,12 @@
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
         <item>1.7.5</item>
-        <item>* NFT personal favorites collection</item>
         <item>* Added Optimism network support</item>
         <item>* Added Arbitrum network support</item>
         <item>* Added Sepolia testnet support</item>
         <item>* Added Optimism Kovan testnet support</item>
         <item>* Added Arbitrum Rinkeby testnet support</item>
-        <item>* ETH on Optimism direct purchase via ramp.network</item>
+        <item>* ETH on Arbitrum direct purchase via ramp.network</item>
         <item>* Filter DApps for different networks</item>
         <item>* Improved gas price calculation</item>
         <item>* Preparations to handle unmaintained networks</item>
