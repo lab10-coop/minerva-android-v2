@@ -135,6 +135,7 @@ class AccountViewHolder(
     private fun PopupMenu.setMenuItems(account: Account) {
         with(menu) {
             findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
+            findItem(R.id.openInExplorer).isVisible = if (account.network.explore.isEmpty()) false else true
             findItem(R.id.exportPrivateKey).isVisible = isExportSafeAccountAvailable(account)
             findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
             if (account.dappSessionCount != 0) {
@@ -212,6 +213,7 @@ class AccountViewHolder(
                 R.id.manageTokens -> listener.onManageTokens(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
+                R.id.openInExplorer -> listener.openInExplorer(account)
                 R.id.exportPrivateKey -> listener.onExportPrivateKey(account)
                 R.id.editName -> listener.onEditName(account)
                 R.id.hide -> listener.onAccountHide(index)

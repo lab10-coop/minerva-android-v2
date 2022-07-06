@@ -1,5 +1,7 @@
 package minerva.android.accounts
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -189,6 +191,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun getAccountWidgetState(index: Int): AccountWidgetState =
         appUIState.getAccountWidgetState(index)
+
+    override fun openInExplorer(account: Account) {
+        //check all necessary data is filled
+        if (!account.network.explore.isEmpty() && !account.address.isEmpty()) {
+            //build full web path to explore transaction
+            val path = "${account.network.explore}${getString(R.string.address_text)}${getString(R.string.slash_text)}${account.address}"
+            //create web Intent
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(path))
+            startActivity(browserIntent)
+        }
+    }
 
     override fun getTokens(account: Account): List<AccountToken> = viewModel.getTokens(account)
     fun updateTokensRate() = viewModel.updateTokensRate()

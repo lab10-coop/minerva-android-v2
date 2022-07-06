@@ -17,4 +17,9 @@ interface AccountsAdapterListener {
     fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState)
     fun getAccountWidgetState(index: Int): AccountWidgetState
     fun onEditName(account: Account)
+    /**
+     * Open In Explorer - open in browser wallet transactions info by specified account
+     * @param account - Account which info we need to show
+     */
+    fun openInExplorer(account: Account)
 }
