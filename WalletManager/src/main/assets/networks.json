@@ -12,7 +12,8 @@
     "tokens": [],
     "color": "#393939",
     "testNet": false,
-    "chainId": 1
+    "chainId": 1,
+    "explore": "https://etherscan.io/"
   },
   {
     "name": "Gnosis Chain",
@@ -28,6 +29,7 @@
     "color": "#04795B",
     "testNet": false,
     "chainId": 100,
+    "explore": "https://blockscout.com/poa/xdai/",
     "superfluid": {
       "host": "0x2dFe937cD98Ab92e59cF3139138f18c823a4efE7",
       "cfav1": "0xEbdA4ceF883A7B12c4E669Ebc58927FBa8447C7D"
@@ -47,6 +49,7 @@
     "color": "#8247e5",
     "testNet": false,
     "chainId": 137,
+    "explore": "https://polygonscan.com/",
     "superfluid": {
       "host": "0x3E14dC1b13c488a8d5D310918780c983bD5982E7",
       "cfav1": "0x6EeE6060f715257b970700bc2656De21dEdF074C"
@@ -66,6 +69,7 @@
     "color": "#ff0420",
     "testNet": false,
     "chainId": 10,
+    "explore": "https://optimistic.etherscan.io/",
     "superfluid": {
       "host": "0x567c4B141ED61923967cA25Ef4906C8781069a10",
       "cfav1": "0x204C6f131bb7F258b2Ea1593f5309911d8E458eD"
@@ -85,6 +89,7 @@
     "color": "#28a0f0",
     "testNet": false,
     "chainId": 42161,
+    "explore": "https://explorer.arbitrum.io/",
     "superfluid": {
       "host": "0xCf8Acb4eF033efF16E8080aed4c7D5B9285D2192",
       "cfav1": "0x731FdBB12944973B500518aea61942381d7e240D"
@@ -104,6 +109,7 @@
     "color": "#ff0420",
     "testNet": false,
     "chainId": 43114,
+    "explore": "https://snowtrace.io/",
     "superfluid": {
       "host": "0x60377C7016E4cdB03C87EF474896C11cB560752C",
       "cfav1": "0x6946c5B38Ffea373b0a2340b4AEf0De8F6782e58"
@@ -123,6 +129,7 @@
     "color": "#f3ba2f",
     "testNet": false,
     "chainId": 56,
+    "explore": "https://www.bscscan.com/",
     "superfluid": {
       "host": "0xd1e2cFb6441680002Eb7A44223160aB9B67d7E6E",
       "cfav1": "0x49c38108870e74Cb9420C0991a85D3edd6363F75"
@@ -141,7 +148,8 @@
     "tokens": [],
     "color": "#35d07f",
     "testNet": false,
-    "chainId": 42220
+    "chainId": 42220,
+    "explore": "https://explorer.celo.org/"
   },
   {
     "name": "ARTIS Σ1",
@@ -156,7 +164,8 @@
     "tokens": [],
     "color": "#129c6b",
     "testNet": false,
-    "chainId": 246529
+    "chainId": 246529,
+    "explore": "https://blockscout.com/artis/sigma1/"
   },
   {
     "name": "POA Core",
@@ -171,7 +180,8 @@
     "tokens": [],
     "color": "#5c34a2",
     "testNet": false,
-    "chainId": 99
+    "chainId": 99,
+    "explore": "https://blockscout.com/poa/core/"
   },
   {
     "name": "RSK Mainnet",
@@ -186,7 +196,8 @@
     "tokens": [],
     "color": "#2ca93c",
     "testNet": false,
-    "chainId": 30
+    "chainId": 30,
+    "explore": "https://explorer.rsk.co/"
   },
   {
     "name": "Sepolia Test Network",
@@ -201,7 +212,8 @@
     "tokens": [],
     "color": "#b6c6ff",
     "testNet": true,
-    "chainId": 11155111
+    "chainId": 11155111,
+    "explore": "https://sepolia.etherscan.io/"
   },
   {
     "name": "Kovan",
@@ -217,6 +229,7 @@
     "color": "#FF6535c9",
     "testNet": true,
     "chainId": 42,
+    "explore": "https://kovan.etherscan.io/",
     "superfluid": {
       "host": "0xF0d7d1D47109bA426B9D8A3Cde1941327af1eea3",
       "cfav1": "0xECa8056809e7e8db04A8fF6e4E82cD889a46FE2F"
@@ -236,6 +249,7 @@
     "color": "#FFBDAE9B",
     "testNet": true,
     "chainId": 5,
+    "explore": "https://goerli.etherscan.io/",
     "superfluid": {
       "host": "0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9",
       "cfav1": "0xEd6BcbF6907D4feEEe8a8875543249bEa9D308E8"
@@ -255,6 +269,7 @@
     "color": "#FF6535c9",
     "testNet": true,
     "chainId": 4,
+    "explore": "",
     "superfluid": {
       "host": "0xeD5B5b32110c3Ded02a07c8b8e97513FAfb883B6",
       "cfav1": "0xF4C5310E51F6079F601a5fb7120bC72a70b96e2A"
@@ -274,6 +289,7 @@
     "color": "#FF6535c9",
     "testNet": true,
     "chainId": 3,
+    "explore": "",
     "superfluid": {
       "host": "0xF2B4E81ba39F5215Db2e05B2F66f482BB8e87FD2",
       "cfav1": "0xaD2F1f7cd663f6a15742675f975CcBD42bb23a88"
@@ -293,6 +309,7 @@
     "color": "#8247e5",
     "testNet": true,
     "chainId": 80001,
+    "explore": "",
     "superfluid": {
       "host": "0xEB796bdb90fFA0f28255275e16936D25d3418603",
       "cfav1": "0x49e565Ed1bdc17F3d220f72DF0857C26FA83F873"
@@ -312,6 +329,7 @@
     "color": "#ff0420",
     "testNet": true,
     "chainId": 69,
+    "explore": "",
     "superfluid": {
       "host": "0x74b57883f8ce9F2BD330286E884CfD8BB24AC4ED",
       "cfav1": "0x523481a8a5455efB1F301C6e00B5525Eb12a51da"
@@ -331,6 +349,7 @@
     "color": "#28a0f0",
     "testNet": true,
     "chainId": 421611,
+    "explore": "",
     "superfluid": {
       "host": "0xE01F8743677Da897F4e7De9073b57Bf034FC2433",
       "cfav1": "0xcA0569223e56B479FaC6d554FA0D3867A4384657"
@@ -350,6 +369,7 @@
     "color": "#ff0420",
     "testNet": true,
     "chainId": 43113,
+    "explore": "",
     "superfluid": {
       "host": "0xf04F2C525819691ed9ABD3D2B7109E1633795e68",
       "cfav1": "0xED74d30B8034152b0638CB03cc5c3c906dd1c482"
@@ -368,7 +388,8 @@
     "tokens": [],
     "color": "#f3ba2f",
     "testNet": true,
-    "chainId": 97
+    "chainId": 97,
+    "explore": ""
   },
   {
     "name": "Celo Alfajores Testnet",
@@ -383,7 +404,8 @@
     "tokens": [],
     "color": "#35d07f",
     "testNet": true,
-    "chainId": 44787
+    "chainId": 44787,
+    "explore": ""
   },
   {
     "name": "Celo Baklava Testnet",
@@ -398,7 +420,8 @@
     "tokens": [],
     "color": "#35d07f",
     "testNet": true,
-    "chainId": 62320
+    "chainId": 62320,
+    "explore": ""
   },
   {
     "name": "LUKSO (L14 Testnet)",
@@ -413,7 +436,8 @@
     "tokens": [],
     "color": "#FFFBCDC5",
     "testNet": true,
-    "chainId": 22
+    "chainId": 22,
+    "explore": ""
   },
   {
     "name": "ARTIS (τ1)",
@@ -428,7 +452,8 @@
     "tokens": [],
     "color": "#FFF97599",
     "testNet": true,
-    "chainId": 246785
+    "chainId": 246785,
+    "explore": ""
   },
   {
     "name": "POA Sokol",
@@ -443,7 +468,8 @@
     "tokens": [],
     "color": "#FF5CBEAB",
     "testNet": true,
-    "chainId": 77
+    "chainId": 77,
+    "explore": ""
   },
   {
     "name": "RSK Testnet",
@@ -458,6 +484,7 @@
     "tokens": [],
     "color": "#2ca93c",
     "testNet": true,
-    "chainId": 31
+    "chainId": 31,
+    "explore": ""
   }
 ]
