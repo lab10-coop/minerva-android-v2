@@ -675,7 +675,9 @@ class AccountsViewModel(
 
     fun stopStreaming() {
         transactionRepository.disconnectFromSuperTokenStreaming()
-        streamingDisposable.dispose()
+        if (::streamingDisposable.isInitialized) {
+            streamingDisposable.dispose()
+        }
         resetStreamingAnimation()
     }
 
