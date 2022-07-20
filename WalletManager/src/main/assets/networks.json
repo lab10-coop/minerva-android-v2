@@ -89,7 +89,7 @@
     "color": "#28a0f0",
     "testNet": false,
     "chainId": 42161,
-    "explore": "https://explorer.arbitrum.io/",
+    "explore": "https://arbiscan.io/",
     "superfluid": {
       "host": "0xCf8Acb4eF033efF16E8080aed4c7D5B9285D2192",
       "cfav1": "0x731FdBB12944973B500518aea61942381d7e240D"
