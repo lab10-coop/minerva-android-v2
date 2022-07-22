@@ -134,7 +134,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), Op
 
     private fun prepareEmptyAmountsView() = with(binding) {
         transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
-        fiatAmountValue.text = BalanceUtils.getFiatBalance(Double.InvalidValue.toBigDecimal(), viewModel.fiatSymbol)
+        fiatAmountValue.text = BalanceUtils.getFiatBalance(Double.InvalidValue.toBigDecimal(), viewModel.fiatSymbol, rounding = true)
     }
 
     private fun prepareObservers() {
@@ -277,7 +277,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), Op
                 }
                 allPressed = inputAmount == viewModel.recalculateAmount.toString()
                 binding.fiatAmountValue.text =
-                    BalanceUtils.getFiatBalance(viewModel.recalculateFiatAmount(getAmount()), viewModel.fiatSymbol)
+                    BalanceUtils.getFiatBalance(viewModel.recalculateFiatAmount(getAmount()), viewModel.fiatSymbol, rounding = true)
             }
         }
     }
@@ -519,7 +519,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), Op
                     sendButton.text = "${getString(R.string.send)} $it"
                 }
                 fiatAmountValue.text =
-                    BalanceUtils.getFiatBalance(recalculateFiatAmount(getAmount()), fiatSymbol)
+                    BalanceUtils.getFiatBalance(recalculateFiatAmount(getAmount()), fiatSymbol, rounding = true)
             }
         }
     }
