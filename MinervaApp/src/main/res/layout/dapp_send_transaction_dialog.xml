@@ -248,7 +248,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/transaction_cost"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
