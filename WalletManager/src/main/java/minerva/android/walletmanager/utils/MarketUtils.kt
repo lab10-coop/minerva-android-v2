@@ -46,8 +46,14 @@ object MarketUtils {
     }
 
     fun calculateFiatBalance(value: BigDecimal, rate: Double?): BigDecimal =
-        rate?.let { value.multiply(BigDecimal(it)).setScale(SCALE, RoundingMode.HALF_DOWN) }
-            .orElse { Double.InvalidValue.toBigDecimal() }
+        rate?.let {
+            val multiplyValue = value.multiply(BigDecimal(it))
+
+            if (multiplyValue > BalanceUtils.BIG_DECIMAL_ZERO && multiplyValue < BalanceUtils.ROUNDING_TO)
+                multiplyValue //value got between range (from "$ 0.00...." to "< $ 0.01") and have to be rounded
+            else
+                multiplyValue.setScale(SCALE, RoundingMode.HALF_DOWN)
+        }.orElse { Double.InvalidValue.toBigDecimal() }
 
     fun getRate(chainId: Int, markets: Markets, currentFiatCurrency: String): Double? =
         when (chainId) {

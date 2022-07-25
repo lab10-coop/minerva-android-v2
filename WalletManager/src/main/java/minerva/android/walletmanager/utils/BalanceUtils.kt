@@ -32,9 +32,13 @@ object BalanceUtils {
             fiatBalance != Double.InvalidValue.toBigDecimal() -> {
                 if (rounding) {
                     if (fiatBalance > BIG_DECIMAL_ZERO && fiatBalance < ROUNDING_TO) {//rounding value
-                        String.format(Locale.ROOT, CURRENCY_FORMAT, "< $fiatSymbol", ROUNDING_TO)
-                    } else String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
-                } else String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+                        String.format(Locale.ROOT, CURRENCY_FORMAT, String.format(FIAT_PLACEHOLDER, fiatSymbol), ROUNDING_TO)
+                    } else {
+                        String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+                    }
+                } else {
+                    String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+                }
             }
             fiatBalance == BigDecimal.ZERO -> ZERO
             else -> String.format(Locale.ROOT, NO_FIAT_VALUE, fiatSymbol)
@@ -51,6 +55,9 @@ object BalanceUtils {
             else -> DecimalFormat(SUPER_TOKEN_CRYPTO_FORMAT, DecimalFormatSymbols(Locale.ROOT)).format(balance.setScale(SUPER_TOKEN_CRYPTO_SCALE, RoundingMode.HALF_UP))
         }
 
+    val ROUNDING_TO = BigDecimal(0.01) //value which have to be paste instead of "0.00......" (more than 0)
+    val BIG_DECIMAL_ZERO = BigDecimal(0)
+    private val MINIMAL_VALUE = 0.0000000001.toBigDecimal()
     private const val CURRENCY_FORMAT = "%s %.2f"
     private const val NO_FIAT_VALUE = "%s -.--"
     private const val NO_VALUE = "-.--"
@@ -59,9 +66,7 @@ object BalanceUtils {
     private const val CRYPTO_SCALE = 10
     private const val CRYPTO_FORMAT = "#.##########"
     private const val BELOW_MINIMAL_VALUE = "<0.0000000001"
-    private val MINIMAL_VALUE = 0.0000000001.toBigDecimal()
     private const val SUPER_TOKEN_CRYPTO_SCALE = 14
     private const val SUPER_TOKEN_CRYPTO_FORMAT = "0.00000000000000"
-    private val ROUNDING_TO = BigDecimal(0.01) //value which we will get instead of "0.00......"
-    private val BIG_DECIMAL_ZERO = BigDecimal(0)
+    private const val FIAT_PLACEHOLDER = "< %s" //first part of fiat text view
 }
