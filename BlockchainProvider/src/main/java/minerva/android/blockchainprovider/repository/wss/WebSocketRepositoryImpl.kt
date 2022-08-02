@@ -1,6 +1,5 @@
 package minerva.android.blockchainprovider.repository.wss
 
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.reactivex.Flowable
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.kotlinUtils.map.value
@@ -20,25 +19,23 @@ class WebSocketRepositoryImpl(
     private var wssService: WebSocketService? = null
     private var web3j: Web3j? = null
 
+    @Throws(ConnectException::class)
     override fun subscribeToExecutedTransactions(chainId: Int, blockNumber: BigInteger): Flowable<ExecutedTransaction> {
         openConnection(chainId)
         return provider.subscribeToExecutedTransactions(web3j!!, blockNumber)
     }
 
+    @Throws(ConnectException::class)
     override fun subscribeToBlockCreation(chainId: Int): Flowable<Unit> {
         openConnection(chainId)
         return provider.subscribeToBlockCreation(web3j!!)
     }
 
+    @Throws(ConnectException::class)
     private fun openConnection(chainId: Int) {
         wssClient = WebSocketClient(URI(wssUrls.value(chainId)))
         wssService = WebSocketService(wssClient, false)
-        try {
-            wssService?.connect()
-        } catch (e: ConnectException) {
-            FirebaseCrashlytics.getInstance()
-                .recordException(Throwable("Failed to ws connect: ${wssUrls.value(chainId)}"))
-        }
+        wssService?.connect()
         web3j = Web3j.build(wssService)
     }
 

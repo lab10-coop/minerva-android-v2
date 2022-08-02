@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import minerva.android.R
 import minerva.android.accounts.AccountsFragment
 import minerva.android.accounts.nft.view.NftCollectionActivity
@@ -39,6 +40,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
+import java.net.ConnectException
 
 class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractorListener {
 
@@ -282,8 +284,16 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
             val index = getIntExtra(ACCOUNT_INDEX, Int.InvalidValue)
             if (index != Int.InvalidValue) {
                 val chainId = getIntExtra(ACCOUNT_CHAIN_ID, Int.InvalidValue)
-                viewModel.subscribeToExecutedTransactions(index)
-                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, chainId, true)
+                try {
+                    viewModel.subscribeToExecutedTransactions(index)
+                    (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, chainId, true)
+                } catch (e: ConnectException) {
+                    FirebaseCrashlytics.getInstance()
+                        .recordException(Throwable("Native Coin Send: Failed to ws connect: ${chainId}"))
+                    getStringExtra(TRANSACTION_MESSAGE)?.let { message ->
+                        showFlashbar(getString(R.string.transaction_success_title), message)
+                    }
+                }
             } else {
                 getStringExtra(TRANSACTION_MESSAGE)?.let { message ->
                     showFlashbar(getString(R.string.transaction_success_title), message)

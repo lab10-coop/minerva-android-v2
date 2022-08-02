@@ -15,6 +15,7 @@ import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.net.ConnectException
 
 interface TransactionRepository {
     var newTaggedTokens: MutableList<ERCToken>
@@ -36,6 +37,7 @@ interface TransactionRepository {
     fun getTokensRates(): Completable
     fun updateTokensRate()
 
+    @Throws(ConnectException::class)
     fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount>
     fun removePendingAccount(pendingAccount: PendingAccount)
     fun clearPendingAccounts()
