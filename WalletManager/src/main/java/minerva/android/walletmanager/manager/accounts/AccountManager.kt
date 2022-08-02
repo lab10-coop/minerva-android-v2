@@ -5,8 +5,8 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.Manager
+import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.ERCToken
@@ -40,7 +40,7 @@ interface AccountManager : Manager {
     fun getAllActiveAccounts(chainId: Int): List<Account>
     fun getNumberOfAccountsToUse(): Int
     fun getAllAccountsForSelectedNetworksType(): List<Account>
-    fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>>
+    fun getAllFreeAccountForNetwork(chainId: Int): List<AddressWrapper>
     fun toChecksumAddress(address: String, chainId: Int? = null): String
     fun clearFiat()
     fun connectAccountToNetwork(index: Int, network: Network): Single<String>
