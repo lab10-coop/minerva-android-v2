@@ -701,14 +701,14 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         val result = manager.getAllFreeAccountForNetwork(ChainId.ATS_TAU)
-        result[0].first shouldBeEqualTo 1
-        result[0].second shouldBeEqualTo "address1"
-        result[1].first shouldBeEqualTo 3
-        result[1].second shouldBeEqualTo "address3"
-        result[2].first shouldBeEqualTo 5
-        result[2].second shouldBeEqualTo "address5"
-        result[3].first shouldBeEqualTo 6
-        result[3].second shouldBeEqualTo "address6"
+        result[0].index shouldBeEqualTo 0
+        result[0].address shouldBeEqualTo "address0"
+        result[1].index shouldBeEqualTo 1
+        result[1].address shouldBeEqualTo "address1"
+        result[2].index shouldBeEqualTo 2
+        result[2].address shouldBeEqualTo "address2"
+        result[3].index shouldBeEqualTo 3
+        result[3].address shouldBeEqualTo "address3"
     }
 
     @Test

@@ -423,7 +423,7 @@ class AccountManagerImpl(
     override fun getAllAccounts(): List<Account> = walletManager.getWalletConfig().accounts
 
     override fun getAllActiveAccounts(chainId: Int): List<Account> =
-        getAllAccounts().filter { account -> !account.isDeleted && account.chainId == chainId }
+        getAllAccounts().filter { account -> !account.isHide && !account.isDeleted && account.chainId == chainId }
 
     override fun getFirstActiveAccountForAllNetworks(): List<Account> =
         getAllAccountsForSelectedNetworksType().filter { account -> account.shouldShow }
@@ -439,15 +439,17 @@ class AccountManagerImpl(
         getAllAccounts().filter { account -> account.isTestNetwork == !areMainNetworksEnabled }
 
     override fun getAllFreeAccountForNetwork(chainId: Int): List<AddressWrapper> {
-        //id of account which chain already uses
-        val usedIds = getAllActiveAccounts(chainId).map { account -> account.id }
         //get all accounts
-        val accounts = getAllAccountsForSelectedNetworksType().filter { !it.isDeleted }
-        //filtering addresses which chain already uses
+        val accounts = getAllAccounts().filter { !it.isDeleted }
+        //filtering accounts which chain already uses
         val usedAccounts: List<Account> = accounts.filter { it.chainId == chainId }
+        //id of account which chain already uses to integer list
+        val usedIdsOfAccounts: List<Int> = usedAccounts.map { account -> account.id }
         //filtering available addresses for chain
-        val availableAccounts: MutableList<Account> = accounts.filter { !usedIds.contains(it.id) }.distinctBy { it.id }.toMutableList()
-
+        val availableAccounts: MutableList<Account> = accounts
+            .filter { !usedIdsOfAccounts.contains(it.id) }
+            .distinctBy { it.id }
+            .toMutableList()
         //replace same addresses from other chain - for get correct state af address
         usedAccounts.forEach { used ->
             val equalAddressHashFromDiffChain: Account? = availableAccounts.find { used.address == it.address }
@@ -459,7 +461,7 @@ class AccountManagerImpl(
         val allChainAccounts: Set<Account> = availableAccounts.union(usedAccounts)
         //wrapping addresses to AddressWrapper for put it forward
         val allChainAccountsToAddressWrapper: List<AddressWrapper> = allChainAccounts
-            .map { account -> accountToAddressWrapper(account, usedIds) }
+            .map { account -> accountToAddressWrapper(account, usedIdsOfAccounts) }
             .sortedBy { account -> account.index }
 
         return allChainAccountsToAddressWrapper
