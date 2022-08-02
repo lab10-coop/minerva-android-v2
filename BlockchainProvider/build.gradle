@@ -54,5 +54,6 @@ dependencies {
     implementation blockChainDependencies.values()
     implementation rxDependencies.values()
     implementation koinDependencies.values()
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.1.0'
     testImplementation testDependencies.values()
 }

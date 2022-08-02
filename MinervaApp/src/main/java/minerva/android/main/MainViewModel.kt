@@ -34,6 +34,7 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.state.AppUIState
 import timber.log.Timber
+import java.net.ConnectException
 
 class MainViewModel(
     private val masterSeedRepository: MasterSeedRepository,
@@ -76,6 +77,7 @@ class MainViewModel(
         }
     }
 
+    @Throws(ConnectException::class)
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
             webSocketSubscriptions.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)

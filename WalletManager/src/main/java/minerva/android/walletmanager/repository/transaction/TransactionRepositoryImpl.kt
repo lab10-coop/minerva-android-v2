@@ -57,6 +57,7 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.net.ConnectException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -154,6 +155,7 @@ class TransactionRepositoryImpl(
         }
     }
 
+    @Throws(ConnectException::class)
     override fun startSuperTokenStreaming(chainId: Int): Flowable<Asset> {
         accountsForTokenBalanceRefresh.let { accounts ->
             val accountsWithActiveStreams: List<Account> =
@@ -440,6 +442,7 @@ class TransactionRepositoryImpl(
         }
     }
 
+    @Throws(ConnectException::class)
     override fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount> {
         val pendingAccount = getPendingAccount(accountIndex)
         return webSocketRepository.subscribeToExecutedTransactions(pendingAccount.chainId, pendingAccount.blockNumber)
