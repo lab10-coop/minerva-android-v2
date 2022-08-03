@@ -415,6 +415,8 @@
     <string name="my_favorites">My Favorites</string>
     <string name="my_favorites_item_description">"Personal collection of NFTs"</string>
     <string name="open_in_explorer">Open in Explorer</string>
+    <string name="already_in_use">Already in use</string>
+    <string name="free">Free</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
