@@ -27,6 +27,8 @@ import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.AddressStatus
+import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.network.Network
@@ -436,16 +438,52 @@ class AccountManagerImpl(
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =
         getAllAccounts().filter { account -> account.isTestNetwork == !areMainNetworksEnabled }
 
-    override fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>> {
-        val usedIds = getAllActiveAccounts(chainId).map { account -> account.id }
-        return getAllAccountsForSelectedNetworksType().filter { account ->
-            !account.isDeleted && !usedIds.contains(
-                account.id
-            )
+    override fun getAllFreeAccountForNetwork(chainId: Int): List<AddressWrapper> {
+        //get all accounts
+        val accounts = getAllAccounts().filter { !it.isDeleted }
+        //filtering accounts which chain already uses
+        val usedAccounts: List<Account> = accounts.filter { it.chainId == chainId }
+        //id of account which chain already uses to integer list
+        val usedIdsOfAccounts: List<Int> = usedAccounts.map { account -> account.id }
+        //filtering available addresses for chain
+        val availableAccounts: MutableList<Account> = accounts
+            .filter { !usedIdsOfAccounts.contains(it.id) }
+            .distinctBy { it.id }
+            .toMutableList()
+        //replace same addresses from other chain - for get correct state af address
+        usedAccounts.forEach { used ->
+            val equalAddressHashFromDiffChain: Account? = availableAccounts.find { used.address == it.address }
+            if (null != equalAddressHashFromDiffChain) {
+                availableAccounts.remove(equalAddressHashFromDiffChain)
+            }
         }
-            .map { account -> account.id to account.address }
-            .distinctBy { account -> account.first }
-            .sortedBy { account -> account.first }
+        //merge available and used addresses
+        val allChainAccounts: Set<Account> = availableAccounts.union(usedAccounts)
+        //wrapping addresses to AddressWrapper for put it forward
+        val allChainAccountsToAddressWrapper: List<AddressWrapper> = allChainAccounts
+            .map { account -> accountToAddressWrapper(account, usedIdsOfAccounts) }
+            .sortedBy { account -> account.index }
+
+        return allChainAccountsToAddressWrapper
+    }
+
+    /**
+     * Account To Address Wrapper -  wrapping specified account to AddressWrapper
+     * @param account - current account
+     * @param usedIds - ids which account already used
+     * @return AddressWrapper with correct states
+     */
+    private fun accountToAddressWrapper(account: Account, usedIds: List<Int> = listOf()): AddressWrapper {
+        val addressStatus: AddressStatus = if (!usedIds.contains(account.id)) { //acc didn't use this address earlier
+            AddressStatus.FREE
+        } else {
+            if (account.isHide) {
+                AddressStatus.HIDDEN
+            } else {
+                AddressStatus.ALREADY_IN_USE
+            }
+        }
+        return AddressWrapper(account.id, account.address, addressStatus)
     }
 
     override fun getNumberOfAccountsToUse() =
