@@ -77,8 +77,4 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <include
-        android:id="@+id/dapps_bottom_sheet"
-        layout="@layout/dapp_list_bottom_sheet" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

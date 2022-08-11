@@ -100,12 +100,7 @@ class WalletConnectViewModel(
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = {
-                            _viewStateLiveData.value = if (it.isEmpty()) {
-                                HideDappsState
-                            } else {
-                                UpdateDappsState(it)
-                            }
-
+                            _viewStateLiveData.value = HideDappsState
                         },
                         onError = {
                             _viewStateLiveData.value = OnGeneralError(it)
@@ -120,17 +115,6 @@ class WalletConnectViewModel(
     fun removeDeadSession() {
         repository.removeDeadSessions()
         hideProgress()
-    }
-
-    fun killSession(peerId: String) {
-        launchDisposable {
-            repository.killSession(peerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { _viewStateLiveData.value = OnSessionDeleted },
-                    onError = { Timber.e(it) })
-        }
     }
 
     fun handleQrCode(qrCode: String) {
