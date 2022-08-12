@@ -5,7 +5,6 @@ import androidx.appcompat.app.AlertDialog
 import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
 import minerva.android.extension.margin
-import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
@@ -70,7 +69,6 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         confirmationDialogDialog = DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession(meta, false)
-                binding.dappsBottomSheet.dapps.visible()
                 binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
             },
             {

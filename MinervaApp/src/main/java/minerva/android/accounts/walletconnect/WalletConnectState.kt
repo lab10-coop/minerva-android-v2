@@ -25,9 +25,7 @@ data class OnSessionRequest(
 
 data class OnDisconnected(val sessionName: String = String.Empty) : WalletConnectState()
 data class ProgressBarState(val show: Boolean) : WalletConnectState()
-data class UpdateDappsState(val dapps: List<DappSession>) : WalletConnectState()
 object HideDappsState : WalletConnectState()
-object OnSessionDeleted : WalletConnectState()
 data class OnEthSignRequest(val message: String, val session: DappSession) : WalletConnectState()
 data class OnEthSendTransactionRequest(
     val transaction: WalletConnectTransaction,
