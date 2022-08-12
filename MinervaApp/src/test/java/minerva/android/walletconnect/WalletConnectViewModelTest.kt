@@ -282,17 +282,6 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `kill session test`() {
-        whenever(repository.killSession(any())).thenReturn(Completable.complete())
-        viewModel.killSession("peerID")
-        viewModel.stateLiveData.observeForever(stateObserver)
-        stateCaptor.run {
-            verify(stateObserver).onChanged(capture())
-            firstValue is OnSessionDeleted
-        }
-    }
-
-    @Test
     fun `get account test`() {
         whenever(manager.loadAccount(any())).thenReturn(Account(1))
         whenever(repository.getSessionsFlowable()).thenReturn(
