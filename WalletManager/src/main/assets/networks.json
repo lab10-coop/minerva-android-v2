@@ -137,7 +137,7 @@
   },
   {
     "name": "Celo",
-    "isActive": true,
+    "isActive": false,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://celo.rpc.minerva.digital",

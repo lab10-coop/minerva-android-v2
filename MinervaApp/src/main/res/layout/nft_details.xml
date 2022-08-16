@@ -80,7 +80,8 @@
         android:layout_width="0dp"
         app:layout_constraintEnd_toEndOf="@id/content"
         app:layout_constraintTop_toTopOf="@id/name"
-        tools:visibility="visible" />
+        android:visibility="gone"
+        tools:visibility="gone" />
 
     <TextView
         android:fontFamily="@font/rubik_medium"
