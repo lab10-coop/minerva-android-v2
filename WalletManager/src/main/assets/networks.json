@@ -137,7 +137,7 @@
   },
   {
     "name": "Celo",
-    "isActive": true,
+    "isActive": false,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://celo.rpc.minerva.digital",
@@ -257,7 +257,7 @@
   },
   {
     "name": "Rinkeby",
-    "isActive": true,
+    "isActive": false,
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
@@ -277,7 +277,7 @@
   },
   {
     "name": "Ropsten",
-    "isActive": true,
+    "isActive": false,
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
@@ -393,7 +393,7 @@
   },
   {
     "name": "Celo Alfajores Testnet",
-    "isActive": true,
+    "isActive": false,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://alfajores-forno.celo-testnet.org",
@@ -409,7 +409,7 @@
   },
   {
     "name": "Celo Baklava Testnet",
-    "isActive": true,
+    "isActive": false,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://baklava-forno.celo-testnet.org",

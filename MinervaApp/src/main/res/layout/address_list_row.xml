@@ -71,7 +71,8 @@
             app:layout_constraintStart_toEndOf="@id/indexIcon"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="RelativeOverlap"
-            tools:text="@string/free" />
+            tools:text="@string/free"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

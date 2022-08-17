@@ -132,14 +132,13 @@ class RampViewModel(
                     R.drawable.ic_bsc_token,
                     getNetworkName(ChainId.BSC)
                 ),
-
-                /*RampCrypto(
+                RampCrypto(
                     ChainId.AVA_C,
                     AVAX_RAMP_SYMBOL,
                     R.drawable.ic_avalanche,
                     getNetworkName(ChainId.AVA_C)
                 ),
-                RampCrypto(
+                /*RampCrypto(
                     ChainId.CELO,
                     CELO_RAMP_SYMBOL,
                     R.drawable.ic_celo_coin,
