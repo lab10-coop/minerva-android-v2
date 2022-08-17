@@ -374,6 +374,8 @@
     <string name="grid">Grid view</string>
     <string name="more_label"> more</string>
     <string name="amount_label">Amount: %s</string>
+    <string name="address_text">address</string>
+    <string name="slash_text">/</string>
 
     <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="default_dapp_dialog_confirm">Open</string>
@@ -412,6 +414,9 @@
     <string name="exclamation_mark">!</string>
     <string name="my_favorites">My Favorites</string>
     <string name="my_favorites_item_description">"Personal collection of NFTs"</string>
+    <string name="open_in_explorer">Open in Explorer</string>
+    <string name="already_in_use">Already in use</string>
+    <string name="free">Free</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
@@ -465,6 +470,14 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.7.8</item>
+        <item>* Added Avalanche network support</item>
+        <item>* Added Avalanche testnet support</item>
+        <item>* AVAX on Avalanche direct purchase via ramp.network</item>
+        <item>* Added "Open in Explorer" Option to Accounts</item>
+        <item>* Set POA Core, ARTIS ∑1, Rinkeby and Ropsten as unmaintained networks</item>
+        <item>* Unified QR-Scanner</item>
+        <item>Various bug fixes and UI improvements</item>
         <item>1.7.5</item>
         <item>* Added Optimism network support</item>
         <item>* Added Arbitrum network support</item>

@@ -81,4 +81,6 @@
     <color name="advancedActionColor">#908F9D</color>
     <color name="servicesFilterNetworkMainColor">#5858ED</color>
     <color name="warningOrangeLight">#FFE4B9</color>
+    <color name="saturatedGreen">#129C6B</color>
+    <color name="lightGreen">#A1C0B4</color>
 </resources>

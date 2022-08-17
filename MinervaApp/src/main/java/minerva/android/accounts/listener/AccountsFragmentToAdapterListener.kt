@@ -35,4 +35,10 @@ interface AccountsFragmentToAdapterListener {
 
     fun indexOf(account: Account): Int
     fun stopPendingAccounts()
+
+    /**
+     * Open In Explorer - open in browser wallet transactions info by specified account
+     * @param account - Account which info we need to show
+     */
+    fun openInExplorer(account: Account)
 }

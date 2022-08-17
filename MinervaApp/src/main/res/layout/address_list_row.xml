@@ -30,25 +30,56 @@
         app:layout_constraintTop_toTopOf="@id/indexIcon"
         tools:text="#1" />
 
-    <TextView
-        android:id="@+id/address"
-        android:layout_width="135dp"
+    <LinearLayout
+        android:id="@+id/addressContainer"
+        android:orientation="vertical"
+        android:layout_width="152dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_normal"
-        android:ellipsize="middle"
-        android:fontFamily="@font/rubik_regular"
-        android:gravity="center_vertical"
-        android:singleLine="true"
-        android:textColor="@color/gray"
-        android:textSize="@dimen/text_normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/indexIcon"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RelativeOverlap"
-        tools:text="0x427D6427D6f427D6f427D6f427D6f427D6f427D6f" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="136dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:ellipsize="middle"
+            android:fontFamily="@font/rubik_regular"
+            android:gravity="center_vertical"
+            android:singleLine="true"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/text_normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/indexIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="RelativeOverlap"
+            tools:text="0x427D6427D6f427D6f427D6f427D6f427D6f427D6f" />
+
+        <TextView
+            android:id="@+id/addressStatus"
+            android:layout_marginTop="@dimen/margin_xxxsmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_regular"
+            android:gravity="center_vertical"
+            android:textColor="@color/saturatedGreen"
+            android:textSize="@dimen/text_xsmall"
+            android:textFontWeight="700"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/indexIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="RelativeOverlap"
+            tools:text="@string/free"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/checkButton"
+        android:visibility="gone"
+        tools:visibility="visible"
         android:layout_width="@dimen/xsmall_logo_size"
         android:layout_height="@dimen/xsmall_logo_size"
         android:layout_alignParentEnd="true"
