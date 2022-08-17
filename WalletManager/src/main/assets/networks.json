@@ -393,7 +393,7 @@
   },
   {
     "name": "Celo Alfajores Testnet",
-    "isActive": true,
+    "isActive": false,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://alfajores-forno.celo-testnet.org",
@@ -409,7 +409,7 @@
   },
   {
     "name": "Celo Baklava Testnet",
-    "isActive": true,
+    "isActive": false,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://baklava-forno.celo-testnet.org",
