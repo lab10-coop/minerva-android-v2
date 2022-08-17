@@ -257,7 +257,7 @@
   },
   {
     "name": "Rinkeby",
-    "isActive": true,
+    "isActive": false,
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
@@ -277,7 +277,7 @@
   },
   {
     "name": "Ropsten",
-    "isActive": true,
+    "isActive": false,
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
