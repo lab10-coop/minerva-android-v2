@@ -144,7 +144,8 @@ class ServicesScannerViewModel(
     }
 
     override fun handleSessionRequest(sessionRequest: OnSessionRequest) {
-        val id = sessionRequest.chainId
+        //if ethereum was chosen set unknown id for showing all networks
+        val id: Int? = if (ChainId.ETH_MAIN == sessionRequest.chainId) null else sessionRequest.chainId
         when {
             id == null -> {
                 accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
