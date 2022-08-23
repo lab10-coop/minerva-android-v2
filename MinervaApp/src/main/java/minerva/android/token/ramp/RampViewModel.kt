@@ -187,8 +187,8 @@ class RampViewModel(
                     ETH_RAMP_SYMBOL,
                     R.drawable.ic_ethereum_token,
                     getNetworkName(ChainId.MATIC)
-                )
-                /*RampCrypto(
+                ),
+                RampCrypto(
                     ChainId.CELO,
                     CELO_CUSD_RAMP_SYMBOL,
                     R.drawable.ic_celo_dollar,
@@ -199,8 +199,7 @@ class RampViewModel(
                     CELO_CEUR_RAMP_SYMBOL,
                     R.drawable.ic_celo_dollar,
                     getNetworkName(ChainId.CELO)
-                )*/
-
+                )
             )
     }
 }
