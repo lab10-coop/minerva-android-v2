@@ -2,6 +2,7 @@ package minerva.android.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import coil.imageLoader
@@ -36,6 +37,13 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
         collectibleDesc.text = collectible.collectionName
         collectibleItem.text = balance.toEngineeringString()
         collectible.logoURI?.let { logoUri -> collectibleLogo.loadUrl(logoUri) }
+        if (TokensAndCollectiblesView.FAVORITE_GROUP_ID == collectible.chainId) {
+            collectibleViewItemSeparator.visibility = View.VISIBLE
+            collectibleDesc.visibility = View.GONE
+        } else {
+            collectibleViewItemSeparator.visibility = View.GONE
+            collectibleDesc.visibility = View.VISIBLE
+        }
     }
 
     private fun prepareListener(callback: CollectibleViewCallback, account: Account, collectible: ERCToken, isGroup: Boolean = false) {

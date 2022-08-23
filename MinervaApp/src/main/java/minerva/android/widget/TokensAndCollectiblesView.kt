@@ -209,7 +209,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         private const val START_DRAWABLE_INDEX = 0
         private const val START_ROTATION_LEVEL = 10000
         private const val STOP_ROTATION_LEVEL = 0
-        private const val FAVORITE_GROUP_ID = -2
+        const val FAVORITE_GROUP_ID = -2
     }
 
     //TODO this method is not used, because Asset Manage screen is not implemented yet - ready to use UI
