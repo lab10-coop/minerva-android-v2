@@ -8,6 +8,7 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
 import minerva.android.extension.empty
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
@@ -790,8 +791,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             verify(requestObserver).onChanged(capture())
             firstValue shouldBeEqualTo minerva.android.accounts.walletconnect.OnSessionRequest(
                 meta,
-                BaseNetworkData(1, "Ethereum"),
-                WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR
+                BaseNetworkData(Int.InvalidId, String.Empty),
+                WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
             )
         }
     }
@@ -811,8 +812,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             verify(requestObserver).onChanged(capture())
             firstValue shouldBeEqualTo minerva.android.accounts.walletconnect.OnSessionRequest(
                 meta,
-                BaseNetworkData(1, "Ethereum"),
-                WalletConnectAlertType.CHANGE_ACCOUNT_WARNING
+                BaseNetworkData(Int.InvalidId, String.Empty),
+                WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
             )
         }
     }
