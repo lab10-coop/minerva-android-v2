@@ -100,8 +100,8 @@ class RampViewModel(
         private const val BSC_RAMP_SYMBOL = "BSC_BNB"
         private const val ARB_ONE_ETH_RAMP_SYMBOL = "ARBITRUM_ETH"
         private const val CELO_RAMP_SYMBOL = "CELO"
-        private const val CELO_CEUR_RAMP_SYMBOL = "CEUR"
-        private const val CELO_CUSD_RAMP_SYMBOL = "CUSD"
+        private const val CELO_CEUR_RAMP_SYMBOL = "cEUR"
+        private const val CELO_CUSD_RAMP_SYMBOL = "cUSD"
         private const val AVAX_RAMP_SYMBOL = "AVAX"
         private fun getNetworkName(chainId: Int): String = NetworkManager.getNetwork(chainId).name
 
