@@ -140,6 +140,11 @@ class NftCollectionViewModel(
     }
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal) {
+        //if selected nft is in "isFavorite" status - changing it to false (because nft info stayed on memory after it was transferred)
+        if (NftItem.Invalid != selectedItem && selectedItem.isFavorite) {
+            changeFavoriteState(selectedItem.copy(isFavorite = false))
+        }
+
         sendTransferTransaction(
             receiverKey,
             amount,
