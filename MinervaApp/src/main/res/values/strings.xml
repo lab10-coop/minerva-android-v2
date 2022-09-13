@@ -473,7 +473,7 @@
         <item>1.7.9</item>
         <item>* Added Celo network support</item>
         <item>* Added Celo testnets support</item>
-        <item>* CELO, CUSD, CEUR & cREAL on Celo direct purchase via ramp.network</item>
+        <item>* CELO, CUSD, CEUR &amp; cREAL on Celo direct purchase via ramp.network</item>
         <item>* Manually change Network selection on WalletConnect Connection Request</item>
         <item>* Various bug fixes and UI improvements</item>
         <item>1.7.8</item>
