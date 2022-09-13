@@ -470,6 +470,12 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.7.9</item>
+        <item>* Added Celo network support</item>
+        <item>* Added Celo testnets support</item>
+        <item>* CELO, CUSD, CEUR & cREAL on Celo direct purchase via ramp.network</item>
+        <item>* Manually change Network selection on WalletConnect Connection Request</item>
+        <item>* Various bug fixes and UI improvements</item>
         <item>1.7.8</item>
         <item>* Added Avalanche network support</item>
         <item>* Added Avalanche testnet support</item>
@@ -477,7 +483,7 @@
         <item>* Added "Open in Explorer" Option to Accounts</item>
         <item>* Set POA Core, ARTIS ∑1, Rinkeby and Ropsten as unmaintained networks</item>
         <item>* Unified QR-Scanner</item>
-        <item>Various bug fixes and UI improvements</item>
+        <item>* Various bug fixes and UI improvements</item>
         <item>1.7.5</item>
         <item>* Added Optimism network support</item>
         <item>* Added Arbitrum network support</item>
