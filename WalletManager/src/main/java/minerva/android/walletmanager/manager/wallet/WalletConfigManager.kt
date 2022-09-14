@@ -14,6 +14,7 @@ import java.math.BigDecimal
 
 interface WalletConfigManager : Manager {
     val masterSeed: MasterSeed
+    fun isMasterSeedInitialised(): Boolean
     val walletConfigErrorLiveData: LiveData<Event<Throwable>>
     fun isMasterSeedSaved(): Boolean
     fun dispose()

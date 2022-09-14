@@ -100,8 +100,8 @@ class RampViewModel(
         private const val BSC_RAMP_SYMBOL = "BSC_BNB"
         private const val ARB_ONE_ETH_RAMP_SYMBOL = "ARBITRUM_ETH"
         private const val CELO_RAMP_SYMBOL = "CELO"
-        private const val CELO_CEUR_RAMP_SYMBOL = "CEUR"
-        private const val CELO_CUSD_RAMP_SYMBOL = "CUSD"
+        private const val CELO_CEUR_RAMP_SYMBOL = "cEUR"
+        private const val CELO_CUSD_RAMP_SYMBOL = "cUSD"
         private const val AVAX_RAMP_SYMBOL = "AVAX"
         private fun getNetworkName(chainId: Int): String = NetworkManager.getNetwork(chainId).name
 
@@ -138,12 +138,12 @@ class RampViewModel(
                     R.drawable.ic_avalanche,
                     getNetworkName(ChainId.AVA_C)
                 ),
-                /*RampCrypto(
+                RampCrypto(
                     ChainId.CELO,
                     CELO_RAMP_SYMBOL,
                     R.drawable.ic_celo_coin,
                     getNetworkName(ChainId.CELO)
-                ),*/
+                ),
                 RampCrypto(
                     ChainId.ARB_ONE,
                     ARB_ONE_ETH_RAMP_SYMBOL,
@@ -187,8 +187,8 @@ class RampViewModel(
                     ETH_RAMP_SYMBOL,
                     R.drawable.ic_ethereum_token,
                     getNetworkName(ChainId.MATIC)
-                )
-                /*RampCrypto(
+                ),
+                RampCrypto(
                     ChainId.CELO,
                     CELO_CUSD_RAMP_SYMBOL,
                     R.drawable.ic_celo_dollar,
@@ -199,8 +199,7 @@ class RampViewModel(
                     CELO_CEUR_RAMP_SYMBOL,
                     R.drawable.ic_celo_dollar,
                     getNetworkName(ChainId.CELO)
-                )*/
-
+                )
             )
     }
 }

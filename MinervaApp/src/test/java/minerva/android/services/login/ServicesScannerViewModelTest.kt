@@ -136,6 +136,7 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
     fun `on session request event with no available account test`() {
         whenever(walletConnectRepository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
+        //set ethereum account which has to return unknown accounts
         NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1, token = "Ethereum"))
         viewModel.viewStateLiveData.observeForever(stateObserver)
         viewModel.subscribeToWCConnectionStatusFlowable()
@@ -144,8 +145,8 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
             firstValue shouldBeEqualTo ProgressBarState(false)
             secondValue shouldBeEqualTo WalletConnectSessionRequestResult(
                 meta,
-                BaseNetworkData(1, "Ethereum"),
-                WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR
+                BaseNetworkData(Int.InvalidId, String.Empty),
+                WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
             )
         }
     }
@@ -155,7 +156,7 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
         NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1, token = "Ethereum"))
-        val ethereumAccount = Account(1, chainId = 1)
+        val ethereumAccount = Account(1, chainId = 1)//ethereum account has to return unknown accounts
         whenever(accountManager.getFirstActiveAccountOrNull(1)).thenReturn(ethereumAccount)
         viewModel.viewStateLiveData.observeForever(stateObserver)
         viewModel.subscribeToWCConnectionStatusFlowable()
@@ -164,8 +165,8 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
             firstValue shouldBeEqualTo ProgressBarState(false)
             secondValue shouldBeEqualTo WalletConnectSessionRequestResult(
                 meta,
-                BaseNetworkData(1, "Ethereum"),
-                WalletConnectAlertType.CHANGE_ACCOUNT_WARNING
+                BaseNetworkData(Int.InvalidId, String.Empty),
+                WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
             )
         }
     }

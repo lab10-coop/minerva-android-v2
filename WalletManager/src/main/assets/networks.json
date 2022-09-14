@@ -137,7 +137,7 @@
   },
   {
     "name": "Celo",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://celo.rpc.minerva.digital",
@@ -393,7 +393,7 @@
   },
   {
     "name": "Celo Alfajores Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://alfajores-forno.celo-testnet.org",
@@ -409,7 +409,7 @@
   },
   {
     "name": "Celo Baklava Testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "CELO",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://baklava-forno.celo-testnet.org",
