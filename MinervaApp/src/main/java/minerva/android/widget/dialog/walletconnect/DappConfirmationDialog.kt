@@ -28,15 +28,30 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
 
     private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
+    //current dapp session wallet connection
+    var dappSessionMeta: WalletConnectPeerMeta? = null
 
     init {
         setContentView(binding.root)
         initButtons(binding.confirmationButtons)
         binding.confirmationButtons.confirm.text = context.getString(R.string.Connect)
+        binding.confirmationButtons.confirm.isClickable = false //for prevent exrta db records
         binding.confirmationView.hideRequestedData()
     }
 
+    /**
+     * Change Clickable Confirm Button State - check and change confirm button state for prevent extra db records
+     * @param address - address of specified account
+     */
+    fun changeClickableConfirmButtonState(address: String) {
+        dappSessionMeta?.let { session ->
+            binding.confirmationButtons.confirm.isClickable = !session.address.isEmpty() && address != session.address
+        }
+    }
+
     fun setView(meta: WalletConnectPeerMeta, networkName: String) = with(binding) {
+        //set current wallet connection dapp session
+        dappSessionMeta = meta
         setupHeader(meta.name, networkName, getIcon(meta))
     }
 
@@ -73,6 +88,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                     if (selectedAccountId != Int.InvalidId) {
                         availableAccounts.indexOfFirst { account -> account.id == selectedAccountId }
                     } else Int.FirstIndex
+                changeClickableConfirmButtonState(availableAccounts.get(defaultPosition).address)
                 prepareSpinner(R.drawable.rounded_background_purple_frame, defaultPosition) { position, view ->
                     onAccountSelected(accountAdapter.getItem(position))
                     accountAdapter.selectedItemWidth = view?.width
