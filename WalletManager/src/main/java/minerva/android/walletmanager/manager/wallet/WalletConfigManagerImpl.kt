@@ -55,7 +55,7 @@ class WalletConfigManagerImpl(
 ) : WalletConfigManager {
 
     private var walletConfigExecutor = Executors.newSingleThreadExecutor()
-    override var masterSeed: MasterSeed = MasterSeed()
+    override lateinit var masterSeed: MasterSeed
     private var disposable: Disposable? = null
 
     //TODO delete saving WalletConfig as reference - use Room for handling it - MinervaDatabase
