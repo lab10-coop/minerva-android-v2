@@ -108,6 +108,7 @@ class MinervaPrimitiveViewHolder(
                 setMenuItems(minervaPrimitive)
                 setOnMenuItemClickListener {
                     if (it.itemId == R.id.remove || it.itemId == R.id.disconnect) listener.onRemoved(minervaPrimitive)
+                    else if (it.itemId == R.id.change_account) listener.onChangeAccount(minervaPrimitive)
                     true
                 }
             }.also {
@@ -123,6 +124,7 @@ class MinervaPrimitiveViewHolder(
     private fun PopupMenu.setMenuItems(minervaPrimitive: MinervaPrimitive) {
         with(menu) {
             findItem(R.id.disconnect).isVisible = minervaPrimitive is DappSession
+            findItem(R.id.change_account).isVisible = minervaPrimitive is DappSession
             findItem(R.id.remove).isVisible = minervaPrimitive is Service || minervaPrimitive is Credential
         }
     }

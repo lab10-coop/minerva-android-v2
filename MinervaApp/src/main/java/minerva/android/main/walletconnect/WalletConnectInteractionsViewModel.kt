@@ -68,6 +68,16 @@ class WalletConnectInteractionsViewModel(
     private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
     val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
 
+    /**
+     * On Change Account - method which update of viewModel state
+     * @param state - new (viewModel::_walletConnectStatus) state
+     */
+    fun onChangeAccount(state: WalletConnectState) {
+        if (state != _walletConnectStatus.value) {
+            _walletConnectStatus.postValue(state)
+        }
+    }
+
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 

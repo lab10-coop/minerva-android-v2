@@ -1,5 +1,6 @@
 package minerva.android.accounts.walletconnect
 
+import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -58,9 +59,9 @@ abstract class BaseWalletConnectScannerViewModel(
         }
 
     var requestedNetwork: BaseNetworkData = BaseNetworkData(Int.InvalidId, String.Empty)
-    internal lateinit var topic: Topic
+    internal var topic: Topic = Topic()
     private var handshakeId: Long = 0L
-    internal lateinit var currentSession: WalletConnectSession
+    internal var currentSession: WalletConnectSession = WalletConnectSession()
 
     private val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
 
@@ -138,6 +139,36 @@ abstract class BaseWalletConnectScannerViewModel(
                         onError = { setLiveDataError(it) }
                     )
             }
+        }
+    }
+
+    /**
+     * Update Session - update account for current wallet api connection
+     * @param connectionPeerId - id of socket client connection
+     * @param isMobileWalletConnect - flag which show trying to connect through mobile (manually) or scanner (barcode) types
+     */
+    fun updateSession(connectionPeerId: String, isMobileWalletConnect: Boolean) {
+        if (account.id != Int.InvalidId) {
+            launchDisposable {
+                walletConnectRepository.updateSession(
+                    connectionPeerId,
+                    account.address,
+                    account.chainId,
+                    account.name
+                )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onComplete = { closeScanner(isMobileWalletConnect) },
+                        onError = {
+                            //changing "walletConnectStatus" for correct opening popap next time (change wallet connection case)
+                            closeScanner(isMobileWalletConnect)
+                            setLiveDataError(it)
+                        }
+                    )
+            }
+        } else {
+            closeScanner(isMobileWalletConnect)
         }
     }
 

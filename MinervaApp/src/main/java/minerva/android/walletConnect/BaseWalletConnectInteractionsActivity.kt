@@ -34,6 +34,14 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     abstract fun isProtectTransactionEnabled(): Boolean
 
+    /**
+     * On Change Account - method which tries to change state of viewModel
+     * @param state - new (viewModel::_walletConnectStatus) state
+     */
+    fun onChangeAccount(state: WalletConnectState) {
+        walletConnectViewModel.onChangeAccount(state)
+    }
+
     private fun rejectRequest() {
         dappDialog?.let {
             it.dismiss()
@@ -231,9 +239,17 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
+        //if this is "update wallet connection" case - set "dialogType" to correct state, because we use temporary flag (for set it to update case)
+        val correctDialogType =
+            if (WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT == dialogType) WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
+            else dialogType
         confirmationDialogDialog = DappConfirmationDialog(this,
             {
-                walletConnectViewModel.approveSession(meta, true)
+                if (WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT == dialogType) {
+                    walletConnectViewModel.updateSession(meta.peerId, true)
+                } else {
+                    walletConnectViewModel.approveSession(meta, true)
+                }
                 clearAllDialogs()
             },
             {
@@ -241,9 +257,9 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 clearAllDialogs()
             },
             { chainId ->
-                walletConnectViewModel.addAccount(chainId, dialogType)
+                walletConnectViewModel.addAccount(chainId, correctDialogType)
             }).apply {
-            setView(meta, network.name)
+            setView(meta, network.name) //set current wallet connection dapp session
             handleNetwork(network, dialogType)
             updateAccountSpinner()
             show()
@@ -253,15 +269,24 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     private fun DappConfirmationDialog.updateAccountSpinner() {
         setupAccountSpinner(walletConnectViewModel.account.id, walletConnectViewModel.availableAccounts) { account ->
             walletConnectViewModel.setNewAccount(account)
+            changeClickableConfirmButtonState(account.address)
         }
     }
 
     private fun DappConfirmationDialog.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         when (dialogType) {
             WalletConnectAlertType.NO_ALERT -> setNoAlert()
-            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning(walletConnectViewModel.availableNetworks) { chainId ->
-                walletConnectViewModel.setAccountForSelectedNetwork(chainId)
-                updateAccountSpinner()
+            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING, WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT -> {
+                setNotDefinedNetworkWarning(walletConnectViewModel.availableNetworks) { chainId ->
+                    walletConnectViewModel.setAccountForSelectedNetwork(chainId)
+                    updateAccountSpinner()
+                }
+                if (WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT == dialogType) {
+                    //set default network for equal state in "networkAdapter" and "accountAdapter"
+                    walletConnectViewModel.setAccountForSelectedNetwork(
+                        walletConnectViewModel.availableNetworks.first().chainId
+                    )
+                }
             }
             WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
             WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)

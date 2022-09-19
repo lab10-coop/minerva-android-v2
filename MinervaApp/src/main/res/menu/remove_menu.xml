@@ -13,4 +13,11 @@
         android:icon="@drawable/ic_disconnect"
         android:title="@string/disconnect"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/change_account"
+        android:enabled="true"
+        android:icon="@drawable/ic_change_account"
+        android:title="@string/change_account"
+        app:showAsAction="ifRoom" />
 </menu>

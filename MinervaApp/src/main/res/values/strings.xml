@@ -176,7 +176,7 @@
     <string name="safe_accounts_count_format">+%d Safe Accounts</string>
     <string name="did">DID</string>
     <string name="required">Required</string>
-
+    <string name="change_account">Change Account</string>
     <string name="show_identity">Show identity</string>
     <string name="credentials">Credentials</string>
     <string name="connected_services">Connected services</string>
