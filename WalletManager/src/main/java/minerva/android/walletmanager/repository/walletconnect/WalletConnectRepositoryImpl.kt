@@ -33,6 +33,7 @@ import minerva.android.walletmanager.model.mappers.WCSessionToWalletConnectSessi
 import minerva.android.walletmanager.model.mappers.WalletConnectSessionMapper
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
@@ -247,6 +248,9 @@ class WalletConnectRepositoryImpl(
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
 
+    override fun updateDappSession(peerId: String, address: String, chainId: Int, accountName: String): Completable =
+        dappDao.update(peerId, address, chainId, accountName)
+
     override fun deleteDappSession(peerId: String): Completable =
         dappDao.delete(peerId)
 
@@ -280,6 +284,20 @@ class WalletConnectRepositoryImpl(
             saveDappSession(dapp)
         } else {
             Completable.error(Throwable("Session not approved"))
+        }
+
+    override fun updateSession(
+        connectionPeerId: String,
+        accountAddress: String,
+        accountChainId: Int,
+        accountName: String
+    ): Completable =
+        if (clientMap[connectionPeerId]?.approveSession(listOf(accountAddress), accountChainId, connectionPeerId) == true) {
+            logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} ${connectionPeerId}")
+            //update specified dapp session db record by specified parameters
+            updateDappSession(connectionPeerId, accountAddress, accountChainId, accountName)
+        } else {
+            Completable.error(Throwable("Update of Session not approved"))
         }
 
     private fun startPing(dapps: List<DappSession>) {

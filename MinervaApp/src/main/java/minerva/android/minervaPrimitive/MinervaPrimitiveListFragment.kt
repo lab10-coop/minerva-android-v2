@@ -3,15 +3,22 @@ package minerva.android.minervaPrimitive
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.account_type_item.*
 import minerva.android.R
+import minerva.android.accounts.walletconnect.*
 import minerva.android.databinding.RecyclerViewLayoutBinding
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.main.MainActivity
 import minerva.android.main.base.BaseFragment
+import minerva.android.services.ServicesFragment
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 
 abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_view_layout), MinervaPrimitiveClickListener {
 
@@ -46,6 +53,22 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
             is Credential -> onRemoveCredential(minervaPrimitive)
             is DappSession -> onRemoveDappSession(minervaPrimitive)
         }
+    }
+
+    override fun onChangeAccount(minervaPrimitive: MinervaPrimitive) {
+        //trying get MainActivity instance from context - for change state through changing LiveModel
+        val mainActivityFromContext: MainActivity = ((this.parentFragment as ServicesFragment).interactor as MainActivity)
+        //transferring current connection state (data) to caller (fragment which called action)
+        val state = OnSessionRequest(
+            WalletConnectPeerMeta(
+                name = minervaPrimitive.name,
+                icons = listOf(minervaPrimitive.iconUrl ?: ""),
+                peerId = minervaPrimitive.peerId,
+                address = minervaPrimitive.address),
+            BaseNetworkData(chainId = Int.InvalidValue, name = String.Empty), //put empties values for get popap with all available networks
+            WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT) //put value for calling wallet connection change action
+        //calling LiveModel changing through pulling new state (of WalletConnectInteractionsViewModel::_walletConnectStatus)
+        mainActivityFromContext.onChangeAccount(state)
     }
 
     override fun onContainerClick(minervaPrimitive: MinervaPrimitive) {

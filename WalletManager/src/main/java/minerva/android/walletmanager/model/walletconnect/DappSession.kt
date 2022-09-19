@@ -12,10 +12,10 @@ data class DappSession(
     val key: String = String.Empty,
     override var name: String = String.Empty,
     override val iconUrl: String = String.Empty,
-    val peerId: String = String.Empty,
+    override val peerId: String = String.Empty,
     val remotePeerId: String? = String.Empty,
     val networkName: String = String.Empty,
-    val accountName: String = String.Empty,
+    override val accountName: String = String.Empty,
     val chainId: Int = Int.InvalidValue,
     val handshakeId: Long = Long.InvalidValue,
     val isMobileWalletConnect: Boolean = false
