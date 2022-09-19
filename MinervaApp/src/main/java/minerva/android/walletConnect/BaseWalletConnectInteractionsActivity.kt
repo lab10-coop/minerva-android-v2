@@ -323,7 +323,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private fun closeToBackground() {
         clearAllDialogs()
-//        moveTaskToBack(true) //this action hide app from display
+        moveTaskToBack(true)
     }
 
     companion object {
