@@ -35,7 +35,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         setContentView(binding.root)
         initButtons(binding.confirmationButtons)
         binding.confirmationButtons.confirm.text = context.getString(R.string.Connect)
-        binding.confirmationButtons.confirm.isClickable = false //for prevent exrta db records
         binding.confirmationView.hideRequestedData()
     }
 
@@ -44,14 +43,19 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
      * @param address - address of specified account
      */
     fun changeClickableConfirmButtonState(address: String) {
-        dappSessionMeta?.let { session ->
-            binding.confirmationButtons.confirm.isClickable = !session.address.isEmpty() && address != session.address
+        if (address.isEmpty()) binding.confirmationButtons.confirm.isClickable = true
+        else {
+            dappSessionMeta?.let { session ->
+                binding.confirmationButtons.confirm.isClickable = address != session.address
+            }
         }
     }
 
     fun setView(meta: WalletConnectPeerMeta, networkName: String) = with(binding) {
         //set current wallet connection dapp session
         dappSessionMeta = meta
+        //disable confirm only if it update wallet connection state
+        if (!meta.address.isEmpty()) changeClickableConfirmButtonState(meta.address)
         setupHeader(meta.name, networkName, getIcon(meta))
     }
 
