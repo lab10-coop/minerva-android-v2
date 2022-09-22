@@ -131,7 +131,8 @@ class NftCollectionViewModel(
                 cost = txCost,
                 fiatCost = BalanceUtils.getFiatBalance(
                     txCost.multiply(account.coinRate.toBigDecimal()),
-                    transactionRepository.getFiatSymbol()
+                    transactionRepository.getFiatSymbol(),
+                    rounding = true //check and rounding (if needed) fiat value to specified ("< %s") placeholder
                 ),
                 gasPrice = gasPrice
             )
