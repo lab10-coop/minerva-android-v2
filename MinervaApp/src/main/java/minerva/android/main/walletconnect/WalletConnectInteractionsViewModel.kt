@@ -74,7 +74,7 @@ class WalletConnectInteractionsViewModel(
      */
     fun onChangeAccount(state: WalletConnectState) {
         if (state != _walletConnectStatus.value) {
-            _walletConnectStatus.postValue(state)
+            _walletConnectStatus.value = state
         }
     }
 

@@ -269,7 +269,8 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     private fun DappConfirmationDialog.updateAccountSpinner() {
         setupAccountSpinner(walletConnectViewModel.account.id, walletConnectViewModel.availableAccounts) { account ->
             walletConnectViewModel.setNewAccount(account)
-            changeClickableConfirmButtonState(account.address)
+            //change state of confirm button for prevent the same db records
+            changeClickableConfirmButtonState(account.address, account.chainId)
         }
     }
 
