@@ -41,12 +41,14 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     /**
      * Change Clickable Confirm Button State - check and change confirm button state for prevent extra db records
      * @param address - address of specified account
+     * @param address - chain id of specified account
      */
-    fun changeClickableConfirmButtonState(address: String) {
+    fun changeClickableConfirmButtonState(address: String, chainId: Int) {
         if (address.isEmpty()) binding.confirmationButtons.confirm.isClickable = true
         else {
             dappSessionMeta?.let { session ->
-                binding.confirmationButtons.confirm.isClickable = address != session.address
+                binding.confirmationButtons.confirm.isClickable =
+                    !(address == session.address && chainId == session.chainId) //compare specified meta data and db stored data
             }
         }
     }
@@ -55,7 +57,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         //set current wallet connection dapp session
         dappSessionMeta = meta
         //disable confirm only if it update wallet connection state
-        if (!meta.address.isEmpty()) changeClickableConfirmButtonState(meta.address)
+        if (!meta.address.isEmpty()) changeClickableConfirmButtonState(meta.address, meta.chainId)
         setupHeader(meta.name, networkName, getIcon(meta))
     }
 
@@ -92,7 +94,8 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                     if (selectedAccountId != Int.InvalidId) {
                         availableAccounts.indexOfFirst { account -> account.id == selectedAccountId }
                     } else Int.FirstIndex
-                changeClickableConfirmButtonState(availableAccounts.get(defaultPosition).address)
+                //change state of confirm button for prevent the same db records
+                changeClickableConfirmButtonState(availableAccounts.get(defaultPosition).address, availableAccounts.get(defaultPosition).chainId)
                 prepareSpinner(R.drawable.rounded_background_purple_frame, defaultPosition) { position, view ->
                     onAccountSelected(accountAdapter.getItem(position))
                     accountAdapter.selectedItemWidth = view?.width

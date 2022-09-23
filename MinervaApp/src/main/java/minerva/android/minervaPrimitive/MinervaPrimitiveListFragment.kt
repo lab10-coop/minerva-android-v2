@@ -58,13 +58,14 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
     override fun onChangeAccount(minervaPrimitive: MinervaPrimitive) {
         //trying get MainActivity instance from context - for change state through changing LiveModel
         val mainActivityFromContext: MainActivity = ((this.parentFragment as ServicesFragment).interactor as MainActivity)
-        //transferring current connection state (data) to caller (fragment which called action)
+        //create/set transferring current connection state (data) to caller (fragment which called action)
         val state = OnSessionRequest(
             WalletConnectPeerMeta(
                 name = minervaPrimitive.name,
                 icons = listOf(minervaPrimitive.iconUrl ?: ""),
                 peerId = minervaPrimitive.peerId,
-                address = minervaPrimitive.address),
+                address = minervaPrimitive.address,
+                chainId = minervaPrimitive.chainId),
             BaseNetworkData(chainId = Int.InvalidValue, name = String.Empty), //put empties values for get popap with all available networks
             WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT) //put value for calling wallet connection change action
         //calling LiveModel changing through pulling new state (of WalletConnectInteractionsViewModel::_walletConnectStatus)
