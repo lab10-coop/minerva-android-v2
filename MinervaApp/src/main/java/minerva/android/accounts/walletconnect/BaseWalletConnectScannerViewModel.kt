@@ -159,16 +159,9 @@ abstract class BaseWalletConnectScannerViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onComplete = { closeScanner(isMobileWalletConnect) },
-                        onError = {
-                            //changing "walletConnectStatus" for correct opening popap next time (change wallet connection case)
-                            closeScanner(isMobileWalletConnect)
-                            setLiveDataError(it)
-                        }
+                        onError = { setLiveDataError(it) }
                     )
             }
-        } else {
-            closeScanner(isMobileWalletConnect)
         }
     }
 
