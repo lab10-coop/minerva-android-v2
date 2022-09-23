@@ -13,7 +13,10 @@ import minerva.android.extension.empty
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.main.MainActivity
+import minerva.android.main.handler.replaceFragment
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
+import minerva.android.services.ServicesFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
@@ -101,6 +104,8 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 CloseScannerState -> closeToBackground()
                 CloseDialogState -> closeDialog()
                 CorrectWalletConnectCodeState -> handleLoadingDialogForWCConnection(true)
+                //navigate to ServicesFragment
+                ToServiceFragmentRequest -> (this as MainActivity).replaceFragment(ServicesFragment.newInstance())
                 else -> {
                 }
             }
@@ -246,7 +251,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         confirmationDialogDialog = DappConfirmationDialog(this,
             {
                 if (WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT == dialogType) {
-                    walletConnectViewModel.updateSession(meta.peerId, true)
+                    walletConnectViewModel.updateSession(meta.peerId)
                 } else {
                     walletConnectViewModel.approveSession(meta, true)
                 }

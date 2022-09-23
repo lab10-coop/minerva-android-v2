@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.services_fragment_layout.*
 import minerva.android.R
+import minerva.android.accounts.AccountsFragment
 import minerva.android.databinding.ServicesFragmentLayoutBinding
 import minerva.android.extension.onTabSelected
 import minerva.android.kotlinUtils.event.EventObserver
@@ -78,5 +79,7 @@ class ServicesFragment : BaseFragment(R.layout.services_fragment_layout) {
         const val DAPPS_POSITION = 0
         const val CARD_NUMBER = 2
         private const val FIRST_PAGE = 0
+        @JvmStatic
+        fun newInstance() = ServicesFragment()
     }
 }

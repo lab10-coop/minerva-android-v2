@@ -1,6 +1,5 @@
 package minerva.android.accounts.walletconnect
 
-import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -11,6 +10,7 @@ import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.ChainId
@@ -145,9 +145,8 @@ abstract class BaseWalletConnectScannerViewModel(
     /**
      * Update Session - update account for current wallet api connection
      * @param connectionPeerId - id of socket client connection
-     * @param isMobileWalletConnect - flag which show trying to connect through mobile (manually) or scanner (barcode) types
      */
-    fun updateSession(connectionPeerId: String, isMobileWalletConnect: Boolean) {
+    fun updateSession(connectionPeerId: String) {
         if (account.id != Int.InvalidId) {
             launchDisposable {
                 walletConnectRepository.updateSession(
@@ -159,6 +158,10 @@ abstract class BaseWalletConnectScannerViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
+                        onComplete = {
+                            //change viewModel state for navigate to ServicesFragment
+                            (this as WalletConnectInteractionsViewModel).onChangeAccount(ToServiceFragmentRequest)
+                        },
                         onError = { setLiveDataError(it) }
                     )
             }
