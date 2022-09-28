@@ -5,9 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
-import kotlinx.android.synthetic.main.services_fragment_layout.*
 import minerva.android.R
-import minerva.android.accounts.AccountsFragment
 import minerva.android.databinding.ServicesFragmentLayoutBinding
 import minerva.android.extension.onTabSelected
 import minerva.android.kotlinUtils.event.EventObserver
