@@ -158,10 +158,6 @@ abstract class BaseWalletConnectScannerViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onComplete = {
-                            //change viewModel state for navigate to ServicesFragment
-                            (this as WalletConnectInteractionsViewModel).onChangeAccount(ToServiceFragmentRequest)
-                        },
                         onError = { setLiveDataError(it) }
                     )
             }

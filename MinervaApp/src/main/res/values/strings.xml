@@ -276,6 +276,7 @@
     <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
     <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please click \'Add account\' button above.</string>
     <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
+    <string name="change_account_not_defined_warning_message">You can change the existing WalletConnect \n connections  with a website (DApp) to another \n network and/or address. The changes will also be \n visible on the Service screen.</string>
     <string name="dapp_disconnected">%s session disconnected</string>
     <string name="dapp_unnamed">Unnamed</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
@@ -417,6 +418,9 @@
     <string name="open_in_explorer">Open in Explorer</string>
     <string name="already_in_use">Already in use</string>
     <string name="free">Free</string>
+    <string name="change_account_dialog">CHANGE ACCOUNT</string>
+    <string name="change">Change</string>
+    <string name="connect">Connect</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

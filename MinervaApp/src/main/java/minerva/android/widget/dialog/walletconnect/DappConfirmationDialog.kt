@@ -9,6 +9,7 @@ import minerva.android.R
 import minerva.android.accounts.walletconnect.DappAccountsSpinnerAdapter
 import minerva.android.accounts.walletconnect.DappNetworksSpinnerAdapter
 import minerva.android.accounts.walletconnect.NetworkDataSpinnerItem
+import minerva.android.accounts.walletconnect.WalletConnectAlertType
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
@@ -22,19 +23,19 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.DynamicWidthSpinner
+import minerva.android.widget.dialog.models.ViewDetails
 
 class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit, private val onAddAccountClick: (Int) -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
 
     private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
-    //current dapp session wallet connection
-    var dappSessionMeta: WalletConnectPeerMeta? = null
+    //current DApp session wallet connection
+    var dAppSessionMeta: WalletConnectPeerMeta? = null
 
     init {
         setContentView(binding.root)
         initButtons(binding.confirmationButtons)
-        binding.confirmationButtons.confirm.text = context.getString(R.string.Connect)
         binding.confirmationView.hideRequestedData()
     }
 
@@ -44,21 +45,32 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
      * @param address - chain id of specified account
      */
     fun changeClickableConfirmButtonState(address: String, chainId: Int) {
-        if (address.isEmpty()) binding.confirmationButtons.confirm.isClickable = true
-        else {
-            dappSessionMeta?.let { session ->
-                binding.confirmationButtons.confirm.isClickable =
-                    !(address == session.address && chainId == session.chainId) //compare specified meta data and db stored data
+        dAppSessionMeta?.let { session ->
+            //compare specified meta data and db stored data (current connection)
+            val isActive: Boolean = !(address == session.address && chainId == session.chainId)
+            binding.confirmationButtons.confirm.apply {
+                isClickable = isActive
+                isEnabled = isActive
             }
         }
     }
 
-    fun setView(meta: WalletConnectPeerMeta, networkName: String) = with(binding) {
+    /**
+     * Set View - prepare global variables and set some state for popap dialog
+     * @param meta - set current wallet connection DApp session (from db)
+     * @param viewDetails - popap dialog view details
+     */
+    fun setView(
+        meta: WalletConnectPeerMeta,
+        viewDetails: ViewDetails)
+    = with(binding) {
         //set current wallet connection dapp session
-        dappSessionMeta = meta
-        //disable confirm only if it update wallet connection state
-        if (!meta.address.isEmpty()) changeClickableConfirmButtonState(meta.address, meta.chainId)
-        setupHeader(meta.name, networkName, getIcon(meta))
+        dAppSessionMeta = meta
+        setupHeader(meta.name, viewDetails.networkName, getIcon(meta))
+        binding.apply {
+            confirmationButtons.confirm.text = viewDetails.confirmButtonName
+            connectionName.text = viewDetails.connectionName
+        }
     }
 
     private fun DappConfirmationDialogBinding.getIcon(meta: WalletConnectPeerMeta): Any =
@@ -105,8 +117,12 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
 
     private fun isAccountSpinnerVisible(listSize: Int): Boolean = listSize > Int.OneElement && networkHeader.addAccount.isGone
 
-    fun setNotDefinedNetworkWarning(availableNetworks: List<NetworkDataSpinnerItem>, onNetworkSelected: (Int) -> Unit) =
-        with(binding) {
+    fun setNotDefinedNetworkWarning(
+        availableNetworks: List<NetworkDataSpinnerItem>,
+        dialogType: WalletConnectAlertType,
+        currentDAppSessionChainId: Int = Int.InvalidId, //current chainId connection (or -1 if connection wasn't installed)
+        onNetworkSelected: (Int) -> Unit)
+    = with(binding) {
             setNetworkHeader()
             showWaring()
             networkHeader.network.gone()
@@ -114,18 +130,33 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                 context,
                 R.layout.spinner_network_wallet_connect,
                 availableNetworks
-            ).apply { setDropDownViewResource(R.layout.spinner_network_wallet_connect) }
-            updateNotDefinedNetworkWarning(networkAdapter.getItem(Int.FirstIndex))
+            ).apply {
+                setDropDownViewResource(R.layout.spinner_network_wallet_connect)
+            }
+            //get current DApp session (item) index from availableNetworks (for set this network(account) like selected in spinner)
+            val networkItemIndex: Int =  if (Int.InvalidId == currentDAppSessionChainId) {
+                Int.FirstIndex
+            } else {
+                var indexByChainId: Int = Int.FirstIndex //DApp session default value
+                //trying to find index in availableNetworks by chainId
+                availableNetworks.forEachIndexed { index, networkDataSpinnerItem ->
+                    if (currentDAppSessionChainId == networkDataSpinnerItem.chainId) {
+                        indexByChainId = index
+                    }
+                }
+                indexByChainId
+            }
+            updateNotDefinedNetworkWarning(networkAdapter.getItem(networkItemIndex), dialogType)
             networkHeader.networkSpinner.apply {
                 visible()
                 addOnGlobalLayoutListener() {
                     networkAdapter.selectedItemWidth = networkHeader.accountSpinner.width
                 }
                 adapter = networkAdapter
-                prepareSpinner(R.drawable.warning_background, Int.FirstIndex) { position, view ->
+                prepareSpinner(R.drawable.warning_background, networkItemIndex) { position, view ->
                     val selectedItem = networkAdapter.getItem(position)
                     networkAdapter.selectedItemWidth = view?.width
-                    updateNotDefinedNetworkWarning(selectedItem)
+                    updateNotDefinedNetworkWarning(selectedItem, dialogType)
                     if (selectedItem.isAccountAvailable) {
                         onNetworkSelected(selectedItem.chainId)
                     }
@@ -151,15 +182,25 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-    private fun updateNotDefinedNetworkWarning(item: NetworkDataSpinnerItem) = with(networkHeader) {
+    private fun updateNotDefinedNetworkWarning(item: NetworkDataSpinnerItem, dialogType: WalletConnectAlertType) = with(networkHeader) {
         val warningRes =
-            if (item.isAccountAvailable) R.string.not_defined_warning_message else R.string.not_defined_warning_ethereum_message
+            if (item.isAccountAvailable) {
+                //set correct description for message
+                if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType)
+                    R.string.change_account_not_defined_warning_message
+                else
+                    R.string.not_defined_warning_message
+            } else R.string.not_defined_warning_ethereum_message
         accountSpinner.visibleOrGone(item.isAccountAvailable)
         addAccount.apply {
             visibleOrGone(!item.isAccountAvailable)
             setupAddAccountListener(item.chainId)
         }
-        setupWarning(warningRes)
+        setupWarning(
+            warningRes,
+            null,
+            WalletConnectAlertType.CHANGE_ACCOUNT != dialogType
+        )
         binding.confirmationButtons.confirm.isEnabled = item.isAccountAvailable
     }
 
@@ -231,10 +272,14 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-    private fun setupWarning(warningRes: Int, networkName: String? = null) = with(binding) {
+    private fun setupWarning(warningRes: Int, networkName: String? = null, warningColor: Boolean = true/*color for message*/) = with(binding) {
         warringIcon.setImageResource(R.drawable.ic_warning)
         networkName?.let { warning.setTextWithArgs(warningRes, networkName) }.orElse { warning.setText(warningRes) }
-        warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
+        if (warningColor) {
+            warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
+        } else {
+            warning.setTextColor(ContextCompat.getColor(context, R.color.darkGray70))
+        }
     }
 
     private fun showWaring() = with(binding) {
