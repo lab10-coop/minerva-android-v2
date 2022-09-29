@@ -6,5 +6,5 @@ enum class WalletConnectAlertType {
     CHANGE_ACCOUNT_WARNING,
     NO_AVAILABLE_ACCOUNT_ERROR,
     UNSUPPORTED_NETWORK_WARNING,
-    CHANGE_CURRENT_ACCOUNT //value for calling wallet connection change action
+    CHANGE_ACCOUNT //value for calling wallet connection change action
 }

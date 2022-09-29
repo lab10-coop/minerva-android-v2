@@ -3,7 +3,6 @@ package minerva.android.minervaPrimitive
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.account_type_item.*
 import minerva.android.R
 import minerva.android.accounts.walletconnect.*
 import minerva.android.databinding.RecyclerViewLayoutBinding
@@ -67,7 +66,7 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
                 address = minervaPrimitive.address,
                 chainId = minervaPrimitive.chainId),
             BaseNetworkData(chainId = Int.InvalidValue, name = String.Empty), //put empties values for get popap with all available networks
-            WalletConnectAlertType.CHANGE_CURRENT_ACCOUNT) //put value for calling wallet connection change action
+            WalletConnectAlertType.CHANGE_ACCOUNT) //put value for calling wallet connection change action
         //calling LiveModel changing through pulling new state (of WalletConnectInteractionsViewModel::_walletConnectStatus)
         mainActivityFromContext.onChangeAccount(state)
     }
