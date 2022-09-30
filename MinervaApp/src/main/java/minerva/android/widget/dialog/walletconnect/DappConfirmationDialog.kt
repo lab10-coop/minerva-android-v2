@@ -14,10 +14,7 @@ import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Compa
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
-import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.FirstIndex
-import minerva.android.kotlinUtils.InvalidId
-import minerva.android.kotlinUtils.OneElement
+import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
@@ -115,7 +112,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             }
         }
 
-    private fun isAccountSpinnerVisible(listSize: Int): Boolean = listSize > Int.OneElement && networkHeader.addAccount.isGone
+    private fun isAccountSpinnerVisible(listSize: Int): Boolean = listSize > Int.EmptyResource && networkHeader.addAccount.isGone
 
     fun setNotDefinedNetworkWarning(
         availableNetworks: List<NetworkDataSpinnerItem>,
