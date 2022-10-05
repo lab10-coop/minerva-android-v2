@@ -35,13 +35,11 @@ object DefaultWalletConfig {
                     AccountPayload(
                         FIRST_DEFAULT_TEST_NETWORK_INDEX,
                         CryptoUtils.prepareName(firstDefaultTestNetwork.name, FIRST_DEFAULT_TEST_NETWORK_INDEX),
-                        firstDefaultTestNetwork.chainId,
                         _isTestNetwork = true
                     ),
                     AccountPayload(
                         SECOND_DEFAULT_TEST_NETWORK_INDEX,
                         CryptoUtils.prepareName(secondDefaultTestNetwork.name, SECOND_DEFAULT_TEST_NETWORK_INDEX),
-                        secondDefaultTestNetwork.chainId,
                         _isTestNetwork = true
                     ),
                     AccountPayload(
