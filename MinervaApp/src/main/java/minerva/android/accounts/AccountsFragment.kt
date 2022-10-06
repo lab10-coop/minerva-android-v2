@@ -60,7 +60,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             interactor.changeActionBarColor(R.color.lightGray)
             viewModel.apply {
                 onResume()
-                refreshAddCryptoButton()
                 if (arePendingAccountsEmpty) {
                     accountAdapter.stopPendingTransactions()
                 }
@@ -219,7 +218,14 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             viewModel.apply {
                 logToFirebaseIfNotSynced()
                 networksHeader.text = getHeader(areMainNetsEnabled)
-                addCryptoButton.apply { text = getBuyCryptoButtonText(this) }
+                addCryptoButton.apply {
+                    if (viewModel.areMainNetsEnabled) {
+                        this.setBackgroundColor( ContextCompat.getColor(this.context, R.color.colorPrimary) )
+                        text = getString(R.string.buy_crypto)
+                    } else {
+                        this.visibility = View.GONE
+                    }
+                }
                 if (!appUIState.shouldShowSplashScreen && isFirstLaunch) {
                     SelectPredefinedAccountDialog(
                         requireContext(),
@@ -229,25 +235,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             }
         }
     }
-
-    private fun getBuyCryptoButtonText(materialButton: MaterialButton): String =
-        if (viewModel.areMainNetsEnabled) {
-            materialButton.setBackgroundColor(
-                ContextCompat.getColor(
-                    materialButton.context,
-                    R.color.colorPrimary
-                )
-            )
-            getString(R.string.buy_crypto)
-        } else {
-            materialButton.setBackgroundColor(
-                ContextCompat.getColor(
-                    materialButton.context,
-                    R.color.artis
-                )
-            )
-            getString(R.string.add_tats)
-        }
 
     private fun setupRecycleView(view: View) {
         binding.apply {
@@ -317,7 +304,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             errorLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking { errorState ->
                 when (errorState) {
                     BaseError -> {
-                        refreshAddCryptoButton()
                         showErrorFlashbar(R.string.error_header, R.string.unexpected_error)
                     }
                     BalanceIsNotEmptyAndHasMoreOwnersError ->
@@ -350,16 +336,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
             accountHideLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
                 activity?.invalidateOptionsMenu()
-                refreshAddCryptoButton()
             })
-
-            addFreeAtsLiveData.observe(
-                viewLifecycleOwner,
-                EventObserverWithSyncChecking { success ->
-                    val message = if (success) R.string.refresh_balance_to_check_transaction_status
-                    else R.string.free_ats_warning
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                })
         }
     }
 
@@ -377,32 +354,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
-    private fun refreshAddCryptoButton() {
-        viewModel.apply {
-            isAddingFreeATSAvailable(activeAccounts).let { isAvailable ->
-                binding.addCryptoButton.apply {
-                    if (!viewModel.areMainNetsEnabled) {
-                        val color = if (isAvailable) R.color.artis else R.color.inactiveButtonColor
-                        setBackgroundColor(ContextCompat.getColor(context, color))
-                    }
-                }
-            }
-        }
-    }
-
     private fun setTatsButtonListener() =
         binding.addCryptoButton.setOnClickListener { view ->
             viewModel.apply {
                 if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
-                else {
-                    view.setBackgroundColor(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            R.color.inactiveButtonColor
-                        )
-                    )
-                    addAtsToken()
-                }
             }
         }
 

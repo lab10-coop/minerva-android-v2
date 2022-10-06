@@ -116,9 +116,6 @@ class AccountsViewModel(
     private val _accountHideLiveData = MutableLiveData<Event<Unit>>()
     val accountHideLiveData: LiveData<Event<Unit>> get() = _accountHideLiveData
 
-    private val _addFreeAtsLiveData = MutableLiveData<Event<Boolean>>()
-    val addFreeAtsLiveData: LiveData<Event<Boolean>> get() = _addFreeAtsLiveData
-
     private val _dappSessions = MutableLiveData<List<DappSessionData>>()
     val dappSessions: LiveData<List<DappSessionData>> get() = _dappSessions
 
@@ -773,40 +770,6 @@ class AccountsViewModel(
 
     private fun getSafeAccountWalletAction(account: Account): List<WalletAction> =
         listOf(getWalletAction(SA_ADDED, accountManager.getSafeAccountName(account)))
-
-    fun addAtsToken() {
-        getAccountForFreeATS(activeAccounts).let { account ->
-            if (account.id != Int.InvalidId && isAddingFreeATSAvailable(activeAccounts)) {
-                launchDisposable {
-                    transactionRepository.getFreeATS(account.address)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeBy(
-                            onComplete = {
-                                accountManager.saveFreeATSTimestamp()
-                                _addFreeAtsLiveData.value = Event(true)
-                            },
-                            onError = {
-                                Timber.e("Adding 5 tATS failed: ${it.message}")
-                                _errorLiveData.value = Event(BaseError)
-                            }
-                        )
-                }
-            } else _addFreeAtsLiveData.value = Event(false)
-        }
-    }
-
-    fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
-        shouldGetFreeAts() && accounts.any { account -> account.network.chainId == NetworkManager.networks[FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId }
-
-    private fun shouldGetFreeAts() =
-        ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(DAY)) < accountManager.currentTimeMills())
-
-    @VisibleForTesting
-    fun getAccountForFreeATS(accounts: List<Account>): Account =
-        accounts.find { account ->
-            account.network.chainId == NetworkManager.networks[FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
-        } ?: Account(Int.InvalidId)
 
     private fun saveTokenVisibility(networkAddress: String, tokenAddress: String) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
