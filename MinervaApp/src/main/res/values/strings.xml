@@ -346,6 +346,7 @@
     <string name="no_addresses_left_info">You reached the maximum number of accounts</string>
     <string name="ethereum_label">Ethereum</string>
     <string name="polygon_label">Polygon (Matic)</string>
+    <string name="celo_label">Celo</string>
     <string name="xdai_label">Gnosis Chain</string>
     <string name="create_your_first_account_header">Create your \nfirst account!</string>
     <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
