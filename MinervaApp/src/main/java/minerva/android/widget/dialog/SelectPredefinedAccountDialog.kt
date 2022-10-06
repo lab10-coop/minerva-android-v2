@@ -26,8 +26,8 @@ class SelectPredefinedAccountDialog(context: Context, private val predefinedNetw
     private fun initView() = with(binding) {
         skip.setOnClickListener { doOnSelectedNetwork(ChainId.ETH_MAIN) }
         ethereumNetwork.setOnClickListener { doOnSelectedNetwork(ChainId.ETH_MAIN) }
-        polygonNetwork.setOnClickListener { doOnSelectedNetwork(ChainId.MATIC) }
         xdaiNetwork.setOnClickListener { doOnSelectedNetwork(ChainId.XDAI) }
+        celoNetwork.setOnClickListener { doOnSelectedNetwork(ChainId.CELO) }
     }
 
     private fun doOnSelectedNetwork(chainId: Int) {
