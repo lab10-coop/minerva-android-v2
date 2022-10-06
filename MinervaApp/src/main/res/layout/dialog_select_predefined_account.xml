@@ -83,23 +83,6 @@
                     android:background="@color/separatorColor" />
 
                 <minerva.android.widget.PredefinedNetworkView
-                    android:id="@+id/polygon_network"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/rubik_medium"
-                    android:gravity="center"
-                    android:lines="2"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/text_large"
-                    app:icon="@drawable/ic_polygon_matic"
-                    app:name="@string/polygon_label" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/divider_height_small"
-                    android:background="@color/separatorColor" />
-
-                <minerva.android.widget.PredefinedNetworkView
                     android:id="@+id/xdai_network"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -110,6 +93,23 @@
                     android:textSize="@dimen/text_large"
                     app:icon="@drawable/ic_gnosis_chain"
                     app:name="@string/xdai_label" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/divider_height_small"
+                    android:background="@color/separatorColor" />
+
+                <minerva.android.widget.PredefinedNetworkView
+                    android:id="@+id/celo_network"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/rubik_medium"
+                    android:gravity="center"
+                    android:lines="2"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_large"
+                    app:icon="@drawable/ic_celo"
+                    app:name="@string/celo_label" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
