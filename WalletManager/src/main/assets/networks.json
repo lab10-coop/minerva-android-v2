@@ -217,7 +217,7 @@
   },
   {
     "name": "Kovan",
-    "isActive": true,
+    "isActive": false,
     "token": "kETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
