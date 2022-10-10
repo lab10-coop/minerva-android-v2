@@ -5,7 +5,6 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.Asset
-import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.token.UpdateTokensResult
@@ -42,10 +41,8 @@ interface TokenManager {
     fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable
     fun updateTokensRate(account: Account)
     fun getSingleTokenRate(tokenHash: String): Double
-    fun getTaggedTokensUpdate(): Flowable<List<ERCToken>>
-    fun getTaggedTokensSingle(): Single<List<ERCToken>>
+    fun getTokensUpdate(): Flowable<List<ERCToken>>
     fun getSuperTokenBalance(account: Account): Flowable<Asset>
-    var activeSuperTokenStreams: MutableList<ActiveSuperToken>
     fun mergeNFTDetailsWithRemoteConfig(
         shouldBeUpdated: Boolean,
         tokensPerChainIdMap: Map<Int, List<ERCToken>>

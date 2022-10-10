@@ -723,19 +723,19 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `get super token balance success test`() {
-        val taggedTokens = listOf(
+        val tokens = listOf(
             ERCToken(
                 ATS_TAU,
                 "name1",
                 address = "address1",
                 tag = "SuperToken",
                 accountAddress = "address4455",
-                type = TokenType.ERC20
+                type = TokenType.SUPER_TOKEN
             ),
-            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.ERC20)
+            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.SUPER_TOKEN)
         )
         val account = Account(1, chainId = ATS_TAU, address = "address4455")
-        whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(taggedTokens))
+        whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(tokens))
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(erc20TokenRepository.getTokenBalance(any(), any(), any(), any())).thenReturn(
@@ -761,19 +761,19 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `get super token balance failure test`() {
         val error = Throwable("Get super token flowable")
-        val taggedTokens = listOf(
+        val tokens = listOf(
             ERCToken(
                 ATS_TAU,
                 "name1",
                 address = "address1",
                 tag = "SuperToken",
                 accountAddress = "address4455",
-                type = TokenType.ERC20
+                type = TokenType.SUPER_TOKEN
             ),
-            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.ERC20)
+            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.SUPER_TOKEN)
         )
         val account = Account(1, chainId = ATS_TAU, address = "address4455")
-        whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(taggedTokens))
+        whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(tokens))
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(erc20TokenRepository.getTokenBalance(any(), any(), any(), any())).thenReturn(

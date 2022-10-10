@@ -886,7 +886,7 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `fill missing account address test`() {
-        repository.newTaggedTokens = mutableListOf(
+        repository.newTokens = mutableListOf(
             ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1", address = "token1", type = TokenType.ERC20),
             ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address2", address = "token2", type = TokenType.ERC20),
             ERCToken(88, tag = "tag1", accountAddress = "address2", address = "token2", type = TokenType.ERC20)
@@ -905,27 +905,27 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `update tokens with tagged tokens test`() {
-        repository.newTaggedTokens = mutableListOf(
+        repository.newTokens = mutableListOf(
             ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1", type = TokenType.ERC20),
             ERCToken(ChainId.ETH_RIN, tag = "tag2", accountAddress = "address2", type = TokenType.ERC20)
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        repository.updateTaggedTokens()
+        repository.updateTokens()
             .test()
             .assertComplete()
             .assertNoErrors()
-        assertEquals(repository.newTaggedTokens.isEmpty(), true)
+        assertEquals(repository.newTokens.isEmpty(), true)
     }
 
     @Test
     fun `do not update tokens with tagged tokens test`() {
-        repository.newTaggedTokens = mutableListOf()
-        repository.updateTaggedTokens()
+        repository.newTokens = mutableListOf()
+        repository.updateTokens()
             .test()
             .assertComplete()
             .assertNoErrors()
-        assertEquals(repository.newTaggedTokens.isEmpty(), true)
+        assertEquals(repository.newTokens.isEmpty(), true)
     }
 
     @Test
