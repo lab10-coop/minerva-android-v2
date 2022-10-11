@@ -933,6 +933,21 @@ class TransactionRepositoryTest : RxTest() {
         val accounts = listOf(
             Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
         )
+        val tokens = mapOf(
+            Pair(
+                ChainId.ETH_RIN,
+                listOf(
+                    ERCToken(
+                        ChainId.ETH_RIN,
+                        "one",
+                        address = "address",
+                        decimals = "10",
+                        accountAddress = "address",
+                        type = TokenType.SUPER_TOKEN
+                    )
+                )
+            )
+        )
         val accountToken =
             AccountToken(
                 ERCToken(
@@ -941,27 +956,19 @@ class TransactionRepositoryTest : RxTest() {
                     address = "address",
                     decimals = "10",
                     accountAddress = "address",
-                    isStreamActive = true,
-                    type = TokenType.ERC20
+                    type = TokenType.SUPER_TOKEN
                 ),
                 currentRawBalance = BigDecimal.TEN
             )
 
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(
+            WalletConfig(1, emptyList(), accounts, erc20Tokens = tokens)
+        )
         whenever(tokenManager.getSuperTokenBalance(any())).thenReturn(
             Flowable.just(AssetBalance(ChainId.ETH_RIN, "privateKey", accountToken))
         )
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(tokenManager.activeSuperTokenStreams).thenReturn(
-            mutableListOf(
-                ActiveSuperToken(
-                    "address",
-                    "address",
-                    ChainId.ETH_RIN
-                )
-            )
-        )
 
         repository.getSuperTokenStreamInitBalance()
             .test()
@@ -994,15 +1001,6 @@ class TransactionRepositoryTest : RxTest() {
         )
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(tokenManager.activeSuperTokenStreams).thenReturn(
-            mutableListOf(
-                ActiveSuperToken(
-                    "address",
-                    "address",
-                    ChainId.ETH_RIN
-                )
-            )
-        )
 
         repository.getSuperTokenStreamInitBalance()
             .test()
@@ -1026,8 +1024,7 @@ class TransactionRepositoryTest : RxTest() {
                     address = "address",
                     decimals = "10",
                     accountAddress = "address",
-                    isStreamActive = true,
-                    type = TokenType.ERC20
+                    type = TokenType.SUPER_TOKEN
                 ),
                 currentRawBalance = BigDecimal.TEN
             )
@@ -1039,15 +1036,6 @@ class TransactionRepositoryTest : RxTest() {
         whenever(webSocketRepositoryImpl.subscribeToBlockCreation(any())).thenReturn(Flowable.just(Unit))
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(tokenManager.activeSuperTokenStreams).thenReturn(
-            mutableListOf(
-                ActiveSuperToken(
-                    "address",
-                    "address",
-                    ChainId.ETH_RIN
-                )
-            )
-        )
 
         repository.startSuperTokenStreaming(ChainId.ETH_RIN)
             .test()
@@ -1073,8 +1061,7 @@ class TransactionRepositoryTest : RxTest() {
                     address = "address",
                     decimals = "10",
                     accountAddress = "address",
-                    isStreamActive = true,
-                    type = TokenType.ERC20
+                    type = TokenType.SUPER_TOKEN
                 ),
                 currentRawBalance = BigDecimal.TEN
             )
@@ -1095,15 +1082,6 @@ class TransactionRepositoryTest : RxTest() {
         whenever(webSocketRepositoryImpl.subscribeToBlockCreation(any())).thenReturn(Flowable.just(Unit))
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(tokenManager.activeSuperTokenStreams).thenReturn(
-            mutableListOf(
-                ActiveSuperToken(
-                    "address",
-                    "address",
-                    ChainId.ETH_RIN
-                )
-            )
-        )
 
         repository.startSuperTokenStreaming(ChainId.ETH_RIN)
             .test()

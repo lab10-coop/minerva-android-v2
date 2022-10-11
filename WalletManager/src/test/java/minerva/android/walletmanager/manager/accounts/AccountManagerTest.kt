@@ -11,7 +11,6 @@ import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.TokenBalanceDao
-import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager

@@ -133,8 +133,7 @@ class TokenManagerImpl(
 
     override fun checkMissingTokensDetails(): Completable =
         cryptoApi.getLastCommitFromTokenList(url = ERC20_TOKEN_DATA_LAST_COMMIT)
-            .zipWith(cryptoApi.getLastCommitFromTokenList(url = ERC20_TOKEN_DATA_LAST_COMMIT)) // todo: remove this line
-            .filter { (commits, commits2) -> isNewCommit(commits) }
+            .filter { (commit) -> isNewCommit(commit) }
             .flatMapSingle { getMissingTokensDetails() }
             .flatMapCompletable { tokenDetailsMap -> updateTokensIcons(tokenDetailsMap) }
             .andThen(checkMissingNFTDetails())
@@ -144,8 +143,8 @@ class TokenManagerImpl(
         getNftCollectionDetails()
             .flatMapCompletable { tokenDetailsMap -> updateNFTsIcons(tokenDetailsMap) }
 
-    private fun isNewCommit(list: List<CommitElement>): Boolean =
-        list[LAST_UPDATE_INDEX].lastCommitDate.let {
+    private fun isNewCommit(commit: CommitElement): Boolean =
+        commit.lastCommitDate.let {
             localStorage.loadTokenIconsUpdateTimestamp() < DateUtils.getTimestampFromDate(it)
         }
 
@@ -235,25 +234,22 @@ class TokenManagerImpl(
 
     override fun getSuperTokenBalance(account: Account): Flowable<Asset> {
         with(account) {
-            return Single.just(getSuperTokensPerAccount(this))
-                .zipWith(Single.just(getSuperTokensPerAccount(this))) // todo: remove
-                .flatMapPublisher { (supertokensPerAccount, supertokensPerAccount2) ->
-                    Flowable.mergeDelayError(
-                        getSuperTokenBalanceFlowables(
-                            supertokensPerAccount,
-                            this
-                        )
-                    )
-                        .flatMap { superTokenBalance ->
-                            getSuperTokenNetFlow(superTokenBalance, account)
-                                .map { netFlow ->
-                                    handleTokensBalances(
-                                        superTokenBalance,
-                                        getSuperTokensForAccount(supertokensPerAccount),
-                                        account,
-                                        netFlow
-                                    )
-                                }
+            val supertokensPerAccount = getSuperTokensPerAccount(this)
+            return Flowable.mergeDelayError(
+                getSuperTokenBalanceFlowables(
+                    supertokensPerAccount,
+                    this
+                )
+            )
+                .flatMap { superTokenBalance ->
+                    getSuperTokenNetFlow(superTokenBalance, account)
+                        .map { netFlow ->
+                            handleTokensBalances(
+                                superTokenBalance,
+                                getSuperTokensForAccount(supertokensPerAccount),
+                                account,
+                                netFlow
+                            )
                         }
                 }
         }
@@ -349,16 +345,14 @@ class TokenManagerImpl(
 
     override fun getTokenBalance(account: Account): Flowable<Asset> {
         with(account) {
-            return Single.just(getAllTokensPerAccount(this))
-                .zipWith(Single.just(getAllTokensPerAccount(this))) // todo: remove
-                .flatMapPublisher { (tokensPerAccount, tokensPerAccount2) ->
-                    val tokens = getTokensForAccount(tokensPerAccount, this)
-                    Flowable.mergeDelayError(getTokenBalanceFlowables(tokens, this))
-                        .flatMap { (token, type) ->
-                            Flowable.just(token) // todo: remove this?
-                        }
-                        .map { token -> handleTokensBalances(token, tokens, account) }
+            val tokensPerAccount = getAllTokensPerAccount(this)
+            val tokens = getTokensForAccount(tokensPerAccount, this)
+            return Flowable.mergeDelayError(getTokenBalanceFlowables(tokens, this))
+                // todo: can this be simplified?
+                .flatMap { (token, type) ->
+                    Flowable.just(token)
                 }
+                .map { token -> handleTokensBalances(token, tokens, account) }
         }
     }
 
