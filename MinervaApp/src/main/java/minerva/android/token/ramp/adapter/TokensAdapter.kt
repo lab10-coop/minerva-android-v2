@@ -26,7 +26,7 @@ class TokensAdapter(private var tokens: List<RampCrypto>) : RecyclerView.Adapter
 
     private fun onTokenSelection(position: Int) {
         currentCryptoPosition = position
-        onTokenSelected(tokens[position].chainId, tokens[position].symbol)
+        onTokenSelected(tokens[position].chainId, tokens[position].apiSymbol)
         notifyDataSetChanged()
     }
 
@@ -49,7 +49,7 @@ class TokenViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
         network.text = String.format(NETWORK_FORMAT, rampCrypto.network)
         tokenSymbol.apply {
-            text = rampCrypto.symbol.substringAfter(SYMBOL_DELIMITER)
+            text = rampCrypto.displaySymbol
             setCompoundDrawablesWithIntrinsicBounds(NO_IMAGE, rampCrypto.iconRes, NO_IMAGE, NO_IMAGE)
         }
         cryptoView.setOnClickListener { onTokenSelection(position) }
@@ -65,7 +65,6 @@ class TokenViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
     companion object {
         private const val NO_IMAGE = 0
         private const val NETWORK_FORMAT = "(%s)"
-        private const val SYMBOL_DELIMITER = "_"
     }
 
 }

@@ -18,12 +18,15 @@ class RampCryptoAdapter(
         RampCryptoViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.ramp_crypto_grid, parent, false))
 
     override fun onBindViewHolder(holder: RampCryptoViewHolder, position: Int) {
-        when (position) {
-            FIRST_PAGE -> holder.setTokens(tokens.subList(0, 4))
-            SECOND_PAGE -> holder.setTokens(tokens.subList(4, 8))
-            THIRD_PAGE -> holder.setTokens(tokens.subList(8, 12))
-            FOURTH_PAGE -> holder.setTokens(tokens.subList(12, 15))
-        }
+        holder.setTokens(
+            tokens.subList(
+                position * MAX_TOKENS_PER_PAGE,
+                kotlin.math.min(
+                    position * MAX_TOKENS_PER_PAGE + MAX_TOKENS_PER_PAGE,
+                    tokens.size
+                )
+            )
+        )
     }
 
     private fun RampCryptoViewHolder.setTokens(tokens: List<RampCrypto>) {
@@ -33,21 +36,17 @@ class RampCryptoAdapter(
     private fun updateTokens(chainId: Int, symbol: String) {
         onTokenSelected(chainId, symbol)
         tokens.forEach { token -> token.isSelected = false }
-        tokens.find { token -> token.chainId == chainId && token.symbol == symbol }?.isSelected = true
+        tokens.find { token -> token.chainId == chainId && token.apiSymbol == symbol }?.isSelected = true
     }
 
-    override fun getItemCount() = PAGES
+    override fun getItemCount() = kotlin.math.ceil(tokens.size.toDouble() / MAX_TOKENS_PER_PAGE).toInt()
 
     fun notifyData() {
         notifyDataSetChanged()
     }
 
     companion object {
-        private const val FIRST_PAGE = 0
-        private const val SECOND_PAGE = 1
-        private const val THIRD_PAGE = 2
-        private const val FOURTH_PAGE = 3
-        private const val PAGES = 4
+        private const val MAX_TOKENS_PER_PAGE = 4
     }
 }
 
