@@ -28,7 +28,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
-import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.AssetError
@@ -542,7 +542,7 @@ class TokenManagerTest : RxTest() {
         val accountThree = Account(1, chainId = POA_SKL, address = "0xADDRESSxTHREE")
         val accountFour = Account(1, chainId = LUKSO_14, address = "0xADDRESSxFOUR")
         val accountFive = Account(1, chainId = ATS_SIGMA, address = "0xADDRESSxFIVE")
-        val accountSix = Account(1, chainId = XDAI, address = "0xADDRESSxSIX")
+        val accountSix = Account(1, chainId = GNO, address = "0xADDRESSxSIX")
         val accountSeven = Account(1, chainId = POA_CORE, address = "0xADDRESSxSEVEN")
         val accountEight = Account(1, chainId = -1, address = "0xADDRESSxEMPTY")
 
@@ -916,7 +916,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `test download tokens owned`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        val account = Account(1, chainId = XDAI, address = "accountAddress", privateKey = "privateKey")
+        val account = Account(1, chainId = GNO, address = "accountAddress", privateKey = "privateKey")
         whenever(cryptoApi.getTokensOwned(any())).thenReturn(
             Single.just(
                 TokensOwnedPayload(
@@ -967,7 +967,7 @@ class TokenManagerTest : RxTest() {
             .await()
             .assertValue {
                     result -> result.size == 3
-                        && result.first().chainId == XDAI
+                        && result.first().chainId == GNO
                         && result.first().name == String.Empty
                         && result.first().collectionName == "Name"
                         && result.first().symbol == "Symbol"
@@ -976,7 +976,7 @@ class TokenManagerTest : RxTest() {
                         && result.first().accountAddress == "accountAddress"
                         && result.first().tokenId == "88"
                         && result.first().type == TokenType.ERC1155
-                        && result.last().chainId == XDAI
+                        && result.last().chainId == GNO
                         && result.last().name == "Nam3"
                         && result.last().collectionName == null
                         && result.last().symbol == "Symb0l"
@@ -1147,7 +1147,7 @@ class TokenManagerTest : RxTest() {
         NetworkManager.initialize(MockDataProvider.networks)
         val collectionAddress = "collectionAddress"
         val token1 = ERCToken(
-            XDAI,
+            GNO,
             "token1",
             address = collectionAddress,
             accountAddress = "accountAddress",
@@ -1155,7 +1155,7 @@ class TokenManagerTest : RxTest() {
             tokenId = "1"
         )
         val token2 = ERCToken(
-            XDAI,
+            GNO,
             "token2",
             address = collectionAddress,
             accountAddress = "accountAddress",
@@ -1163,7 +1163,7 @@ class TokenManagerTest : RxTest() {
             tokenId = "2"
         )
         val token3 = ERCToken(
-            XDAI,
+            GNO,
             "token3",
             address = collectionAddress,
             accountAddress = "accountAddress",
@@ -1171,7 +1171,7 @@ class TokenManagerTest : RxTest() {
             tokenId = "3"
         )
         val token4 = ERCToken(
-            XDAI,
+            GNO,
             "erc1155",
             address = collectionAddress,
             accountAddress = "accountAddress",
@@ -1179,7 +1179,7 @@ class TokenManagerTest : RxTest() {
             tokenId = "4"
         )
         val token5 = ERCToken(
-            XDAI,
+            GNO,
             "erc1155",
             address = collectionAddress,
             accountAddress = "accountAddress",
@@ -1188,11 +1188,11 @@ class TokenManagerTest : RxTest() {
         )
         val localTokens = tokenManager.sortTokensByChainId(listOf(token1, token2, token3, token4, token5))
         whenever(walletManager.getWalletConfig()).thenReturn(WalletConfig(1, erc20Tokens = localTokens))
-        val account = Account(1, chainId = XDAI, address = "accountAddress", privateKey = "privateKey")
-        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[0] shouldBeEqualTo token1
-        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[1] shouldBeEqualTo token2
-        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[2] shouldBeEqualTo token3
-        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[3] shouldBeEqualTo token4
-        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[4] shouldBeEqualTo token5
+        val account = Account(1, chainId = GNO, address = "accountAddress", privateKey = "privateKey")
+        tokenManager.getNftsPerAccount(GNO, account.address, collectionAddress)[0] shouldBeEqualTo token1
+        tokenManager.getNftsPerAccount(GNO, account.address, collectionAddress)[1] shouldBeEqualTo token2
+        tokenManager.getNftsPerAccount(GNO, account.address, collectionAddress)[2] shouldBeEqualTo token3
+        tokenManager.getNftsPerAccount(GNO, account.address, collectionAddress)[3] shouldBeEqualTo token4
+        tokenManager.getNftsPerAccount(GNO, account.address, collectionAddress)[4] shouldBeEqualTo token5
     }
 }

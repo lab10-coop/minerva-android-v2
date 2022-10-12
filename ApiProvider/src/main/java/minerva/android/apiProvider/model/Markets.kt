@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class Markets(
     @SerializedName(MarketIds.ETHEREUM)
     val ethFiatPrice: FiatPrice? = null,
-    @SerializedName(MarketIds.XDAI)
+    @SerializedName(MarketIds.GNO)
     val daiFiatPrice: FiatPrice? = null,
     @SerializedName(MarketIds.POA_NETWORK)
     val poaFiatPrice: FiatPrice? = null,

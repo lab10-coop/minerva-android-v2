@@ -91,7 +91,7 @@ class RampViewModel(
         const val DEFAULT_CRYPTO_POSITION = 0
         private const val ETH_RAMP_SYMBOL = "ETH"
         private const val DAI_RAMP_SYMBOL = "DAI"
-        private const val XDAI_RAMP_SYMBOL = "xDAI"
+        private const val GNO_RAMP_SYMBOL = "xDAI"
         private const val USDC_RAMP_SYMBOL = "USDC"
         private const val MATIC_RAMP_SYMBOL = "MATIC"
         private const val USDT_RAMP_SYMBOL = "USDT"
@@ -121,10 +121,10 @@ class RampViewModel(
                     getNetworkName(ChainId.MATIC)
                 ),
                 RampCrypto(
-                    ChainId.XDAI,
-                    XDAI_RAMP_SYMBOL,
+                    ChainId.GNO,
+                    GNO_RAMP_SYMBOL,
                     R.drawable.ic_gnosis_chain_token,
-                    getNetworkName(ChainId.XDAI)
+                    getNetworkName(ChainId.GNO)
                 ),
                 RampCrypto(
                     ChainId.BSC,

@@ -296,6 +296,22 @@
     }
   },
   {
+    "name": "Chiado",
+    "isActive": true,
+    "token": "xDAI",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rpc.chiadochain.net",
+    "wsRpc": "",
+    "gasPriceOracle": "https://rpc.chiadochain.net",
+    "gasPrice": "20000000000",
+    "minGasPrice": "1000000000",
+    "tokens": [],
+    "color": "#04795B",
+    "testNet": true,
+    "chainId": 10200,
+    "explore": "https://blockscout.chiadochain.net"
+  },
+  {
     "name": "Mumbai",
     "isActive": true,
     "token": "tMATIC",
