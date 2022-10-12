@@ -24,7 +24,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
-import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO_CHAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
@@ -42,7 +43,8 @@ private fun getMainIcon(chainId: Int): Int =
     when (chainId) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma
         ETH_MAIN -> R.drawable.ic_ethereum
-        XDAI -> R.drawable.ic_gnosis_chain
+        GNO -> R.drawable.ic_gnosis_chain
+        GNO_CHAI -> R.drawable.ic_gnosis_chiado
         POA_CORE -> R.drawable.ic_poa_core
         ATS_TAU -> R.drawable.ic_artis
         POA_SKL -> R.drawable.ic_poa
@@ -69,7 +71,8 @@ fun getMainTokenIconRes(chainId: Int): Int =
     when (chainId) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma_token
         ETH_MAIN -> R.drawable.ic_ethereum_token
-        XDAI -> R.drawable.ic_gnosis_chain_token
+        GNO -> R.drawable.ic_gnosis_chain_token
+        GNO_CHAI -> R.drawable.ic_gnosis_chiado_token
         POA_CORE -> R.drawable.ic_poa_token
         ATS_TAU -> R.drawable.ic_artis_token
         ETH_KOV, ETH_RIN, ETH_ROP, ETH_GOR, ETH_SEP -> R.drawable.ic_ethereum_token_test

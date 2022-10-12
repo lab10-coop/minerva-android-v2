@@ -5,7 +5,7 @@ import minerva.android.apiProvider.model.Markets
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
-import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinCryptoBalance
 import minerva.android.walletmanager.model.network.Network
@@ -18,9 +18,9 @@ import kotlin.test.assertEquals
 class MarketUtilsTest {
 
     private val poaNetwork = Network(testNet = false, chainId = POA_CORE, httpRpc = "some")
-    private val xdaiNetwork = Network(testNet = false, chainId = XDAI, httpRpc = "some")
+    private val xdaiNetwork = Network(testNet = false, chainId = GNO, httpRpc = "some")
 
-    private val xdaiTestNetwork = Network(testNet = true, chainId = XDAI)
+    private val xdaiTestNetwork = Network(testNet = true, chainId = GNO)
     private val markets = Markets(poaFiatPrice = FiatPrice(eur = 0.5), daiFiatPrice = FiatPrice(2.0))
 
     @Test

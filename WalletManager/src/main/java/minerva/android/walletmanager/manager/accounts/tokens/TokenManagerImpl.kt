@@ -6,7 +6,6 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
-import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
@@ -25,7 +24,6 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.BuildConfig.*
-import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotERC1155Throwable
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -58,7 +56,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
-import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO_CHAI
 import minerva.android.walletmanager.model.mappers.TokenDataToERCToken
 import minerva.android.walletmanager.model.mappers.TokenToAssetBalanceErrorMapper
 import minerva.android.walletmanager.model.mappers.TokensOwnedToERCToken
@@ -506,9 +505,9 @@ class TokenManagerImpl(
 
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
-            ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, BSC_TESTNET -> getTokensFromTx(account)
+            ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, GNO_CHAI, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
-            XDAI, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C -> getTokensOwned(account)
+            GNO, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
@@ -790,7 +789,8 @@ class TokenManagerImpl(
             ATS_SIGMA -> ARTIS_SIGMA_TOKEN_BALANCE_URL
             POA_SKL -> POA_SOKOL_TOKEN_BALANCE_URL
             POA_CORE -> POA_CORE_TOKEN_BALANCE_URL
-            XDAI -> X_DAI_TOKEN_BALANCE_URL
+            GNO -> GNO_TOKEN_BALANCE_URL
+            GNO_CHAI -> GNO_CHAI_TOKEN_BALANCE_URL
             LUKSO_14 -> LUKSO_TOKEN_BALANCE_URL
             MATIC -> POLYGON_TOKEN_BALANCE_URL
             BSC -> BINANCE_SMART_CHAIN_MAINNET_TOKEN_BALANCE_URL
@@ -801,7 +801,7 @@ class TokenManagerImpl(
     @VisibleForTesting
     fun getTokensOwnedURL(chainId: Int) =
         when (chainId) {
-            XDAI -> X_DAI_TOKENS_OWNED_URL
+            GNO -> GNO_TOKENS_OWNED_URL
             MATIC -> POLYGON_TOKENS_OWNED_URL
             ATS_SIGMA -> ARTIS_SIGMA_TOKENS_OWNED_URL
             BSC -> BSC_TOKENS_OWNED_URL
