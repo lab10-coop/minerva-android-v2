@@ -15,7 +15,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
-import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinCryptoBalance
 import minerva.android.walletmanager.model.transactions.Balance
@@ -62,7 +62,7 @@ object MarketUtils {
             ETH_MAIN -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
             ARB_ONE -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
             OPT -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
-            XDAI -> markets.daiFiatPrice?.getRate(currentFiatCurrency)
+            GNO -> markets.daiFiatPrice?.getRate(currentFiatCurrency)
             MATIC -> markets.maticFiatPrice?.getRate(currentFiatCurrency)
             BSC -> markets.bscFiatPrice?.getRate(currentFiatCurrency)
             RSK_MAIN -> markets.rskFiatPrice?.getRate(currentFiatCurrency)
@@ -75,7 +75,7 @@ object MarketUtils {
     fun getTokenGeckoMarketId(chainId: Int): String =
         when (chainId) {
             ETH_MAIN -> MarketIds.ETHEREUM
-            XDAI -> MarketIds.XDAI
+            GNO -> MarketIds.GNO
             MATIC -> MarketIds.POLYGON
             BSC -> MarketIds.BSC_TOKEN
             RSK_MAIN -> MarketIds.RSK
@@ -91,7 +91,7 @@ object MarketUtils {
         when (chainId) {
             ETH_MAIN -> MarketIds.ETHEREUM
             POA_CORE -> MarketIds.POA_NETWORK
-            XDAI -> MarketIds.XDAI
+            GNO -> MarketIds.GNO
             MATIC -> MarketIds.MATIC
             BSC -> MarketIds.BSC_COIN
             RSK_MAIN -> MarketIds.RSK

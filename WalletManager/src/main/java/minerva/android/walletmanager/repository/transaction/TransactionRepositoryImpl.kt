@@ -369,7 +369,7 @@ class TransactionRepositoryImpl(
                 ChainId.ARB_ONE -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 ChainId.OPT -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 ChainId.POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
-                ChainId.XDAI -> fetchCoinRate(MarketIds.XDAI).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
+                ChainId.GNO -> fetchCoinRate(MarketIds.GNO).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
                 ChainId.MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
                 ChainId.BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
                 ChainId.CELO -> fetchCoinRate(MarketIds.CELO).map { markets -> markets.celoFiatPrice?.getRate(currentFiat) }

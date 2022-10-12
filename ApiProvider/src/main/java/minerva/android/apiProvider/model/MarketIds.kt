@@ -18,7 +18,7 @@ annotation class MarketIds {
 
         // both: coin and asset_platform
         const val ETHEREUM = "ethereum"
-        const val XDAI = "xdai"
+        const val GNO = "xdai"
         const val RSK = "rootstock"
         const val CELO = "celo"
     }

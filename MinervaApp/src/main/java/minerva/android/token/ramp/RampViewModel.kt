@@ -109,11 +109,11 @@ class RampViewModel(
                     getNetworkName(ChainId.MATIC)
                 ),
                 RampCrypto(
-                    ChainId.XDAI,
+                    ChainId.GNO,
                     "xDAI",
                     "XDAI_XDAI",
                     R.drawable.ic_gnosis_chain_token,
-                    getNetworkName(ChainId.XDAI)
+                    getNetworkName(ChainId.GNO)
                 ),
                 RampCrypto(
                     ChainId.BSC,
