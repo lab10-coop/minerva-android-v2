@@ -62,4 +62,7 @@ data class Account(
 
     fun getTokenIndex(tokenAddress: String) =
         accountTokens.filter { accountToken -> accountToken.token.type.isERC20() }.indexOf(getToken(tokenAddress))
+
+    fun hasSuperfluidSupport() =
+        network.superfluid != null
 }

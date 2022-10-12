@@ -70,7 +70,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
     }
 
     private fun isStreamableToken(accountToken: AccountToken): Boolean =
-        accountToken.token.isStreamActive && accountToken.token.consNetFlow != BigInteger.ZERO
+        accountToken.token.type.isSuperToken() && accountToken.token.consNetFlow != BigInteger.ZERO
 
     private fun isInitStream(accountToken: AccountToken): Boolean =
         accountToken.isInitStream && accountToken.token.consNetFlow != BigInteger.ZERO

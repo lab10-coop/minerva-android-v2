@@ -163,11 +163,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success when tagged tokens are not empty test`() {
-        whenever(transactionRepository.getTaggedTokensUpdate())
+        whenever(transactionRepository.getTokensUpdate())
             .thenReturn(Flowable.just(listOf(ERCToken(1, "token", type = TokenType.ERC20))))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
-        whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
+        whenever(transactionRepository.updateTokens()).thenReturn(Completable.complete())
         viewModel.refreshTokensBalances()
         viewModel.balanceStateLiveData.observeForever(balanceObserver)
         balanceCaptor.run {
@@ -177,7 +177,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success when tagged tokens are empty test`() {
-        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(emptyList()))
+        whenever(transactionRepository.getTokensUpdate()).thenReturn(Flowable.just(emptyList()))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
         viewModel.refreshTokensBalances()
@@ -189,13 +189,13 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success when tagged tokens are not empty and check tokens visibility test`() {
-        whenever(transactionRepository.getTaggedTokensUpdate())
+        whenever(transactionRepository.getTokensUpdate())
             .thenReturn(
                 Flowable.just(listOf(ERCToken(1, "name1", address = "tokenAddress1", tag = "tag", type = TokenType.ERC20)))
             )
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
-        whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
+        whenever(transactionRepository.updateTokens()).thenReturn(Completable.complete())
 
         whenever(accountManager.activeAccounts).thenReturn(
             listOf(
@@ -229,7 +229,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.getTokenBalance()).thenReturn(Flowable.error(error))
-        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(
+        whenever(transactionRepository.getTokensUpdate()).thenReturn(
             Flowable.just(
                 listOf(
                     ERCToken(
@@ -255,7 +255,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Single.just(false),
             Single.error(Throwable("Refresh tokens list error"))
         )
-        whenever(transactionRepository.getTaggedTokensUpdate())
+        whenever(transactionRepository.getTokensUpdate())
             .thenReturn(Flowable.just(listOf(ERCToken(1, "token", type = TokenType.ERC20))))
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
