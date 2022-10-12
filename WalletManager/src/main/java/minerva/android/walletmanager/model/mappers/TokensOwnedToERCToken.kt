@@ -6,9 +6,11 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.ContentType
 import minerva.android.walletmanager.model.NftContent
 import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenTag
 import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.token.Tokens
 import minerva.android.walletmanager.utils.parseIPFSContentUrl
+import timber.log.Timber
 
 object TokensOwnedToERCToken {
 
@@ -21,6 +23,7 @@ object TokensOwnedToERCToken {
             address = token.contractAddress,
             decimals = token.decimals,
             accountAddress = accountAddress,
+            tag = mapToTag(tokenType),
             type = tokenType,
             collectionName = if (tokenType.isNft()) token.name else null,
             tokenId = if (tokenType.isNft()) token.id else null
@@ -29,9 +32,15 @@ object TokensOwnedToERCToken {
         }
     }
 
+    private fun mapToTag(type: TokenType): String = when {
+        type == TokenType.SUPER_TOKEN -> TokenTag.SUPER_TOKEN.name
+        else -> String.Empty
+    }
+
     private fun mapToTokenType(types: List<String>): TokenType = when {
         types.contains(Tokens.ERC_1155.type) -> TokenType.ERC1155
         types.contains(Tokens.ERC_721.type) -> TokenType.ERC721
+        types.contains(Tokens.SUPER_TOKEN.type) -> TokenType.SUPER_TOKEN
         types.contains(Tokens.ERC_20.type) -> TokenType.ERC20
         else -> TokenType.INVALID
     }

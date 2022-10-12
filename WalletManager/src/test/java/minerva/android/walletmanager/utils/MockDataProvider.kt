@@ -50,7 +50,8 @@ object MockDataProvider {
             tokens = listOf(
                 ERCToken(ETH_RIN, "CookieTokenDETH", "Cookie", "0xC00k1e", "13", type = TokenType.ERC20),
                 ERCToken(ETH_RIN, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13", type = TokenType.ERC20)
-            )
+            ),
+            superfluid = SuperFluid("host", "netFlow")
         ),
         Network(chainId = ATS_SIGMA, httpRpc = "address", testNet = true),
         Network(chainId = POA_CORE, httpRpc = "address", testNet = true),

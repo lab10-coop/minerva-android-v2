@@ -37,7 +37,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Balance
@@ -50,6 +49,7 @@ import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
+import java.net.ConnectException
 import java.util.concurrent.TimeUnit
 
 class AccountsViewModel(
@@ -322,14 +322,14 @@ class AccountsViewModel(
     fun refreshTokensBalances(isAutoDiscoveryRefresh: Boolean = false) {
         streamingDisposable = CompositeDisposable()
         tokenBalancesRefreshed = false
-        transactionRepository.getTaggedTokensUpdate()
-            .filter { taggedTokens -> taggedTokens.isNotEmpty() }
+        transactionRepository.getTokensUpdate()
+            .filter { tokens -> tokens.isNotEmpty() }
             .doOnNext {
                 launchDisposable {
                     transactionRepository.getTokenBalance()
                         .flatMap { asset -> updateTokenAndGetIndex(asset) }
                         .filter { index -> index != Int.InvalidIndex }
-                        .doOnComplete { updateNewTaggedTokens(isAutoDiscoveryRefresh) }
+                        .doOnComplete { updateNewTokens(isAutoDiscoveryRefresh) }
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeBy(
@@ -344,7 +344,7 @@ class AccountsViewModel(
                             onError = { error ->
                                 logError("Refresh tokens error: ${getError(error)}")
                                 _errorLiveData.value = Event(RefreshBalanceError)
-                                updateNewTaggedTokens(isAutoDiscoveryRefresh)
+                                updateNewTokens(isAutoDiscoveryRefresh)
                                 _balanceStateLiveData.value = TokenBalanceCompleted
                             }
                         )
@@ -358,69 +358,63 @@ class AccountsViewModel(
         else -> Flowable.just(Int.InvalidIndex)
     }
 
-    private fun updateNewTaggedTokens(isAutoDiscoveryRefresh: Boolean) {
+    private fun updateNewTokens(isAutoDiscoveryRefresh: Boolean) {
         launchDisposable {
-            transactionRepository.updateTaggedTokens()
+            transactionRepository.updateTokens()
                 .subscribeOn(Schedulers.io())
                 .doOnTerminate {
                     if (!isAutoDiscoveryRefresh) {
                         getSuperTokenStreamInitBalance()
                     }
                 }
-                .subscribeBy(onError = { error -> logger.logToFirebase("Saving tagged tokens error: ${error.message}") })
+                .subscribeBy(onError = { error -> logger.logToFirebase("Saving tokens error: ${error.message}") })
         }
     }
 
     private fun getSuperTokenStreamInitBalance() {
-        if (transactionRepository.isSuperTokenStreamAvailable) {
-            launchDisposable {
-                transactionRepository.getSuperTokenStreamInitBalance()
-                    .flatMap { asset -> updateTokenAndGetIndex(asset) }
-                    .filter { index -> index != Int.InvalidIndex }
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = { index ->
-                            _balanceStateLiveData.value = TokenBalanceUpdate(index)
-                        },
-                        onError = { error -> logger.logToFirebase("SuperToken init balance error: $error") },
-                        onComplete = { handleSuperTokenStreams() }
-                    )
-            }
+        launchDisposable {
+            transactionRepository.getSuperTokenStreamInitBalance()
+                .flatMap { asset -> updateTokenAndGetIndex(asset) }
+                .filter { index -> index != Int.InvalidIndex }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = { index ->
+                        _balanceStateLiveData.value = TokenBalanceUpdate(index)
+                    },
+                    onError = { error ->
+                        Timber.e("SuperToken init balance error: ${error.message} ${error.printStackTrace()}")
+                        logger.logToFirebase("SuperToken init balance error: ${error.message}") },
+                    onComplete = { handleSuperTokenStreams() }
+                )
         }
     }
 
     private fun handleSuperTokenStreams() {
-        val activeSuperTokenStreams: MutableList<ActiveSuperToken> =
-            transactionRepository.activeSuperTokenStreams
-
-        val isActiveSuperTokenVisible: Boolean =
-            activeSuperTokenStreams.any { activeSuperToken ->
-                tokenVisibilitySettings.getTokenVisibility(
-                    activeSuperToken.accountAddress,
-                    activeSuperToken.address
-                ) ?: false
+        transactionRepository.getActiveAccountsWithSuperfluidSupport()
+            .forEach {
+                activeAccount -> startSuperTokenStreaming(activeAccount.chainId)
             }
-
-        if (isActiveSuperTokenVisible) {
-            activeSuperTokenStreams
-                .distinctBy { activeSuperToken -> activeSuperToken.chainId }
-                .forEach { activeSuperToken ->
-                    startSuperTokenStreaming(activeSuperToken.chainId)
-                }
-        }
     }
 
     private fun startSuperTokenStreaming(chainId: Int) {
-        transactionRepository.startSuperTokenStreaming(chainId)
-            .flatMap { asset -> updateTokenAndGetIndex(asset) }
-            .filter { index -> index != Int.InvalidIndex }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onNext = { index -> _balanceStateLiveData.value = TokenBalanceUpdate(index) },
-                onError = { error -> logger.logToFirebase("Updating stream error: $error") }
-            ).addTo(streamingDisposable)
+        try {
+            transactionRepository.startSuperTokenStreaming(chainId)
+                .flatMap { asset -> updateTokenAndGetIndex(asset) }
+                .filter { index -> index != Int.InvalidIndex }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = { index -> _balanceStateLiveData.value = TokenBalanceUpdate(index) },
+                    onError = { error ->
+                        logger.logToFirebase("Updating stream error: $error")
+                        Timber.e("Updating stream error: $error")
+                    }
+                ).addTo(streamingDisposable)
+        } catch (error: ConnectException) {
+            logger.logToFirebase("StartSuperTokenStreaming: Failed to connect to WebSocket: ${error.message} ${error.printStackTrace()}")
+            Timber.e("StartSuperTokenStreaming: Failed to connect to WebSocket: ${error.message} ${error.printStackTrace()}")
+        }
     }
 
     private fun updateTokenAndReturnIndex(balance: AssetBalance): Flowable<Int> {
@@ -576,7 +570,7 @@ class AccountsViewModel(
             return insertTokenBalance(balance, balance.accountAddress)
                 .toSingleDefault(index)
                 .map { id ->
-                    if (balance.accountToken.token.isStreamActive) {
+                    if (balance.accountToken.token.type.isSuperToken()) {
                         updateInitSuperTokenStreamBalance(balance, balance.accountToken)
                     }
                     id
@@ -642,7 +636,7 @@ class AccountsViewModel(
         accountToken: AccountToken,
         index: Int
     ): Flowable<Int> =
-        if (balance.accountToken.token.isStreamActive) {
+        if (balance.accountToken.token.type.isSuperToken()) {
             Flowable.just(updateSuperTokenStreamAndReturnIndex(accountToken, balance, index))
         } else {
             with(accountToken) {
@@ -671,7 +665,6 @@ class AccountsViewModel(
         )
 
     fun stopStreaming() {
-        transactionRepository.disconnectFromSuperTokenStreaming()
         if (::streamingDisposable.isInitialized) {
             streamingDisposable.dispose()
         }
