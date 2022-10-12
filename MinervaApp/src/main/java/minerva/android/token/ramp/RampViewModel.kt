@@ -145,13 +145,20 @@ class RampViewModel(
                     getNetworkName(ChainId.ARB_ONE)
                 ),
                 RampCrypto(
+                    ChainId.OPT,
+                    "ETH",
+                    "OPTIMISM_ETH",
+                    R.drawable.ic_ethereum_l2,
+                    getNetworkName(ChainId.OPT)
+                ),
+
+                RampCrypto(
                     ChainId.ETH_MAIN,
                     "DAI",
                     "ETH_DAI",
                     R.drawable.ic_dai_token,
                     getNetworkName(ChainId.ETH_MAIN)
                 ),
-
                 RampCrypto(
                     ChainId.ETH_MAIN,
                     "USDT",
@@ -173,6 +180,7 @@ class RampViewModel(
                     R.drawable.ic_dai_token,
                     getNetworkName(ChainId.MATIC)
                 ),
+
                 RampCrypto(
                     ChainId.MATIC,
                     "USDC",
@@ -180,7 +188,6 @@ class RampViewModel(
                     R.drawable.ic_usdc_token,
                     getNetworkName(ChainId.MATIC)
                 ),
-
                 RampCrypto(
                     ChainId.MATIC,
                     "ETH",
@@ -189,12 +196,20 @@ class RampViewModel(
                     getNetworkName(ChainId.MATIC)
                 ),
                 RampCrypto(
+                    ChainId.OPT,
+                    "DAI",
+                    "OPTIMISM_DAI",
+                    R.drawable.ic_dai_token,
+                    getNetworkName(ChainId.OPT)
+                ),
+                RampCrypto(
                     ChainId.CELO,
                     "cUSD",
                     "CELO_CUSD",
                     R.drawable.ic_celo_dollar,
                     getNetworkName(ChainId.CELO)
                 ),
+
                 RampCrypto(
                     ChainId.CELO,
                     "cEUR",
