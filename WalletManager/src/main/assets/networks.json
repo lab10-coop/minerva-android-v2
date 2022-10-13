@@ -306,7 +306,7 @@
     "gasPrice": "20000000000",
     "minGasPrice": "1000000000",
     "tokens": [],
-    "color": "#04795B",
+    "color": "#666666",
     "testNet": true,
     "chainId": 10200,
     "explore": "https://blockscout.chiadochain.net"
