@@ -29,7 +29,7 @@
     "color": "#04795B",
     "testNet": false,
     "chainId": 100,
-    "explore": "https://blockscout.com/poa/xdai/",
+    "explore": "https://gnosisscan.io/",
     "superfluid": {
       "host": "0x2dFe937cD98Ab92e59cF3139138f18c823a4efE7",
       "cfav1": "0xEbdA4ceF883A7B12c4E669Ebc58927FBa8447C7D"
