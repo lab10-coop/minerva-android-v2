@@ -35,16 +35,16 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
         }
     }
 
-    private fun checkMnemonicWords(mnemonic: String) {
-        if (masterSeedRepository.areMnemonicWordsValid(mnemonic)) {
-            restoreSeedWithMasterKeys(mnemonic)
+    private fun checkMnemonicWords(mnemonicAndPassword: String) {
+        if (masterSeedRepository.areMnemonicWordsValid(mnemonicAndPassword)) {
+            restoreSeedWithMasterKeys(mnemonicAndPassword)
         } else {
             _restoreWalletState.value = InvalidMnemonicWords
         }
     }
 
-    private fun restoreSeedWithMasterKeys(mnemonic: String) {
-        when (val masterSeed = masterSeedRepository.restoreMasterSeed(mnemonic)) {
+    private fun restoreSeedWithMasterKeys(mnemonicAndPassword: String) {
+        when (val masterSeed = masterSeedRepository.restoreMasterSeed(mnemonicAndPassword)) {
             is MasterSeed -> {
                 this.masterSeed = masterSeed
                 _restoreWalletState.value = ValidMnemonic

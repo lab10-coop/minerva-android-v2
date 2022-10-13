@@ -61,7 +61,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for identities test`() {
-        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, didPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", "", 1, didPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x94c87a5f423dbe7bbb085a963142cfd12e6c001e"
         }
@@ -69,7 +69,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for test nets test`() {
-        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, testNetPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", "", 1, testNetPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x4ecc9dbd0494b32bbd77c87f46da92ff5f0c2258"
         }
@@ -77,7 +77,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for main nets test`() {
-        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, mainNetPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", "", 1, mainNetPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x1e7cfbf30f2ae071806a78135f0c1280dece8fda"
         }
@@ -99,6 +99,16 @@ class CryptographyRepositoryTest {
     }
 
     @Test
+    fun `restore master seed and derive keys for main nets test`() {
+        val result =
+            repository.restoreMasterSeed("hamster change resource act wife lamp tower quick dilemma clay receive attract")
+        val test = repository.calculateDerivedKeysSingle((result as SeedWithKeys).seed, "", 1, mainNetPath).test()
+        test.assertValue {
+            it.index == 1 && it.address == "0x1e7cfbf30f2ae071806a78135f0c1280dece8fda"
+        }
+    }
+
+    @Test
     fun `restore master seed error test`() {
         val result =
             repository.restoreMasterSeed("dasdasd change resource act wife lamp tower quick dilemma clay receive attract")
@@ -113,6 +123,17 @@ class CryptographyRepositoryTest {
             repository.restoreMasterSeed("winter wear license spatial history oxygen spell leg wealth stay tornado olympic supersecretpassword")
         (result as SeedWithKeys).apply {
             seed shouldBeEqualTo "fc1f0e04e846c33cb44bfaf83a9f95cd"
+        }
+    }
+
+    @Test
+    fun `restore master seed with password and derive keys for main nets test`() {
+        val result =
+            repository.restoreMasterSeed("mimic taste discover must column hurdle come pig hip decade exhaust vocal superdupersecretpw")
+        val seedWithKeys = (result as SeedWithKeys);
+        val test = repository.calculateDerivedKeysSingle(seedWithKeys.seed, seedWithKeys.password, 0, mainNetPath).test()
+        test.assertValue {
+            it.index == 0 && it.address == "0x6191a349f4bbb4d00b99f190e96deda9e2207b7d"
         }
     }
 

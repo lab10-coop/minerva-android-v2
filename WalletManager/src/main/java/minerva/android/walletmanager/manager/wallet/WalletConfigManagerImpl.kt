@@ -355,7 +355,12 @@ class WalletConfigManagerImpl(
         return Observable.fromIterable(identitiesResponse)
             .filter { identityPayload -> !identityPayload.isDeleted }
             .flatMapSingle { identityPayload ->
-                cryptographyRepository.calculateDerivedKeysSingle(masterSeed.seed, identityPayload.index, DID_PATH)
+                cryptographyRepository.calculateDerivedKeysSingle(
+                    masterSeed.seed,
+                    masterSeed.password,
+                    identityPayload.index,
+                    DID_PATH
+                )
             }
             .toList()
             .map { keys -> completeIdentitiesKeys(payload, keys) }
@@ -365,6 +370,7 @@ class WalletConfigManagerImpl(
                 .flatMapSingle {
                     cryptographyRepository.calculateDerivedKeysSingle(
                         masterSeed.seed,
+                        masterSeed.password,
                         accountsResponse[it].index,
                         getDerivationPath(accountsResponse, it),
                         isTestNet(accountsResponse, it)

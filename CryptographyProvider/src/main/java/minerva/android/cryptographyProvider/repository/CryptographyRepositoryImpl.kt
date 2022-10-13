@@ -39,7 +39,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
             SecureRandom().nextBytes(this)
             val seed = toNoPrefixHexString()
             val mnemonic = entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
-            MnemonicWords(mnemonic).toKey(MASTER_KEYS_PATH).keyPair.apply {
+            MnemonicWords(mnemonic).toKey(MASTER_KEYS_PATH, "").keyPair.apply {
                 return Single.just(Triple(seed, getPublicKey(), getPrivateKey()))
             }
         }
@@ -50,19 +50,21 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
 
     override fun calculateDerivedKeysSingle(
         seed: String,
+        password: String,
         index: Int,
         derivationPathPrefix: String,
         isTestNet: Boolean
-    ): Single<DerivedKeys> = Single.just(calculateDerivedKeys(seed, index, derivationPathPrefix, isTestNet))
+    ): Single<DerivedKeys> = Single.just(calculateDerivedKeys(seed, password, index, derivationPathPrefix, isTestNet))
 
     override fun calculateDerivedKeys(
         seed: String,
+        password: String,
         index: Int,
         derivationPathPrefix: String,
         isTestNet: Boolean
     ): DerivedKeys {
         val derivationPath = "${derivationPathPrefix}$index"
-        val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
+        val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath, password).keyPair
         return DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
     }
 
@@ -77,7 +79,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
             }
             val seed: String = mnemonic.mnemonicToEntropy(WORDLIST_ENGLISH).toNoPrefixHexString()
             val keys: ECKeyPair = mnemonic.toKey(MASTER_KEYS_PATH, password).keyPair
-            SeedWithKeys(seed, keys.getPublicKey(), keys.getPrivateKey())
+            SeedWithKeys(seed, password, keys.getPublicKey(), keys.getPrivateKey())
         } catch (exception: Exception) {
             Timber.e(exception)
             SeedError(exception)
@@ -115,8 +117,8 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
 
     private fun getDIDKey(key: String) = "$DID_PREFIX${KPSigner(key).getAddress()}"
 
-    override fun areMnemonicWordsValid(mnemonic: String): Boolean =
-        mutableListOf<String>().apply { collectInvalidWords(StringTokenizer(mnemonic), this) }.isEmpty()
+    override fun areMnemonicWordsValid(mnemonicAndPassword: String): Boolean =
+        mutableListOf<String>().apply { collectInvalidWords(StringTokenizer(mnemonicAndPassword), this) }.isEmpty()
 
     private fun collectInvalidWords(phrase: StringTokenizer, list: MutableList<String>) {
         val multipleOfThree = phrase.countTokens() % 3 <= 0

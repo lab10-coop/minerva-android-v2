@@ -4,6 +4,7 @@ interface Seed
 
 data class SeedWithKeys(
     val seed: String,
+    val password: String,
     val publicKey: String,
     val privateKey: String
 ) : Seed

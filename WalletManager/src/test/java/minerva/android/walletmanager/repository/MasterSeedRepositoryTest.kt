@@ -51,10 +51,11 @@ class MasterSeedRepositoryTest : RxTest() {
 
     @Test
     fun `restore master seed test`() {
-        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn SeedWithKeys("seed", "key2", "key3")
+        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn SeedWithKeys("seed", "pw", "key2", "key3")
         val result = repository.restoreMasterSeed("mnemonic")
         (result as MasterSeed).apply {
             seed == "seed" &&
+                    password == "pw" &&
                     publicKey == "key2" &&
                     privateKey == "key3"
         }
