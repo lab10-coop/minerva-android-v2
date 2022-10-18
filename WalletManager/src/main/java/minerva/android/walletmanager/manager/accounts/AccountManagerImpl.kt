@@ -127,7 +127,9 @@ class AccountManagerImpl(
                 val keys = cryptographyRepository.calculateDerivedKeys(
                     walletManager.masterSeed.seed,
                     walletManager.masterSeed.password,
-                    index, derivationPath, !areMainNetworksEnabled
+                    index,
+                    derivationPath,
+                    !areMainNetworksEnabled
                 )
                 newAccounts.add(
                     Account(
@@ -150,7 +152,9 @@ class AccountManagerImpl(
             cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
                 walletManager.masterSeed.password,
-                index, derivationPath, network.testNet
+                index,
+                derivationPath,
+                network.testNet
             ).map { keys ->
                 val newAccount = Account(
                     index,

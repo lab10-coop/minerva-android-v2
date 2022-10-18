@@ -23,13 +23,13 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
     val restoreWalletState: LiveData<RestoreWalletState> get() = _restoreWalletState
 
     fun validateMnemonic(content: CharSequence?) {
-        val mnemonic: String = content.toString()
-        val mnemonicSize: Int = StringTokenizer(mnemonic, String.Space).countTokens()
+        val mnemonicAndPassword: String = content.toString()
+        val mnemonicSize: Int = StringTokenizer(mnemonicAndPassword, String.Space).countTokens()
         val isMnemonicSizeValid: Boolean =
             (mnemonicSize.rem(DIVIDER) == 0 || mnemonicSize.dec().rem(DIVIDER) == 0 ) &&
                     (mnemonicSize in MIN_MNEMONIC_SIZE..MAX_MNEMONIC_SIZE)
         if (isMnemonicSizeValid) {
-            checkMnemonicWords(mnemonic)
+            checkMnemonicWords(mnemonicAndPassword)
         } else {
             _restoreWalletState.value = InvalidMnemonicLength
         }
