@@ -343,7 +343,6 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private fun closeToBackground() {
         clearAllDialogs()
-        moveTaskToBack(true)
     }
 
     companion object {

@@ -135,7 +135,11 @@ abstract class BaseWalletConnectScannerViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onComplete = { closeScanner(isMobileWalletConnect) },
+                        onComplete = {
+                            //set default value for showing empty list of network in future
+                            requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                            closeScanner(isMobileWalletConnect)
+                        },
                         onError = { setLiveDataError(it) }
                     )
             }
