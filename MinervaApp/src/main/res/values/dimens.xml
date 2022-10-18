@@ -14,6 +14,7 @@
     <dimen name="margin_average">14dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
+    <dimen name="margin_ysmall">10dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
     <dimen name="margin_xxsmall">4dp</dimen>
     <dimen name="margin_xxxsmall">2dp</dimen>

@@ -120,46 +120,53 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         currentDAppSessionChainId: Int = Int.InvalidId, //current chainId connection (or -1 if connection wasn't installed)
         onNetworkSelected: (Int) -> Unit)
     = with(binding) {
-            setNetworkHeader()
-            showWaring()
-            networkHeader.network.gone()
-            val networkAdapter = DappNetworksSpinnerAdapter(
-                context,
-                R.layout.spinner_network_wallet_connect,
-                availableNetworks
-            ).apply {
-                setDropDownViewResource(R.layout.spinner_network_wallet_connect)
-            }
-            //get current DApp session (item) index from availableNetworks (for set this network(account) like selected in spinner)
-            val networkItemIndex: Int =  if (Int.InvalidId == currentDAppSessionChainId) {
-                Int.FirstIndex
-            } else {
-                var indexByChainId: Int = Int.FirstIndex //DApp session default value
-                //trying to find index in availableNetworks by chainId
-                availableNetworks.forEachIndexed { index, networkDataSpinnerItem ->
-                    if (currentDAppSessionChainId == networkDataSpinnerItem.chainId) {
-                        indexByChainId = index
-                    }
+        setNetworkHeader()
+        showWaring()
+        networkHeader.network.gone()
+        val networkAdapter = DappNetworksSpinnerAdapter(
+            context,
+            R.layout.spinner_network_wallet_connect,
+            availableNetworks
+        ).apply {
+            setDropDownViewResource(R.layout.spinner_network_wallet_connect)
+        }
+        //get current DApp session (item) index from availableNetworks (for set this network(account) like selected in spinner)
+        val networkItemIndex: Int =  if (Int.InvalidId == currentDAppSessionChainId) {
+            Int.FirstIndex
+        } else {
+            var indexByChainId: Int = Int.FirstIndex //DApp session default value
+            //trying to find index in availableNetworks by chainId
+            availableNetworks.forEachIndexed { index, networkDataSpinnerItem ->
+                if (currentDAppSessionChainId == networkDataSpinnerItem.chainId) {
+                    indexByChainId = index
                 }
-                indexByChainId
             }
-            updateNotDefinedNetworkWarning(networkAdapter.getItem(networkItemIndex), dialogType)
-            networkHeader.networkSpinner.apply {
-                visible()
-                addOnGlobalLayoutListener() {
-                    networkAdapter.selectedItemWidth = networkHeader.accountSpinner.width
+            indexByChainId
+        }
+        updateNotDefinedNetworkWarning(networkAdapter.getItem(networkItemIndex), dialogType)
+        networkHeader.networkSpinner.apply {
+            visible()
+            addOnGlobalLayoutListener() {
+                //the longest name length of network list
+                var longestNameLength = 0
+                val BASE_NAME_SIZE = 200
+                val SYMBOL_SIZE = 14
+                availableNetworks.forEach { network ->
+                    if (network.networkName.length > longestNameLength) longestNameLength = network.networkName.length
                 }
-                adapter = networkAdapter
-                prepareSpinner(R.drawable.warning_background, networkItemIndex) { position, view ->
-                    val selectedItem = networkAdapter.getItem(position)
-                    networkAdapter.selectedItemWidth = view?.width
-                    updateNotDefinedNetworkWarning(selectedItem, dialogType)
-                    if (selectedItem.isAccountAvailable) {
-                        onNetworkSelected(selectedItem.chainId)
-                    }
+                //set correct view width (for showing full name of network in dropdown menu)
+                networkAdapter.selectedItemWidth = BASE_NAME_SIZE + (longestNameLength * SYMBOL_SIZE)
+            }
+            adapter = networkAdapter
+            prepareSpinner(R.drawable.warning_background, networkItemIndex) { position, view ->
+                val selectedItem = networkAdapter.getItem(position)
+                updateNotDefinedNetworkWarning(selectedItem, dialogType)
+                if (selectedItem.isAccountAvailable) {
+                    onNetworkSelected(selectedItem.chainId)
                 }
             }
         }
+    }
 
     private fun DynamicWidthSpinner.prepareSpinner(backgroundResId: Int, selectionIndex: Int, onClick: (Int, View?) -> Unit) {
         setBackgroundResource(backgroundResId)
@@ -217,7 +224,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
 
 
     private fun getWarningText(network: BaseNetworkData, context: Context) =
-         if (network.name == String.Empty) context.getString(
+        if (network.name == String.Empty) context.getString(
             R.string.unsupported_network_id_message,
             *arrayOf(network.chainId)
         ) else context.getString(
