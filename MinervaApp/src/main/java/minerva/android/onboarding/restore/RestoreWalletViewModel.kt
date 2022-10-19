@@ -23,27 +23,28 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
     val restoreWalletState: LiveData<RestoreWalletState> get() = _restoreWalletState
 
     fun validateMnemonic(content: CharSequence?) {
-        val mnemonic: String = content.toString()
-        val mnemonicSize: Int = StringTokenizer(mnemonic, String.Space).countTokens()
+        val mnemonicAndPassword: String = content.toString()
+        val mnemonicSize: Int = StringTokenizer(mnemonicAndPassword, String.Space).countTokens()
         val isMnemonicSizeValid: Boolean =
-            mnemonicSize.rem(DIVIDER) == 0 && (mnemonicSize in MIN_MNEMONIC_SIZE..MAX_MNEMONIC_SIZE)
+            (mnemonicSize.rem(DIVIDER) == 0 || mnemonicSize.dec().rem(DIVIDER) == 0 ) &&
+                    (mnemonicSize in MIN_MNEMONIC_SIZE..MAX_MNEMONIC_SIZE)
         if (isMnemonicSizeValid) {
-            checkMnemonicWords(mnemonic)
+            checkMnemonicWords(mnemonicAndPassword)
         } else {
             _restoreWalletState.value = InvalidMnemonicLength
         }
     }
 
-    private fun checkMnemonicWords(mnemonic: String) {
-        if (masterSeedRepository.areMnemonicWordsValid(mnemonic)) {
-            restoreSeedWithMasterKeys(mnemonic)
+    private fun checkMnemonicWords(mnemonicAndPassword: String) {
+        if (masterSeedRepository.areMnemonicWordsValid(mnemonicAndPassword)) {
+            restoreSeedWithMasterKeys(mnemonicAndPassword)
         } else {
             _restoreWalletState.value = InvalidMnemonicWords
         }
     }
 
-    private fun restoreSeedWithMasterKeys(mnemonic: String) {
-        when (val masterSeed = masterSeedRepository.restoreMasterSeed(mnemonic)) {
+    private fun restoreSeedWithMasterKeys(mnemonicAndPassword: String) {
+        when (val masterSeed = masterSeedRepository.restoreMasterSeed(mnemonicAndPassword)) {
             is MasterSeed -> {
                 this.masterSeed = masterSeed
                 _restoreWalletState.value = ValidMnemonic
@@ -98,6 +99,6 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
     companion object {
         private const val DIVIDER = 3
         private const val MIN_MNEMONIC_SIZE = 12
-        private const val MAX_MNEMONIC_SIZE = 24
+        private const val MAX_MNEMONIC_SIZE = 25
     }
 }

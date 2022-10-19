@@ -125,7 +125,11 @@ class AccountManagerImpl(
             for (shift in 0 until numberOfAccounts) {
                 val index = firstFreeIndex + shift
                 val keys = cryptographyRepository.calculateDerivedKeys(
-                    walletManager.masterSeed.seed, index, derivationPath, !areMainNetworksEnabled
+                    walletManager.masterSeed.seed,
+                    walletManager.masterSeed.password,
+                    index,
+                    derivationPath,
+                    !areMainNetworksEnabled
                 )
                 newAccounts.add(
                     Account(
@@ -147,7 +151,10 @@ class AccountManagerImpl(
             val accountName = CryptoUtils.prepareName(network.name, index)
             cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
-                index, derivationPath, network.testNet
+                walletManager.masterSeed.password,
+                index,
+                derivationPath,
+                network.testNet
             ).map { keys ->
                 val newAccount = Account(
                     index,
@@ -335,6 +342,7 @@ class AccountManagerImpl(
             val (index, derivationPath) = getIndexWithDerivationPath(account.network.testNet, this)
             return cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
+                walletManager.masterSeed.password,
                 index, derivationPath, account.network.testNet
             ).map { keys ->
                 val ownerAddress = account.address

@@ -71,7 +71,7 @@ class AccountManagerTest : RxTest() {
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).thenReturn("address1")
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any(), any()))
             .thenReturn(DerivedKeys(0, "publicKey", "privateKey", "address1"))
 
         val test = manager.createEmptyAccounts(2).test()
@@ -256,6 +256,7 @@ class AccountManagerTest : RxTest() {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         ).thenReturn(
@@ -277,8 +278,8 @@ class AccountManagerTest : RxTest() {
         NetworkManager.initialize(MockDataProvider.networks)
         val account = Account(1)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(0, "publicKey1", "privateKey1", "address1")))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey1", "privateKey1", "address1", true)))
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
         whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
@@ -302,10 +303,11 @@ class AccountManagerTest : RxTest() {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         ).thenReturn(
-            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
+            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1", true))
         )
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
@@ -328,8 +330,8 @@ class AccountManagerTest : RxTest() {
         val account = Account(5)
         val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1", true)))
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
@@ -382,8 +384,8 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `create safe account success`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address", true)))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         manager.createSafeAccount(Account(1, chainId = 4), "contract")
@@ -394,8 +396,8 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `create safe account error`() {
         val error = Throwable()
-        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address", true)))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address")
         manager.createSafeAccount(Account(1, chainId = 4), "contract")
