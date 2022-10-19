@@ -8,9 +8,7 @@ import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.NftDetails
-import minerva.android.apiProvider.model.TokenDetails
 import minerva.android.apiProvider.model.TokenTx
 import minerva.android.blockchainprovider.model.Token
 import minerva.android.blockchainprovider.model.TokenWithBalance
@@ -19,7 +17,6 @@ import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenReposit
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepository
 import minerva.android.blockchainprovider.repository.superToken.SuperTokenRepository
-import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
@@ -131,39 +128,12 @@ class TokenManagerImpl(
         } else Single.just(shouldSafeNewTokens)
 
     override fun checkMissingTokensDetails(): Completable =
-        cryptoApi.getLastCommitFromTokenList(url = ERC20_TOKEN_DATA_LAST_COMMIT)
-            .filter { (commit) -> isNewCommit(commit) }
-            .flatMapSingle { getMissingTokensDetails() }
-            .flatMapCompletable { tokenDetailsMap -> updateTokensIcons(tokenDetailsMap) }
-            .andThen(checkMissingNFTDetails())
+        checkMissingNFTDetails()
             .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }
 
     private fun checkMissingNFTDetails(): Completable =
         getNftCollectionDetails()
             .flatMapCompletable { tokenDetailsMap -> updateNFTsIcons(tokenDetailsMap) }
-
-    private fun isNewCommit(commit: CommitElement): Boolean =
-        commit.lastCommitDate.let {
-            localStorage.loadTokenIconsUpdateTimestamp() < DateUtils.getTimestampFromDate(it)
-        }
-
-    private fun getMissingTokensDetails(): Single<Map<String, TokenDetails>> =
-        cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL)
-            .map { tokens ->
-                tokens.associateBy { tokenDetails ->
-                    generateTokenHash(tokenDetails.chainId, tokenDetails.address)
-                }
-            }
-
-    private fun updateTokensIcons(tokens: Map<String, TokenDetails>): Completable =
-        walletManager.getWalletConfig().run {
-            erc20Tokens.forEach { (id, tokenList) ->
-                tokenList.forEach { token ->
-                    token.logoURI = tokens[generateTokenHash(id, token.address)]?.logoURI
-                }
-            }
-            walletManager.updateWalletConfig(copy(version = updateVersion))
-        }
 
     private fun updateNFTsIcons(tokens: Map<String, NftCollectionDetailsResult>): Completable =
         walletManager.getWalletConfig().run {
@@ -477,16 +447,6 @@ class TokenManagerImpl(
             .flatMap { (id, tokenList) -> tokenList })
 
     override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
-
-    private fun getTokenIconsURL(): Single<Map<String, String>> =
-        cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
-            data.associate { tokenDetails ->
-                generateTokenHash(
-                    tokenDetails.chainId,
-                    tokenDetails.address
-                ) to tokenDetails.logoURI
-            }
-        }
 
     private fun getNftCollectionDetails(): Single<Map<String, NftCollectionDetailsResult>> =
         cryptoApi.getNftCollectionDetails().map { data ->
@@ -841,7 +801,6 @@ class TokenManagerImpl(
 
     override fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERCToken>>): UpdateTokensResult =
         walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
-            val shouldUpdateLogosURI = true
             val allLocalTokensMap = allLocalTokens.toMutableMap()
             for ((chainId, newTokens) in newTokensPerChainIdMap) {
                 val localChainTokens = allLocalTokensMap[chainId] ?: listOf()
@@ -850,7 +809,7 @@ class TokenManagerImpl(
                         allLocalTokensMap[chainId] = tokenList
                     }
             }
-            UpdateTokensResult(shouldUpdateLogosURI, allLocalTokensMap)
+            UpdateTokensResult(true, allLocalTokensMap)
         }
 
     private fun mergeNewTokensWithLocal(
@@ -917,27 +876,6 @@ class TokenManagerImpl(
         } else {
             find { localToken -> localToken.address.equals(newToken.address, true) } == null
         }
-
-    override fun updateTokenIcons(
-        shouldBeUpdated: Boolean,
-        tokensPerChainIdMap: Map<Int, List<ERCToken>>
-    ): Single<UpdateTokensResult> =
-        if (shouldBeUpdated) {
-            getTokenIconsURL().map { logoUrls ->
-                tokensPerChainIdMap.values.forEach { tokens ->
-                    tokens.forEach { token ->
-                        token.apply {
-                            if (this.type.isERC20()) {
-                                logoUrls[generateTokenHash(chainId, address)]?.let { newLogoURI ->
-                                    logoURI = newLogoURI
-                                }
-                            }
-                        }
-                    }
-                }
-                UpdateTokensResult(true, tokensPerChainIdMap)
-            }
-        } else Single.just(UpdateTokensResult(false, tokensPerChainIdMap))
 
     override fun mergeNFTDetailsWithRemoteConfig(
         shouldBeUpdated: Boolean,

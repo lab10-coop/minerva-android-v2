@@ -21,7 +21,6 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
-import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
@@ -145,28 +144,6 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
-    }
-
-    @Test
-    fun `Test tokens with online logos data without error`() {
-        NetworkManager.initialize(MockDataProvider.networks)
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(tokenRawData))
-        tokenManager.updateTokenIcons(false, map).test().assertComplete().assertNoErrors()
-            .assertValue {
-                map[1]?.get(0)?.logoURI == null
-            }
-        tokenManager.updateTokenIcons(true, map).test().assertComplete().assertNoErrors()
-            .assertValue {
-                map[1]?.get(0)?.logoURI == "someIconAddress"
-                map[1]?.get(1)?.logoURI == "someIconAddressII"
-            }
-    }
-
-    @Test
-    fun `Test tokens with online logos data with error`() {
-        NetworkManager.initialize(MockDataProvider.networks)
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.error(Throwable("No data here!")))
-        tokenManager.updateTokenIcons(true, map).test().assertErrorMessage("No data here!")
     }
 
     @Test
@@ -432,42 +409,6 @@ class TokenManagerTest : RxTest() {
         mergedTokenMap03.tokensPerChainIdMap[1]?.size shouldBeEqualTo 3
         mergedTokenMap03.tokensPerChainIdMap[2]?.size shouldBeEqualTo 2
         mergedTokenMap03.tokensPerChainIdMap[3]?.size shouldBeEqualTo 2
-    }
-
-    @Test
-    fun `Check that tokens list has icon updates`() {
-        val tokens = tokenManager.sortTokensByChainId(
-            listOf(
-                ERCToken(1, "tokenOneOne", address = "0x0NE0N3", logoURI = "logoOne", type = TokenType.ERC20),
-                ERCToken(2, "tokenTwo", address = "0xS2Two01", logoURI = "logoTwo", type = TokenType.ERC20),
-                ERCToken(3, "tokenThreeThree", address = "0xTHR33THR33", logoURI = null, type = TokenType.ERC20)
-            )
-        )
-
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
-        val updatedIcons = tokenManager.updateTokenIcons(true, tokens)
-        val updatedIcons2 = tokenManager.updateTokenIcons(false, tokens)
-
-        updatedIcons
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.shouldSafeNewTokens &&
-                        it.tokensPerChainIdMap.size == 3 &&
-                        it.tokensPerChainIdMap[1]?.get(0)?.logoURI == "logoOneOne" &&
-                        it.tokensPerChainIdMap[2]?.get(0)?.logoURI == "logoTwo" &&
-                        it.tokensPerChainIdMap[3]?.get(0)?.logoURI == null
-            }
-        updatedIcons2
-            .test()
-            .assertComplete()
-            .assertValue {
-                !it.shouldSafeNewTokens &&
-                        it.tokensPerChainIdMap.size == 3 &&
-                        it.tokensPerChainIdMap[1]?.get(0)?.logoURI == "logoOneOne" &&
-                        it.tokensPerChainIdMap[2]?.get(0)?.logoURI == "logoTwo" &&
-                        it.tokensPerChainIdMap[3]?.get(0)?.logoURI == null
-            }
     }
 
     private val data = listOf(
