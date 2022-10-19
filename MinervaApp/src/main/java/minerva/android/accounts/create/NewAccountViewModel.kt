@@ -10,6 +10,7 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -33,6 +34,7 @@ class NewAccountViewModel(
     val unusedAddresses
         get() = selectedNetworkChainId?.let { chainId ->
             accountManager.getAllFreeAccountForNetwork(chainId)
+                .map { w -> AddressWrapper(w.index, accountManager.toChecksumAddress(w.address), w.status)  }
         } ?: emptyList()
 
     private val _createAccountLiveData = MutableLiveData<Event<Unit>>()
