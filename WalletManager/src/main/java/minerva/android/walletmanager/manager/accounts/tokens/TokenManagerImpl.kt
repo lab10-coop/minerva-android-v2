@@ -129,7 +129,6 @@ class TokenManagerImpl(
 
     override fun checkMissingTokensDetails(): Completable =
         checkMissingNFTDetails()
-            .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }
 
     private fun checkMissingNFTDetails(): Completable =
         getNftCollectionDetails()

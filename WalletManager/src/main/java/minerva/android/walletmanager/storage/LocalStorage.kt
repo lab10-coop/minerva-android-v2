@@ -25,9 +25,6 @@ interface LocalStorage {
     fun loadLastFreeATSTimestamp(): Long
     fun saveFreeATSTimestamp(timestamp: Long)
 
-    fun saveTokenIconsUpdateTimestamp(timestamp: Long)
-    fun loadTokenIconsUpdateTimestamp(): Long
-
     fun saveDappDetailsUpdateTimestamp(timestamp: Long)
     fun loadDappDetailsUpdateTimestamp(): Long
 

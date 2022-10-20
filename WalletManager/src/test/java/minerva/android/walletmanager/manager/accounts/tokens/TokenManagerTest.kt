@@ -448,35 +448,6 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check mapping last commit data to last commit timestamp`() {
-        NetworkManager.initialize(MockDataProvider.networks)
-        whenever(cryptoApi.getLastCommitFromTokenList(any())).thenReturn(Single.just(commitData))
-        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(Single.just(emptyList()))
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
-        whenever(localStorage.loadTokenIconsUpdateTimestamp()).thenReturn(333L, 1611950162000, 1611950162333)
-        whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
-        whenever(tokenDao.getTaggedTokens()).thenReturn(
-            Single.just(
-                listOf(
-                    ERCToken(
-                        ATS_TAU,
-                        "CookieTokenATS",
-                        "Cookie",
-                        "0xS0m3T0k3N",
-                        "13",
-                        type = TokenType.ERC20
-                    )
-                )
-            )
-        )
-        doNothing().whenever(tokenDao).updateTaggedTokens(any())
-        doNothing().whenever(localStorage).saveFreeATSTimestamp(any())
-        tokenManager.checkMissingTokensDetails().test().assertComplete()
-        tokenManager.checkMissingTokensDetails().test().assertNotComplete()
-        tokenManager.checkMissingTokensDetails().test().assertNotComplete()
-    }
-
-    @Test
     fun `Creating correct token URLs`() {
         val accountOne = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
         val accountTwo = Account(1, chainId = ETH_ROP, address = "0xADDRESSxTWO")
