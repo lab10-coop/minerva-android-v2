@@ -21,7 +21,7 @@ object TokensOwnedToERCToken {
             name = if (tokenType.isERC20()) token.name else String.Empty,
             symbol = token.symbol,
             address = token.contractAddress,
-            logoURI = token.tokenURI,
+            logoURI = token.logoURI,
             decimals = token.decimals,
             accountAddress = accountAddress,
             tag = mapToTag(tokenType),
