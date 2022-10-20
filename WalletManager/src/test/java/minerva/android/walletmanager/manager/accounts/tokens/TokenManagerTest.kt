@@ -872,7 +872,8 @@ class TokenManagerTest : RxTest() {
                             "Name",
                             "Symbol",
                             "uri",
-                            listOf("ERC-1155")
+                            listOf("ERC-1155"),
+                            logoURI = "logo.png"
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "10",
@@ -883,7 +884,8 @@ class TokenManagerTest : RxTest() {
                             "n4m8",
                             "Symbol",
                             "uri",
-                            listOf("ERC-721")
+                            listOf("ERC-721"),
+                            logoURI = "logo.png"
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "1000",
@@ -895,7 +897,8 @@ class TokenManagerTest : RxTest() {
                             "Symb0l",
                             "uri",
                             listOf("ERC-20"),
-                            TokensOwnedPayload.TokenOwned.TokenJson.Empty
+                            TokensOwnedPayload.TokenOwned.TokenJson.Empty,
+                            logoURI = "logo.png"
                         )
                     ),
                     ""
