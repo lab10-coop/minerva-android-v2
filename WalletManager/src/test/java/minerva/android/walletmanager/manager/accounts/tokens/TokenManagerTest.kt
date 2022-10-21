@@ -288,21 +288,21 @@ class TokenManagerTest : RxTest() {
     fun `Check merging ERC20Token maps`() {
         val tokensSetOne = tokenManager.sortTokensByChainId(
             listOf(
-                ERCToken(1, "tokenOneOne1", address = "theSame", accountAddress = "accountAddress1", type = TokenType.ERC20),
-                ERCToken(1, "tokenOneOne5", address = "0x0NE0N3", accountAddress = "accountAddress0", type = TokenType.ERC20),
+                ERCToken(1, "tokenOneOne1", address = "theSame", accountAddress = "accountAddress1", type = TokenType.ERC20, logoURI = "logoOneOne"),
+                ERCToken(1, "tokenOneOne5", address = "0x0NE0N3", accountAddress = "accountAddress0", type = TokenType.ERC20, logoURI = "logoOneOne"),
 
                 ERCToken(2, "tokenTwoOne", address = "0xTW00N3", accountAddress = "accountAddress1", type = TokenType.ERC20),
                 ERCToken(2, "tokenTwoTwo", address = "0xTW0TW0", accountAddress = "accountAddress2", type = TokenType.ERC20),
 
                 ERCToken(3, "tokenThreeOne", address = "0xTHR330N3", accountAddress = "accountAddress4", type = TokenType.ERC20),
                 ERCToken(3, "tokenThreeTwo", address = "0xTHR33TW0", accountAddress = "accountAddress2", type = TokenType.ERC20),
-                ERCToken(3, "tokenThreeThree", address = "0xTHR33THR33", accountAddress = "accountAddress1", type = TokenType.ERC721)
+                ERCToken(3, "tokenThreeThree", address = "0xTHR33THR33", accountAddress = "accountAddress1", type = TokenType.ERC721, logoURI = "new")
             )
         )
 
         val tokenSetTwo = tokenManager.sortTokensByChainId(
             listOf(
-                ERCToken(1, "tokenOneOne", address = "0x0NE0N3", type = TokenType.ERC20)
+                ERCToken(1, "tokenOneOne", address = "0x0NE0N3", type = TokenType.ERC20, logoURI = "logoOneOne")
             )
         )
 
@@ -392,7 +392,7 @@ class TokenManagerTest : RxTest() {
 
         mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 5
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.name shouldBeEqualTo "tokenThreeThree"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "bb1"
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "new"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeThree2"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.logoURI shouldBeEqualTo "bb"
 
