@@ -479,6 +479,7 @@
         <item>* WalletConnect: Change account on existing connections</item>
         <item>* Onboarding screen: Added Celo as main option</item>
         <item>* Superfluid Super Token visibility improvement</item>
+        <item>* Support for Secret Recovery Phrase with Password </item>
         <item>* cREAL on Celo direct purchase via ramp.network</item>
         <item>* ETH and DAI on Optimism direct purchase via ramp.network</item>
         <item>* Set Kovan testnet as unmaintained network</item>
