@@ -104,7 +104,9 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                         availableAccounts.indexOfFirst { account -> account.id == selectedAccountId }
                     } else Int.FirstIndex
                 //change state of confirm button for prevent the same db records
-                changeClickableConfirmButtonState(availableAccounts.get(defaultPosition).address, availableAccounts.get(defaultPosition).chainId)
+                if (availableAccounts.isNotEmpty()) {
+                    changeClickableConfirmButtonState(availableAccounts[defaultPosition].address, availableAccounts[defaultPosition].chainId)
+                }
                 prepareSpinner(R.drawable.rounded_background_purple_frame, defaultPosition) { position, view ->
                     onAccountSelected(accountAdapter.getItem(position))
                     accountAdapter.selectedItemWidth = view?.width
