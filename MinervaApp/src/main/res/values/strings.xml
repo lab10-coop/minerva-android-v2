@@ -475,18 +475,26 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.8.0</item>
+        <item>* WalletConnect: Change account on existing connections</item>
+        <item>* Onboarding screen: Added Celo as main option</item>
+        <item>* Superfluid Super Token visibility improvement</item>
+        <item>* cREAL on Celo direct purchase via ramp.network</item>
+        <item>* ETH and DAI on Optimism direct purchase via ramp.network</item>
+        <item>* Set Kovan testnet as unmaintained network</item>
+        <item>* UI adjustments &amp; various improvements</item>
         <item>1.7.9</item>
         <item>* Added Celo network support</item>
         <item>* Added Celo testnets support</item>
-        <item>* CELO, CUSD, CEUR &amp; cREAL on Celo direct purchase via ramp.network</item>
-        <item>* Manually change Network selection on WalletConnect Connection Request</item>
+        <item>* CELO, CUSD &amp; CEUR on Celo direct purchase via ramp.network</item>
+        <item>* Manually change Network selection on WalletConnect connection requests</item>
         <item>* Various bug fixes and UI improvements</item>
         <item>1.7.8</item>
         <item>* Added Avalanche network support</item>
         <item>* Added Avalanche testnet support</item>
-        <item>* AVAX on Avalanche direct purchase via ramp.network</item>
-        <item>* Added "Open in Explorer" Option to Accounts</item>
-        <item>* Set POA Core, ARTIS ∑1, Rinkeby and Ropsten as unmaintained networks</item>
+        <item>* AVAX on Avalnache direct purchase via ramp.network</item>
+        <item>* Added \'Open in Explorer\' option for accounts</item>
+        <item>* Set POA Core, ARTIS ∑1, Rinkeby &amp; Ropsten as unmaintained networks</item>
         <item>* Unified QR-Scanner</item>
         <item>* Various bug fixes and UI improvements</item>
         <item>1.7.5</item>
