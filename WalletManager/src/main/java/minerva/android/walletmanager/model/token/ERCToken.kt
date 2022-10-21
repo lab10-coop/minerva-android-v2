@@ -47,6 +47,10 @@ data class ERCToken(
         collectionName = if (tokenType.isNft()) tokenTx.tokenName else null
     )
 
+    fun mergeLogoURI(ercToken: ERCToken){
+        logoURI = ercToken.logoURI
+    }
+
     fun mergeNftDetailsAfterTokenDiscovery(ercToken: ERCToken){
         mergePropertiesWithLocalFirstStrategy(ercToken)
         mergePropertiesWithRemoteFirstStrategy(ercToken)

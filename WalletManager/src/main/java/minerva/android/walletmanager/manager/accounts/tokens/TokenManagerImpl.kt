@@ -828,6 +828,17 @@ class TokenManagerImpl(
         }
 
     private fun mergeNewTokenWithLocal(localChainTokens: List<ERCToken>, newToken: ERCToken) {
+        localChainTokens.find { localToken ->
+            localToken.address.equals(
+                newToken.address,
+                true
+            )
+        }?.apply {
+            mergeLogoURI(newToken)
+            if (newToken.type.isSuperToken()) {
+                mergeSuperTokenDetailsAfterTokenDiscovery(newToken)
+            }
+        }
         if (newToken.type.isNft()) {
             localChainTokens.find { localToken ->
                 localToken.address.equals(
@@ -836,16 +847,6 @@ class TokenManagerImpl(
                 ) && localToken.tokenId == newToken.tokenId && localToken.tokenId != null
             }?.apply {
                 mergeNftDetailsAfterTokenDiscovery(newToken)
-            }
-        }
-        if (newToken.type.isSuperToken()) {
-            localChainTokens.find { localToken ->
-                localToken.address.equals(
-                    newToken.address,
-                    true
-                )
-            }?.apply {
-                mergeSuperTokenDetailsAfterTokenDiscovery(newToken)
             }
         }
     }
