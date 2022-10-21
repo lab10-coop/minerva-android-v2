@@ -40,7 +40,7 @@
 
     <item
         android:id="@+id/addAccount"
-        android:icon="@drawable/ic_add_account"
+        android:icon="@drawable/ic_add_account_gray"
         android:title="@string/add"
         app:showAsAction="ifRoom" />
 </menu>
