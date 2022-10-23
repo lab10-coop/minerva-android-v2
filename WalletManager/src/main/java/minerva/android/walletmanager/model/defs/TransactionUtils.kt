@@ -9,6 +9,7 @@ fun getTransactionType(chainId: Int): TxType =
         ChainId.ETH_RIN -> TxType.ETH_RIN
         ChainId.ETH_KOV -> TxType.ETH_KOVAN
         ChainId.LUKSO_14 -> TxType.LUKSO
+        ChainId.LUKSO_16 -> TxType.LUKSO
         ChainId.POA_SKL -> TxType.SOKOL
         ChainId.ETH_GOR -> TxType.GORLI
         ChainId.ETH_SEP -> TxType.ETH_SEP
