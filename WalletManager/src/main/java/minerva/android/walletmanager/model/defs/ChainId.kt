@@ -23,6 +23,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
@@ -32,7 +33,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO_CHAI
 
 // why isn't this taken from networks.json?
 @Retention(AnnotationRetention.SOURCE)
-@IntDef(ATS_TAU, ETH_ROP, ETH_RIN, ETH_KOV, ETH_GOR, ETH_SEP, POA_SKL, LUKSO_14, ETH_MAIN, ATS_SIGMA, GNO, GNO_CHAI, POA_CORE, MATIC, MUMBAI, BSC, BSC_TESTNET, RSK_MAIN, RSK_TEST, ARB_ONE, ARB_RIN, OPT, OPT_KOV, CELO, CELO_ALF, CELO_BAK, AVA_C, AVA_FUJ)
+@IntDef(ATS_TAU, ETH_ROP, ETH_RIN, ETH_KOV, ETH_GOR, ETH_SEP, POA_SKL, LUKSO_14, ETH_MAIN, ATS_SIGMA, GNO, GNO_CHAI, POA_CORE, MATIC, MUMBAI, BSC, BSC_TESTNET, RSK_MAIN, RSK_TEST, ARB_ONE, ARB_RIN, OPT, OPT_KOV, OPT_GOR, CELO, CELO_ALF, CELO_BAK, AVA_C, AVA_FUJ)
 annotation class ChainId {
     companion object {
         const val ATS_TAU = 246785
@@ -58,6 +59,7 @@ annotation class ChainId {
         const val ARB_RIN = 421611
         const val OPT = 10
         const val OPT_KOV = 69
+        const val OPT_GOR = 420
         const val CELO = 42220
         const val CELO_ALF = 44787
         const val CELO_BAK = 62320

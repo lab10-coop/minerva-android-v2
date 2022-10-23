@@ -333,7 +333,7 @@
   },
   {
     "name": "Optimism Kovan",
-    "isActive": true,
+    "isActive": false,
     "token": "KOR",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.optimism.io",
@@ -350,6 +350,22 @@
       "host": "0x74b57883f8ce9F2BD330286E884CfD8BB24AC4ED",
       "cfav1": "0x523481a8a5455efB1F301C6e00B5525Eb12a51da"
     }
+  },
+  {
+    "name": "Optimism Goerli",
+    "isActive": true,
+    "token": "ETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://goerli.optimism.io",
+    "wsRpc": "wss://ws-goerli.optimism.io",
+    "gasPriceOracle": "https://goerli.optimism.io",
+    "gasPrice": "20000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#ff0420",
+    "testNet": true,
+    "chainId": 420,
+    "explore": "https://goerli.optimism.io"
   },
   {
     "name": "Arbitrum Rinkeby",
