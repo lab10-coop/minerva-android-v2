@@ -384,6 +384,22 @@
     "explore": ""
   },
   {
+    "name": "zkSync alpha testnet",
+    "isActive": true,
+    "token": "ETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://zksync2-testnet.zksync.dev",
+    "wsRpc": "",
+    "gasPriceOracle": "https://zksync2-testnet.zksync.dev",
+    "gasPrice": "20000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#8c8dfc",
+    "testNet": true,
+    "chainId": 280,
+    "explore": "https://zksync2-testnet.zkscan.io/"
+  },
+  {
     "name": "Arbitrum Rinkeby",
     "isActive": true,
     "token": "ARETH",
