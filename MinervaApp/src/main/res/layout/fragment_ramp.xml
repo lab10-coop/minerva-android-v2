@@ -75,6 +75,8 @@
         app:layout_constraintTop_toBottomOf="@id/accounts_header">
 
         <com.google.android.material.button.MaterialButton
+            app:icon="@drawable/ic_add_account"
+            app:iconGravity="textStart"
             android:id="@+id/create_new_account"
             style="@style/OutlinedButtonStyle"
             android:layout_width="match_parent"
