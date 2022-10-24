@@ -33,6 +33,7 @@ class IdentityManagerImpl(
     override fun saveIdentity(identity: Identity): Completable = walletConfigManager.getWalletConfig().run {
         cryptographyRepository.calculateDerivedKeysSingle(
             walletConfigManager.masterSeed.seed,
+            walletConfigManager.masterSeed.password,
             identity.index,
             DerivationPath.DID_PATH
         )

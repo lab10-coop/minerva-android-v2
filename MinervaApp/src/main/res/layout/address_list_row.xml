@@ -72,7 +72,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="RelativeOverlap"
             tools:text="@string/free"
-            android:visibility="visible"/>
+            android:visibility="gone"/>
 
     </LinearLayout>
 

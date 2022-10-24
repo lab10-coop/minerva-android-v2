@@ -10,6 +10,7 @@ interface CryptographyRepository {
     fun getMnemonicForMasterSeed(seed: String): String
     fun calculateDerivedKeysSingle(
         seed: String,
+        password: String,
         index: Int,
         derivationPathPrefix: String,
         isTestNet: Boolean = true
@@ -17,13 +18,14 @@ interface CryptographyRepository {
 
     fun calculateDerivedKeys(
         seed: String,
+        password: String,
         index: Int,
         derivationPathPrefix: String,
         isTestNet: Boolean = true
     ): DerivedKeys
 
-    fun restoreMasterSeed(mnemonic: String): Seed
-    fun areMnemonicWordsValid(mnemonic: String): Boolean
+    fun restoreMasterSeed(mnemonicAndPassword: String): Seed
+    fun areMnemonicWordsValid(mnemonicAndPassword: String): Boolean
     fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>>
     fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String>
 }
