@@ -58,6 +58,7 @@
             android:lines="1"
             android:paddingStart="@dimen/margin_normal"
             android:paddingTop="@dimen/margin_xxsmall"
+            android:paddingEnd="@dimen/margin_normal"
             android:paddingBottom="@dimen/margin_xxsmall"
             android:textColor="@color/dappStatusColorGray"
             tools:text="name" />
