@@ -105,7 +105,6 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
             setBackgroundResource(R.drawable.rounded_spinner_background)
             adapter = AccountSpinnerAdapter(
                 context,
-                R.layout.spinner_network,
                 accounts + Account(Int.InvalidId),
                 numberOfAccountsToUse
             )
