@@ -273,7 +273,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         confirmationButtons.confirm.isEnabled = true
         networkHeader.apply {
             addAccount.gone()
-            accountSpinner.gone()
+            accountSpinner.visible()
             networkSpinner.gone()
         }
     }

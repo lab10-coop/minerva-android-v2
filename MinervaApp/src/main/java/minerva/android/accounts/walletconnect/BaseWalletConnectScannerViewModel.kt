@@ -157,7 +157,8 @@ abstract class BaseWalletConnectScannerViewModel(
                     connectionPeerId,
                     account.address,
                     account.chainId,
-                    account.name
+                    account.name,
+                    account.network.name
                 )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

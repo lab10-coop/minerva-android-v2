@@ -24,9 +24,10 @@ interface WalletConnectRepository {
      * @param accountAddress - address of account which was specified
      * @param accountChainId - chainId of account which was specified
      * @param accountName - name (with index) of account which was specified
+     * @param networkName - network name of account which was specified
      * @return Completable
      */
-    fun updateSession(connectionPeerId: String, accountAddress: String, accountChainId: Int, accountName: String): Completable
+    fun updateSession(connectionPeerId: String, accountAddress: String, accountChainId: Int, accountName: String, networkName: String): Completable
     fun rejectSession(peerId: String)
     fun killSession(peerId: String): Completable
     val connectionStatusFlowable: Flowable<WalletConnectStatus>
@@ -40,9 +41,10 @@ interface WalletConnectRepository {
      * @param address - address of account which was specified
      * @param chainId - chainId of account which was specified
      * @param accountName - name (with index) of account which was specified
+     * @param networkName - network name of account which was specified
      * @return Completable
      */
-    fun updateDappSession(peerId: String, address: String, chainId: Int, accountName: String): Completable
+    fun updateDappSession(peerId: String, address: String, chainId: Int, accountName: String, networkName: String): Completable
     fun deleteDappSession(peerId: String): Completable
     fun getSessions(): Single<List<DappSession>>
     fun dispose()
