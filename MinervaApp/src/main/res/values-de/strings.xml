@@ -1,5 +1,586 @@
 <resources>
-    <string name="identities">Identität</string>
+    <string name="identities">Identities</string>
     <string name="values">Werte</string>
-    <string name="accounts_navigation_menu_header">Werte</string>
+    <string name="accounts_navigation_menu_header">Values</string>
+    <string name="services">Services</string>
+    <string name="activity">Activity</string>
+    <string name="barcode">Barcode</string>
+    <string name="add">Add</string>
+    <string name="edit_order">Edit order</string>
+    <string name="settings">Settings</string>
+    <string name="welcome_to_minerva">Welcome to Minerva!</string>
+    <string name="welcome_message">Restore your old wallet or create your new Minerva digital wallet.</string>
+    <string name="create_new_wallet">Create new wallet</string>
+    <string name="restore_old_wallet">Restore old wallet</string>
+    <string name="enter_your_new_wallet">Enter your new wallet</string>
+    <string name="import_wallet">Import</string>
+    <string name="instruction">What you can do with your new Minerva digital wallet:</string>
+    <string name="identity_instruction">Create new identities and use them to log in to different services.</string>
+    <string name="accounts_instruction">Own digital assets and use them for transactions and trading.</string>
+    <string name="services_instruction">Have a control over all the services you are sharing your data with.</string>
+    <string name="enter_your_backup_words">Enter your Secret Recovery Phrase</string>
+    <string name="edit">Edit</string>
+    <string name="remove">Remove</string>
+    <string name="no_data_available">No data available</string>
+    <string name="field_cannot_be_empty">Field cannot be empty</string>
+    <string name="unknown_words">Unknown words entered. Please review them.</string>
+    <string name="new_identity">New Identity</string>
+    <string name="identity_label">Identity: %s</string>
+    <string name="edit_identity_order">Rearrange Identities</string>
+    <string name="edit_account_order">Rearrange Accounts</string>
+    <string name="edit_service_order">Rearrange Services</string>
+    <string name="edit_credentials_order">Rearrange Credentials</string>
+    <string name="personal_data">Personal data</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="telephone_number">Telephone Number</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="address">Address</string>
+    <string name="address_line_1">Address Line 1</string>
+    <string name="address_line_2">Address Line 2</string>
+    <string name="city">City</string>
+    <string name="postcode">Postcode</string>
+    <string name="country">Country</string>
+    <string name="create_new_identity">Create new identity</string>
+    <string name="identity_name_label">Identity Name</string>
+    <string name="more_fields">More fields</string>
+    <string name="wrong_email">Wrong email</string>
+    <string name="can_not_be_empty">This field should not be empty</string>
+    <string name="unexpected_error">Unexpected error occurred. Please try again later.</string>
+    <string name="update_identity">Update identity</string>
+    <string name="empty_identity_name">Identity name is empty</string>
+    <string name="missing_required_data">Missing required data</string>
+    <string name="backup">Backup</string>
+    <string name="account_backup">Account Backup</string>
+    <string name="i_will_safety_remember">I stored them safely</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
+    <string name="backup_instruction">The Secret Recovery Phrase is used to recover the wallet and restore all needed keys:</string>
+    <string name="mnemonic_saved_to_clip_board">Secret Recovery Phrase saved to clip board</string>
+    <string name="no_such_file_error_message">No backup data found for the Secret Recovery Phrase you entered. Please make sure that your device is currently online, you entered the Secret Recovery Phrase in the correct order and that you\’re using Secret Recovery Phrase which was created by the Minerva Wallet.</string>
+    <string name="backup_alert_title">You haven\'t yet made a backup of your Minerva Wallet.</string>
+    <string name="sync_alert_title">You are currently offline. Please make sure you are online regularly to back up your data needed for a full Minerva Wallet recovery.</string>
+    <string name="backup_alert_message">This is needed in order to recover identities and accounts in case something goes wrong with your phone.</string>
+    <string name="sync_alert_message">Data related to your Minerva Wallet could not yet be stored to a remote system. You cannot recover your data within Minerva even with your Secret Recovery Phrase yet. Make sure the device is connected to the internet and restart the app in order to fix this.</string>
+    <string name="close">Close</string>
+    <string name="camera_error">Camera initialization error:</string>
+    <string name="login">Login</string>
+    <string name="next">Next</string>
+    <string name="requested_data">Requested data: </string>
+    <string name="required_field">This field is required</string>
+    <string name="choose_an_identity">Choose an identity</string>
+    <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
+    <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
+    <string name="remove_service_dialog_message">Do you really want to remove this service?</string>
+    <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
+    <string name="hide_account_dialog_message">After confirming this message, this account is hidden but can still be used to receive transfers.\n\nTo make the account visible again, you have to tap on ‘+’ in the Values screen, select it from your addresses list and add the account.</string>
+    <string name="hide_account_dialog_title">Hide account</string>
+    <string name="remove_owner">Remove owner</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="replace">Replace</string>
+    <string name="replace_all">Replace all</string>
+    <string name="add_as_new">Add as new</string>
+    <string name="identity">Identity</string>
+    <string name="select_identity_message">Please select identity</string>
+    <string name="invalid_qr_code_message">Invalid QR code, please try again</string>
+    <string name="requested_data_message">Please, use identity with requested data</string>
+    <string name="send">Send</string>
+    <string name="receive">Receive</string>
+    <string name="amount">Amount</string>
+    <string name="show_address">Show address</string>
+    <string name="add_safe_account">Add safe account</string>
+    <string name="login_success_title">Painless Login Successful</string>
+    <string name="login_success_message">You successfully logged into Service</string>
+    <string name="quick_login_success_message">Allow Charging Station Dashboard to send you push\nnotifications and proceed with painless login request?</string>
+    <string name="login_failure_title">Painless Login Failure</string>
+    <string name="login_failure_message">Login to service failed</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="last_used">Last used:</string>
+    <string name="add_account">Add account</string>
+    <string name="networks">Networks</string>
+    <string name="creating_account_error">Creating new account failed</string>
+    <string name="transaction_success_title">Transaction Successful</string>
+    <string name="transaction_success_message">You successfully transferred  %1$s %2$s</string>
+    <string name="transaction_error_title">Error: Transaction failed</string>
+    <string name="transaction_error_message"><b>Error cause:</b> %s</string>
+    <string name="transaction_error_details_message">Transfer of %1$s %2$d failed.</string>
+    <string name="receiver">Receiver</string>
+    <string name="gas_price_gwei">Gas Price (Gwei)</string>
+    <string name="gas_limit">Gas Limit</string>
+    <string name="transaction_cost_label">Transaction cost:</string>
+    <string name="transaction_cost_amount">%1$s %2$s</string>
+    <string name="transactions_error_title">Transaction error occurs</string>
+    <string name="transactions_error_message">Unexpected error occurred while making transaction actions</string>
+    <string name="address_saved_to_clip_board">Address saved to clipboard</string>
+    <string name="identity_saved_to_clipboard">Identity saved to clipboard</string>
+    <string name="private_key_saved_to_clipboard">Private Key saved to clipboard</string>
+    <string name="refresh_balances_error">Error while refreshing balances</string>
+    <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
+    <string name="activities_error">Error while fetching activities</string>
+    <string name="removed">Removed</string>
+    <string name="hidden">Hidden</string>
+    <string name="changed">Changed</string>
+    <string name="added">Added</string>
+    <string name="received">Received</string>
+    <string name="sent">Sent</string>
+    <string name="failed">Failed</string>
+    <string name="logIn">Log in</string>
+    <string name="authorised">Authorised</string>
+    <string name="signed">Signed</string>
+    <string name="updated">Updated</string>
+    <string name="account_action_label">Account %s</string>
+    <string name="safe_account_action_label">Safe Account %s</string>
+    <string name="identity_name">Identity %s</string>
+    <string name="credential_action_label">Credential %s</string>
+    <string name="credential_import_label">Credential import</string>
+    <string name="today">TODAY</string>
+    <string name="yesterday">YESTERDAY</string>
+    <string name="sent_accounts_label">%1$s %2$s sent to %3$s</string>
+    <string name="failed_sent_accounts_label">%1$s %2$s failed sent to %3$s</string>
+    <string name="services_login_label">Identity %1$s at %2$s</string>
+    <string name="wallet_action_header">%1$s • %2$s</string>
+    <string name="service_action_label">%s interaction</string>
+    <string name="service_connection_request">Service Connection Request</string>
+    <string name="connection_label">wants to connect to</string>
+    <string name="minerva">Minerva</string>
+    <string name="deny">Deny</string>
+    <string name="allow">Allow</string>
+    <string name="confirm_transaction">Confirm transaction</string>
+    <string name="recipient">Recipient</string>
+    <string name="iban">IBAN</string>
+    <string name="finger_print_instruction">Confirm this operation with your fingerprint</string>
+    <string name="cancel">Cancel</string>
+    <string name="open">Open</string>
+    <string name="confirm_payment">Confirm payment</string>
+    <string name="share_via">Share via</string>
+    <string name="soon">Soon</string>
+    <string name="no_funds">No funds</string>
+    <string name="no_funds_message">Please add at least 0.1 ATS to this ARTIS (Tau1) account</string>
+    <string name="processing">Processing</string>
+    <string name="channel_id">MinervaLoginChannel</string>
+    <string name="message">Message</string>
+    <string name="known_user_login_message">You are already registered user of Charging Station\nDashboard with the identity %s</string>
+    <string name="not_existed_identity_message">Identity that you already logged in does no exist</string>
+    <string name="fill_requested_data_message">Pls fill Identity %s with requested data</string>
+    <string name="add_owner">Add owner</string>
+    <string name="current_owners">Current owners</string>
+    <string name="owner_address">Owner address</string>
+    <string name="login_notification_title">Painless Login Request by Charging Station Dashboard</string>
+    <string name="login_request_message">Please double tap to confirm login</string>
+    <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
+    <string name="cannot_remove_account_title">You can\'t remove a account with funds</string>
+    <string name="cannot_remove_safe_account_message">Please remove other owners first and then transfer your funds to another account</string>
+    <string name="cannot_remove_account_message">Please transfer your funds to another account</string>
+    <string name="safe_account_removal_error">You can not remove this Safe Account</string>
+    <string name="safe_accounts_count_format">+%d Safe Accounts</string>
+    <string name="did">DID</string>
+    <string name="required">Required</string>
+    <string name="change_account">Change Account</string>
+    <string name="show_identity">Show identity</string>
+    <string name="credentials">Credentials</string>
+    <string name="connected_services">Connected services</string>
+    <string name="success">Success</string>
+    <string name="error_header">An error occurred</string>
+    <string name="error_title">Error occurs</string>
+    <string name="auth_error_title">Error during authentication</string>
+    <string name="attached_credential_success">Your credential was successfully attached to your identity %s</string>
+    <string name="attached_credential_failure">The imported credential could not be attached to any of your identities</string>
+    <string name="remove_credential_dialog_title">Remove Credential?</string>
+    <string name="remove_credential_dialog_message">You will have to get a new credential from the issuer.</string>
+    <string name="update_credential_message">Do you want to update your existing credential?</string>
+    <string name="credentials_label">Credentials</string>
+    <string name="contacts_label">Contacts</string>
+    <string name="my_identities_label">My Identities</string>
+    <string name="connections_label">Connections</string>
+    <string name="dapps_label">Dapps</string>
+    <string name="valid_until">Valid until:</string>
+    <string name="memberId">MemberID:</string>
+    <string name="name_colon">Name:</string>
+    <string name="since">Since:</string>
+    <string name="coverage">Coverage:</string>
+    <string name="ok">OK</string>
+    <string name="future_contacts_info">Here you will be able to save your contacts in the future.</string>
+    <string name="invalid_signature_error_message">Unfortunately the signature of this certificate is not correct, therefore it was not imported. Please contact the certificate issuer.</string>
+    <string name="take_photo">Take new photo</string>
+    <string name="choose_existed_photo">Select from gallery</string>
+    <string name="delete_photo">Delete photo</string>
+
+    <string name="permission_error">Permission Error</string>
+    <string name="permission_error_message">Can not change profile photo without necessary permissions</string>
+    <string name="clear_text">Clear text</string>
+    <string name="pending_account_error_message">Something went wrong, please check your balances.</string>
+    <string name="provide_following_data">You are about to provide the following data</string>
+    <string name="connection_request_manual">This service will be added to the Minerva - Services and future requests will be done automatically. If you want to turn the automation off, you only need to remove it from there.</string>
+    <string name="connection_request">Connection request by %s</string>
+    <string name="service_added">Service: %s</string>
+    <string name="background_service_added">Background-Service: %s</string>
+    <string name="service_sent">Credential %1$s to Service %2$s</string>
+    <string name="rejected">Rejected</string>
+    <string name="accepted">Accepted</string>
+    <string name="estimate_transaction_cost_error">Transaction cost couldn\'t be estimated, but you can adjust the standard values if you like.</string>
+    <string name="security">Security</string>
+    <string name="your_preferences">Your preferences</string>
+    <string name="info">Info</string>
+    <string name="legal">Legal</string>
+    <string name="for_developers">For Developers</string>
+    <string name="use_main_networks">Use Main Networks</string>
+    <string name="follow_on_twitter">Follow us on Twitter</string>
+    <string name="join_community">Join Minerva\'s community</string>
+    <string name="version">App Version</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="token_reset">Reset tokens</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="test_networks">Test networks</string>
+    <string name="main_networks">Main networks</string>
+    <string name="select_network">Select network</string>
+    <string name="automatic_backup_failed_error">Automatic backup failed because this wallet was set up on a new device.</string>
+    <string name="outdated_wallet_error_message">The wallet backup data seems to be outdated, suggesting that you are using it on another device. If you continue using this wallet on this device anyway, no further backups will be made and data may get lost if something happens to this device. If this is the primary device you want to use your wallet with, you need to reinstall the app and recover the latest wallet data with the Secret Recovery Phrase.</string>
+    <string name="wallet_connect_with_count_title">WalletConnect (%d)</string>
+    <string name="wallet_connect_title">WalletConnect</string>
+    <string name="funds_at_risk_message">The use of main networks like Gnosis Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your Secret Recovery Phrase.</string>
+    <string name="fund_at_risk_warning">Act Carefully!</string>
+    <string name="i_understand">I understand</string>
+    <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
+    <string name="collectibles">Collectibles</string>
+    <string name="tokens">Tokens</string>
+    <string name="manage_token">Manage Assets</string>
+    <string name="rearrange_assets">Rearrange Assets</string>
+    <string name="add_asset">Add Asset</string>
+    <string name="contract_address_or_name">Contract Address or name</string>
+    <string name="minerva_support">Minerva supports all %s Tokens. Please enter Token Name or Token Contract Address.</string>
+    <string name="add_token">Add Token</string>
+    <string name="symbol">Symbol</string>
+    <string name="decimals">Decimals</string>
+    <string name="invalid_account_address">Error: Invalid account address</string>
+    <string name="invalid_token_address">Error: Invalid asset address</string>
+    <string name="add_tats">Add 5 tATS</string>
+    <string name="buy_crypto">Buy Crypto</string>
+    <string name="wc_message">WalletConnect lets you connect to desktop websites by scaning a QR code.</string>
+    <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
+    <string name="connected">Connected</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
+    <string name="Connect">Connect</string>
+    <string name="connect_to_website">Connect to website</string>
+    <string name="all_my_assets">All my Assets</string>
+    <string name="free_ats_warning">You can only get 5 tATS per day and you need to have at least one ARTIS (τ1) account.</string>
+    <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
+    <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
+    <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
+    <string name="unsupported_network_id_message">This website requests a connection to Chain id: %s, which is not yet supported by Minerva Wallet.</string>
+    <string name="unsupported_network_name_message">This website requests a connection to Chain: %s, which is not yet supported by Minerva Wallet.</string>
+    <string name="chain_id">Chain id: %s</string>
+    <string name="chain_name">Chain: %s</string>
+    <string name="missing_account_message">You don\'t have an account on %s yet. Please click \'Add account\' button above.</string>
+    <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
+    <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please click \'Add account\' button above.</string>
+    <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
+    <string name="change_account_not_defined_warning_message">You can change the existing WalletConnect \n connections  with a website (DApp) to another \n network and/or address. The changes will also be \n visible on the Service screen.</string>
+    <string name="dapp_disconnected">%s session disconnected</string>
+    <string name="dapp_unnamed">Unnamed</string>
+    <string name="invalid_account_message">Invalid Account, try again</string>
+    <string name="dapp_deleted">Dapp deleted</string>
+    <string name="confirm">Confirm</string>
+    <string name="message_signing_request">Message signing request</string>
+    <string name="export_private_key">Export Private Key</string>
+    <string name="warning_export_private_key">Warning: Never disclose this key. Anyone with your private key can steal any assets held in your account</string>
+    <string name="show_private_key">Show Private Key</string>
+    <string name="hide_private_key">Hide Private Key</string>
+    <string name="private_key">Private Key</string>
+    <string name="transaction_request">Transaction Request</string>
+    <string name="transfer">Transfer</string>
+    <string name="to">To</string>
+    <string name="from">From</string>
+    <string name="transaction_cost">Transaction cost</string>
+    <string name="account_balance_is_to_low">Account balance is too low</string>
+    <string name="custom">Custom</string>
+    <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
+    <string name="unknown_tx_speed">Unknown time</string>
+    <string name="sending">Sending</string>
+    <string name="rapid">Rapid</string>
+    <string name="fast">Fast</string>
+    <string name="standard">Standard</string>
+    <string name="slow">Slow</string>
+    <string name="pre_authorize">Pre-Authorize</string>
+    <string name="unlimited">Unlimited</string>
+    <string name="allowance_receiver">For</string>
+    <string name="allowance">Allowance</string>
+    <string name="undefined_transaction">Undefined transaction</string>
+    <string name="feature_enabled_soon">This feature will be enabled soon</string>
+    <string name="wc_connection_error_message">Your WalletConnect connection was closed, you will have to reconnect again to the website</string>
+    <string name="enable">Enable</string>
+    <string name="create">Create</string>
+    <string name="protect_keys">Protect Keys</string>
+    <string name="protect_transactions">Protect Transactions</string>
+    <string name="protect_keys_description">Enable your standard phone authentication method to protect your Secret Recovery Phrase and the export of private keys.</string>
+    <string name="protect_transactions_description">Enable your standard phone authentication method to protect all transactions sent from Minerva</string>
+    <string name="protect_transaction_error_title">Protect Transaction error</string>
+    <string name="protect_transaction_error_message">You have to enable "Protect Keys" first, before you can also protect transactions.</string>
+    <string name="authentication_title">Use yor phone authentication</string>
+    <string name="device_not_secured">Your device is not secured!</string>
+    <string name="device_not_secured_message">Please change your device security settings and try again.</string>
+    <string name="authentication_fail">Authentication failed!</string>
+    <string name="authentication_fail_message">There was unexpected authentication error. Please try again.</string>
+    <string name="choose_your_crypto">Choose your crypto</string>
+    <string name="continue_to_ramp">Continue to Ramp</string>
+    <string name="create_new_account">Add account</string>
+    <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
+    <string name="currency">Currency</string>
+    <string name="try_again">Try again</string>
+    <string name="active_session_connection_error">Your connection with %s was closed. Check your internet connection and try to reconnect with a refreshed website.</string>
+    <string name="session_connection_error">Check your internet connection and try to reconnect with a refreshed website.</string>
+    <string name="version_history">Version history</string>
+    <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
+    <string name="info_awaiting">Awaiting connection</string>
+    <string name="authentication">Authentication</string>
+    <string name="authentication_alert_title">You should enable an authentication method for your Minerva Wallet.</string>
+    <string name="authentication_alert_message">This helps protect your money and assets from others accessing your unlocked phone.</string>
+    <string name="message_sync_error">If this message is shown despite a good internet connection, contact our support on Telegram or Discord.</string>
+    <string name="wrong_tx_value_error">The DApp has sent the wrong amount. It may help if you retry and initiate a new transaction. If you contact our support, please provide the following error-Id: %s</string>
+    <string name="choose_your_account">Choose your Account</string>
+    <string name="select_address_header">Select Address</string>
+    <string name="add_account_info">You have to select a network and then choose the address you want to use.</string>
+    <string name="hide_now">Hide now</string>
+    <string name="hide">Hide</string>
+    <string name="no_addresses_left_info">You reached the maximum number of accounts</string>
+    <string name="ethereum_label">Ethereum</string>
+    <string name="polygon_label">Polygon (Matic)</string>
+    <string name="celo_label">Celo</string>
+    <string name="xdai_label">Gnosis Chain</string>
+    <string name="create_your_first_account_header">Create your \nfirst account!</string>
+    <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
+    <string name="skip">Skip</string>
+    <string name="edit_name">Edit Name</string>
+    <string name="account_name_label">Account name</string>
+    <string name="change_account_warning">This DApp requests a connection to %s and therefore a corresponding network and account have been selected.</string>
+    <string name="value">Value:</string>
+    <string name="token_balance_unlcear_message">Token balance unclear - transaction could fail</string>
+    <string name="add_account_label">+ Add account</string>
+    <string name="restore_wallet_title">Import existing wallet</string>
+    <string name="type_here">Type here</string>
+    <string name="no_backup_data_found_for_the_secret_recovery_phrase_you_entered">No backup data found for the Secret Recovery Phrase you entered. \n\n Make sure your device \n is currently online.</string>
+    <string name="make_sure_your_device_is_currently_online">Make sure your device\n is currently online.</string>
+    <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please join our community on <a href="https://t.me/MinervaWallet">Telegram</a> or <a href="https://minerva.digital/discord ">Discord</a>.</string>
+    <string name="terms_of_service_info">By proceeding you agree to the <a href="https://docs.minerva.digital/legal/terms">Terms of Service</a></string>
+    <string name="import_with_recovery_phrase">Import with Recovery Phrase</string>
+    <string name="import_info">Import an existing wallet or create a new one</string>
+    <string name="your_identity_label">Your identity</string>
+    <string name="your_data_label">Your data</string>
+    <string name="your_money_label">Your money</string>
+    <string name="your_own_them_label">Own them</string>
+    <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
+    <string name="empty" />
+    <string name="nft_header">NFTs</string>
+    <string name="timeline">Timeline view</string>
+    <string name="grid">Grid view</string>
+    <string name="more_label"> more</string>
+    <string name="amount_label">Amount: %s</string>
+    <string name="address_text">address</string>
+    <string name="slash_text">/</string>
+
+    <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
+    <string name="default_dapp_dialog_confirm">Open</string>
+    <string name="uniswap_dialog_description">To use your Minerva Wallet, in Uniswap tap "Connect Wallet" then "Wallet Connect"</string>
+    <string name="uniswap_dialog_confirm">Open Uniswap</string>
+    <string name="honeyswap_dialog_description">To use your Minerva Wallet, in Honeyswap tap "Connect Wallet" then "Wallet Connect"</string>
+    <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
+    <string name="nft_graphic_error_message">This NFT graphic cannot be displayed</string>
+    <string name="cd_dapp_icon">Dapp icon</string>
+    <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
+    <string name="sponsored_label">Sponsored</string>
+    <string name="open_dapp_label">Open</string>
+    <string name="favorite_label">Favorite</string>
+    <string name="token_reset_message">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
+    <string name="failed_to_fetch_transaction_costs_error">Failed to estimate transaction costs. Try again later or add them manually.</string>
+    <string name="transaction_accepted_title">Transaction Accepted</string>
+    <string name="no_nfts_available">No NFTs available</string>
+    <string name="transaction_cost_format">%1$s %2$s (%3$s)</string>
+    <string name="advanced">Advanced</string>
+    <string name="clear_token_cache_title">Clear Token Cache</string>
+    <string name="clear_token_cache_description">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
+    <string name="clear_token_cache_action_text">Clear</string>
+    <string name="clear">Clear</string>
+    <string name="token_id_hint">Token ID</string>
+    <string name="error_invalid_token_id">Error: Invalid token id</string>
+    <string name="token_type">Type</string>
+    <string name="you_dont_own_this_token">You do not own this token</string>
+    <string name="default_placeholder">default</string>
+    <string name="services_network_filter_main_color">#6442d1</string>
+    <string name="unmaintained_network">UNMAINTAINED NETWORK</string>
+    <string name="unmaintained_network_warning">WARNING: Unmaintained Network</string>
+    <string name="unmaintained_network_learn_dialog">Learn more</string>
+    <string name="unmaintained_network_message_1">This network is not maintained \nanymore and over time transfers from accounts might be not possible any \nmore.</string>
+    <string name="unmaintained_network_message_2">If you experience such a problem \nyou will have to export the private key and import it to another wallet, which still supports transactions on that network.\n\nFurther assistance can be given on our support channels.</string>
+    <string name="unmaintained_network_message_3">Don’t show this message again</string>
+    <string name="exclamation_mark">!</string>
+    <string name="my_favorites">My Favorites</string>
+    <string name="my_favorites_item_description">"Personal collection of NFTs"</string>
+    <string name="open_in_explorer">Open in Explorer</string>
+    <string name="already_in_use">Already in use</string>
+    <string name="free">Free</string>
+    <string name="change_account_dialog">CHANGE ACCOUNT</string>
+    <string name="change">Change</string>
+    <string name="connect">Connect</string>
+    <string name="unknown_type">Unknown Type</string>
+
+    <string-array name="currencies">
+        <item>EUR|Euro</item>
+        <item>GBP|Pound Sterling</item>
+        <item>USD|US Dollar</item>
+        <item>AED|United Arab Emirates Dirham</item>
+        <item>ARS|Argentine Peso</item>
+        <item>AUD|Australian Dollar</item>
+        <item>BDT|Bangladeshi Taka</item>
+        <item>BHD|Bahraini Dinar</item>
+        <item>BMD|Bermudian Dollar</item>
+        <item>BRL|Brazil Real</item>
+        <item>CAD|Canadian Dollar</item>
+        <item>CHF|Swiss Franc</item>
+        <item>CLP|Chilean Peso</item>
+        <item>CNY|Chinese Yuan</item>
+        <item>CZK|Czech Koruna</item>
+        <item>DKK|Danish Krone</item>
+        <item>HKD|Hong Kong Dollar</item>
+        <item>HUF|Hungarian Forint</item>
+        <item>IDR|Indonesian Rupiah</item>
+        <item>ILS|Israeli New Shekel</item>
+        <item>INR|Indian Rupee</item>
+        <item>JPY|Japanese Yen</item>
+        <item>KRW|South Korean Won</item>
+        <item>KWD|Kuwaiti Dinar</item>
+        <item>LKR|Sri Lankan Rupee</item>
+        <item>MMK|Burmese Kyat</item>
+        <item>MXN|Mexican Peso</item>
+        <item>MYR|Malaysian Ringgit</item>
+        <item>NGN|Nigerian Naira</item>
+        <item>NOK|Norwegian Krone</item>
+        <item>NZD|New Zealand Dollar</item>
+        <item>PHP|Philippine Peso</item>
+        <item>PKR|Pakistani Rupee</item>
+        <item>PLN|Polish Zloty</item>
+        <item>RUB|Russian Ruble</item>
+        <item>SAR|Saudi Riyal</item>
+        <item>SEK|Swedish Krona</item>
+        <item>SGD|Singapore Dollar</item>
+        <item>THB|Thai Baht</item>
+        <item>TRY|Turkish Lira</item>
+        <item>TWD|New Taiwan Dollar</item>
+        <item>UAH|Ukrainian hryvnia</item>
+        <item>VEF|Venezuelan Bolívar Fuerte</item>
+        <item>VND|Vietnamese Đồng</item>
+        <item>XDR|IMF Special Drawing Rights</item>
+        <item>ZAR|South African Rand</item>
+    </string-array>
+
+    <!--  TODO Add real release notes  -->
+    <!--  TIP: Use * to show note with bullet -->
+    <string-array name="release_notes">
+        <item>1.8.0</item>
+        <item>* WalletConnect: Change account on existing connections</item>
+        <item>* Onboarding screen: Added Celo as main option</item>
+        <item>* Superfluid Super Token visibility improvement</item>
+        <item>* Support for Secret Recovery Phrase with Password </item>
+        <item>* cREAL on Celo direct purchase via ramp.network</item>
+        <item>* ETH and DAI on Optimism direct purchase via ramp.network</item>
+        <item>* Set Kovan testnet as unmaintained network</item>
+        <item>* UI adjustments &amp; various improvements</item>
+        <item>1.7.9</item>
+        <item>* Added Celo network support</item>
+        <item>* Added Celo testnets support</item>
+        <item>* CELO, CUSD &amp; CEUR on Celo direct purchase via ramp.network</item>
+        <item>* Manually change Network selection on WalletConnect connection requests</item>
+        <item>* Various bug fixes and UI improvements</item>
+        <item>1.7.8</item>
+        <item>* Added Avalanche network support</item>
+        <item>* Added Avalanche testnet support</item>
+        <item>* AVAX on Avalnache direct purchase via ramp.network</item>
+        <item>* Added \'Open in Explorer\' option for accounts</item>
+        <item>* Set POA Core, ARTIS ∑1, Rinkeby &amp; Ropsten as unmaintained networks</item>
+        <item>* Unified QR-Scanner</item>
+        <item>* Various bug fixes and UI improvements</item>
+        <item>1.7.5</item>
+        <item>* Added Optimism network support</item>
+        <item>* Added Arbitrum network support</item>
+        <item>* Added Sepolia testnet support</item>
+        <item>* Added Optimism Kovan testnet support</item>
+        <item>* Added Arbitrum Rinkeby testnet support</item>
+        <item>* ETH on Arbitrum direct purchase via ramp.network</item>
+        <item>* Filter DApps for different networks</item>
+        <item>* Improved gas price calculation</item>
+        <item>* Preparations to handle unmaintained networks</item>
+        <item>1.7.1</item>
+        <item>* Support of Ethereum Name Service NFTs</item>
+        <item>* Support of Unstoppable Domains NFTs</item>
+        <item>* More NFT collections officially supported</item>
+        <item>* Rename Binance Smart Chain to BNB Chain</item>
+        <item>* Improved Super Token stream visualisation</item>
+        <item>* Various UI updates and bug fixes</item>
+        <item>1.7.0</item>
+        <item>* NFT support for all main networks (ERC-721 &amp; ERC-1155)</item>
+        <item>* Support for all NFT media types (SVG, mp4, mp3, …)</item>
+        <item>* Sending NFTs</item>
+        <item>* Rename xDai Chain to Gnosis Chain</item>
+        <item>* Greater DApp integration variety</item>
+        <item>* Select your DApp Favorites</item>
+        <item>* Sponsored DApps on Send and Services screen</item>
+        <item>* Advanced Settings: Clear Token Cache</item>
+        <item>* Various UI tweaks, updates and bug fixes</item>
+        <item>1.6.8</item>
+        <item>* Extension of DApp support for 5 more applications</item>
+        <item>* Various visual updates and bug fixes (e.g. token visibility)</item>
+        <item>1.6.5</item>
+        <item>* Direct DApp access from Services screen</item>
+        <item>* WalletConnect improvements</item>
+        <item>* UI improvements (buttons, spaces, etc.)</item>
+        <item>* Bug fixes (e.g. Android 8 crashes)</item>
+        <item>1.6.0</item>
+        <item>* Full support of Binance Smart Chain (BSC) mainnet and testnet</item>
+        <item>* Caching of token values and icons</item>
+        <item>* BNB on BSC direct purchase via ramp.network</item>
+        <item>* ETH on Polygon direct purchase via ramp.network</item>
+        <item>* Fancier and faster welcome screen &amp; onboarding animation</item>
+        <item>1.5.5</item>
+        <item>* Integration of mobile WalletConnect</item>
+        <item>* Automatic SuperToken stream detection and animation</item>
+        <item>* Several usability improvements and fixes</item>
+        <item>1.5.0</item>
+        <item>* Wallet restore from the most popular 3rd party wallets</item>
+        <item>* Use a scanner to connect to any DApp on any network</item>
+        <item>* Now you can add and change accounts on-the-flight of the DApp connection</item>
+        <item>* Improved welcome screens</item>
+        <item>* Automatic network change to the one required by DApp</item>
+        <item>* Various UI improvements</item>
+        <item>1.4.1</item>
+        <item>* Account name change enabled</item>
+        <item>* WalletConnect connection issues fixed</item>
+        <item>* Stability issues fixed</item>
+        <item>* Several format and naming issues fixed</item>
+        <item>1.4.0</item>
+        <item>* Full Polygon PoS chain and Mumbai testnet integration</item>
+        <item>* Buy crypto on Polygon via Ramp.Network</item>
+        <item>* Major revision of the account management for all networks</item>
+        <item>* Enable hiding of accounts</item>
+        <item>* Integrate token caching for faster balance updates</item>
+        <item>* WalletConnect stability improvements</item>
+        <item>1.3.0</item>
+        <item>* Security update for WalletConnect sessions</item>
+        <item>* Improved opening and closing of accounts</item>
+        <item>* Secure with biometrics for Android 11</item>
+        <item>* Better wording: Secret Recovery Phrase instead of Seed Phrase</item>
+        <item>* Various smaller bug fixes and UI improvements</item>
+        <item>1.2.0</item>
+        <item>* Secure your keys and transactions</item>
+        <item>* Buy crypto with your fiat currency via Ramp</item>
+        <item>* See all token values in your preferred fiat currency</item>
+        <item>* Improved WalletConnect session management</item>
+        <item>* Refined user interface with lots of improvements</item>
+        <item>1.0.1</item>
+        <item>* Enable WalletConnect for DApps</item>
+        <item>* Automated token discovery (e.g. LP tokens)</item>
+        <item>* Allow exporting private key per account</item>
+        <item>* Dynamically calculate the gas price and gas limit</item>
+        <item>* Provide basic information in activities logs</item>
+        <item>* Manage decentralized identities and credentials</item>
+    </string-array>
 </resources>
