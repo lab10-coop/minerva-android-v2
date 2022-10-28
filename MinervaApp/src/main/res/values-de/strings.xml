@@ -1,3 +1,5 @@
 <resources>
     <string name="identities">Identität</string>
+    <string name="values">Werte</string>
+    <string name="accounts_navigation_menu_header">Werte</string>
 </resources>
