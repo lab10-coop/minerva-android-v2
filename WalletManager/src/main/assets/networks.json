@@ -309,7 +309,7 @@
     "color": "#666666",
     "testNet": true,
     "chainId": 10200,
-    "explore": "https://blockscout.chiadochain.net"
+    "explore": "https://blockscout.chiadochain.net/"
   },
   {
     "name": "Mumbai",

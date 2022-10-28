@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/row_container"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/spinner_item_height"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="@dimen/margin_xbig"
+        android:layout_height="@dimen/margin_xbig"
+        android:src="@drawable/ic_add_account"/>
+
+    <TextView
+        android:id="@+id/add_account_row"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/margin_xsmall"
+        android:gravity="center"
+        android:fontFamily="@font/rubik_regular"
+        android:textSize="@dimen/text_normal"
+        android:textColor="@color/colorPrimary"
+        tools:text="@string/create_new_account"/>
+</LinearLayout>
