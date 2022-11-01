@@ -25,6 +25,7 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
     }
 
     fun setStreamingValues(_start: BigDecimal, _speed: BigInteger) {
+        // startTime should be the block timestamp when balance was requested
         startTime = System.currentTimeMillis()
         start = _start
         speed = _speed
