@@ -242,12 +242,12 @@ class TokenManagerImpl(
             )
                 .flatMap { superTokenBalance ->
                     getSuperTokenNetFlow(superTokenBalance, account)
-                        .map { netFlow ->
+                        .map { consNetFlow ->
                             handleTokensBalances(
                                 superTokenBalance,
                                 getSuperTokensForAccount(supertokensPerAccount),
                                 account,
-                                netFlow
+                                consNetFlow
                             )
                         }
                 }
@@ -258,62 +258,11 @@ class TokenManagerImpl(
         token: Token,
         tokens: List<ERCToken>,
         account: Account,
-        netFlow: BigInteger = BigInteger.ZERO
+        constNetFlow: BigInteger? = null
     ): Asset =
         when (token) {
-            is TokenWithBalance -> getAssetBalance(tokens, token, account, netFlow)
+            is TokenWithBalance -> getAssetBalance(tokens, token, account, constNetFlow)
             else -> TokenToAssetBalanceErrorMapper.map(account, token as TokenWithError)
-        }
-
-    private fun getAssetBalance(
-        tokens: List<ERCToken>,
-        tokenWithBalance: TokenWithBalance,
-        account: Account,
-        netFlow: BigInteger
-    ): AssetBalance =
-        tokens.find { token -> token.address.equals(tokenWithBalance.address, true) }
-            ?.let { token ->
-                val isSuper = isSuperToken(token.type, account)
-                AssetBalance(
-                    account.chainId,
-                    account.privateKey,
-                    getAccountToken(
-                        token.copy(isStreamActive = isSuper, consNetFlow = netFlow),
-                        tokenWithBalance.balance,
-                        isSuper
-                    )
-                )
-            }
-            .orElse { throw NullPointerException() }
-
-    private fun getAccountToken(
-        erc20Token: ERCToken,
-        balance: BigDecimal,
-        isStreamActive: Boolean
-    ): AccountToken =
-        if (isStreamActive) {
-            AccountToken(
-                erc20Token,
-                tokenPrice = rateStorage.getRate(
-                    generateTokenHash(
-                        erc20Token.chainId,
-                        erc20Token.address
-                    )
-                ),
-                nextRawBalance = balance,
-                currentRawBalance = balance
-            )
-        } else {
-            AccountToken(
-                erc20Token,
-                currentRawBalance = balance,
-                tokenPrice = rateStorage.getRate(
-                    generateTokenHash(
-                        erc20Token.chainId,
-                        erc20Token.address
-                    )
-                )
-            )
         }
 
     private fun Account.getSuperTokensForAccount(
@@ -351,7 +300,7 @@ class TokenManagerImpl(
                 .flatMap { (token, type) ->
                     Flowable.just(token)
                 }
-                .map { token -> handleTokensBalances(token, tokens, account) }
+                .map { token -> handleTokensBalances(token, tokens, account, null) }
         }
     }
 
@@ -368,18 +317,6 @@ class TokenManagerImpl(
     private fun isSuperToken(type: TokenType, account: Account) =
         type.isSuperToken() && account.hasSuperfluidSupport()
 
-    private fun handleTokensBalances(
-        token: Token,
-        tokens: List<ERCToken>,
-        account: Account
-    ): Asset =
-        when (token) {
-            is TokenWithBalance -> {
-                getAssetBalance(tokens, token, account)
-            }
-            else -> TokenToAssetBalanceErrorMapper.map(account, token as TokenWithError)
-        }
-
     private fun String?.isEqualOrBothAreNullOrBlank(other: String?): Boolean {
         val areEqual = this == other
         val areBothNullOrBlank = (this.isNullOrBlank() && other.isNullOrBlank())
@@ -389,18 +326,23 @@ class TokenManagerImpl(
     private fun getAssetBalance(
         tokens: List<ERCToken>,
         tokenWithBalance: TokenWithBalance,
-        account: Account
+        account: Account,
+        consNetFlow: BigInteger?
     ): AssetBalance =
         tokens.find { token ->
             token.address.equals(tokenWithBalance.address, true)
                     && token.tokenId.isEqualOrBothAreNullOrBlank(tokenWithBalance.tokenId)
         }
             ?.let { token ->
+                var tokenCopy = token.copy()
+                if (consNetFlow != null) {
+                    tokenCopy = tokenCopy.copy(consNetFlow = consNetFlow)
+                }
                 AssetBalance(
                     account.chainId,
                     account.privateKey,
                     getAccountToken(
-                        token.copy(isStreamActive = isSuperToken(token.type, account)),
+                        tokenCopy,
                         tokenWithBalance.balance
                     )
                 )

@@ -10,7 +10,6 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.utils.BalanceUtils.getCryptoBalance
 import minerva.android.walletmanager.utils.BalanceUtils.getFiatBalance
-import minerva.android.widget.CryptoAmountView
 import minerva.android.widget.repository.getMainTokenIconRes
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -32,8 +31,9 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
         getTokensValues(account, accountToken).let { (currentBalance, fiatBalance) ->
             with(binding.amountView) {
                 setCryptoBalance(getCryptoBalance(currentBalance))
-                if (accountToken != null) {
-                    updateTokenBalance(accountToken, currentBalance)
+                if (accountToken != null && accountToken.token.consNetFlow != BigInteger.ZERO) {
+                    setStreamingValues(currentBalance, accountToken.token.consNetFlow)
+                    startStreamAnimation()
                 }
 
                 if (account.isError) {
@@ -50,30 +50,6 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
             }
         }
     }
-
-    private fun CryptoAmountView.updateTokenBalance(
-        accountToken: AccountToken,
-        currentBalance: BigDecimal
-    ) {
-        when {
-            isInitStream(accountToken) -> initAnimation(accountToken, currentBalance)
-            isStreamableToken(accountToken) ->
-                startStreamingAnimation(currentBalance, accountToken.token.consNetFlow)
-        }
-    }
-
-    private fun CryptoAmountView.initAnimation(
-        accountToken: AccountToken,
-        currentBalance: BigDecimal
-    ) {
-        startStreamingAnimation(currentBalance, accountToken.token.consNetFlow)
-    }
-
-    private fun isStreamableToken(accountToken: AccountToken): Boolean =
-        accountToken.token.type.isSuperToken() && accountToken.token.consNetFlow != BigInteger.ZERO
-
-    private fun isInitStream(accountToken: AccountToken): Boolean =
-        accountToken.isInitStream && accountToken.token.consNetFlow != BigInteger.ZERO
 
     private fun getTokensValues(
         account: Account,
@@ -127,6 +103,10 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
             )
         }
         else setOnClickListener { callback.onSendCoinClicked(account) }
+    }
+
+    fun startStreamAnimation() {
+        binding.amountView.startStreamAnimation()
     }
 
     fun endStreamAnimation() {
