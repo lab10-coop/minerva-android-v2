@@ -30,6 +30,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_ALF
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_BAK
@@ -59,6 +60,7 @@ private fun getMainIcon(chainId: Int): Int =
         ARB_RIN -> R.drawable.ic_arbitrum
         OPT -> R.drawable.ic_optimism
         OPT_KOV -> R.drawable.ic_optimism
+        OPT_GOR -> R.drawable.ic_optimism
         CELO -> R.drawable.ic_celo
         CELO_ALF -> R.drawable.ic_celo
         CELO_BAK -> R.drawable.ic_celo
@@ -85,6 +87,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
         ARB_RIN -> R.drawable.ic_ethereum_l2
         OPT -> R.drawable.ic_ethereum_l2
         OPT_KOV -> R.drawable.ic_ethereum_l2
+        OPT_GOR -> R.drawable.ic_ethereum_l2
         CELO -> R.drawable.ic_celo_coin
         CELO_ALF -> R.drawable.ic_celo_coin
         CELO_BAK -> R.drawable.ic_celo_coin
