@@ -68,6 +68,8 @@ android {
 
             buildConfigField "String", "RAMP_API_URL", '"ri-widget-staging.firebaseapp.com"'
             buildConfigField "String", "RAMP_API_KEY", System.env.RAMP_STAGING_API_KEY ?: localProperty("ramp.staging.api.key")
+
+            resConfigs("en", "de")
         }
 
         production {
@@ -82,6 +84,8 @@ android {
 
             buildConfigField "String", "RAMP_API_URL", '"buy.ramp.network"'
             buildConfigField "String", "RAMP_API_KEY", System.env.RAMP_PROD_API_KEY ?: localProperty("ramp.prod.api.key")
+
+            resConfigs("en")
         }
     }
 
