@@ -345,6 +345,7 @@
     <string name="no_addresses_left_info">Du hast die maximale Anzahl von Accounts erreicht</string>
     <string name="ethereum_label">Ethereum</string>
     <string name="polygon_label">Polygon</string>
+    <string name="celo_label">Celo</string>
     <string name="xdai_label">Gnosis Chain</string>
     <string name="create_your_first_account_header">Create your \nfirst account!</string>
     <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
@@ -420,6 +421,7 @@
     <string name="change_account_dialog">ACCOUNT WECHSELN</string>
     <string name="change">Ändern</string>
     <string name="connect">Verbinden</string>
+    <string name="unknown_type">Unknown Type</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
