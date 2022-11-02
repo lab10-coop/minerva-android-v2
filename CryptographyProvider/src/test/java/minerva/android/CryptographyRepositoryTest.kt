@@ -61,7 +61,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for identities test`() {
-        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, didPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", "", 1, didPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x94c87a5f423dbe7bbb085a963142cfd12e6c001e"
         }
@@ -69,7 +69,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for test nets test`() {
-        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, testNetPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", "", 1, testNetPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x4ecc9dbd0494b32bbd77c87f46da92ff5f0c2258"
         }
@@ -77,14 +77,14 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for main nets test`() {
-        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, mainNetPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", "", 1, mainNetPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x1e7cfbf30f2ae071806a78135f0c1280dece8fda"
         }
     }
 
     @Test
-    fun `crate master seed test`() {
+    fun `create master seed test`() {
         val test = repository.createMasterSeed().test()
         test.assertValue { it.first.isNotEmpty() && it.second.isNotEmpty() && it.third.isNotEmpty() }
     }
@@ -99,11 +99,41 @@ class CryptographyRepositoryTest {
     }
 
     @Test
+    fun `restore master seed and derive keys for main nets test`() {
+        val result =
+            repository.restoreMasterSeed("hamster change resource act wife lamp tower quick dilemma clay receive attract")
+        val test = repository.calculateDerivedKeysSingle((result as SeedWithKeys).seed, "", 1, mainNetPath).test()
+        test.assertValue {
+            it.index == 1 && it.address == "0x1e7cfbf30f2ae071806a78135f0c1280dece8fda"
+        }
+    }
+
+    @Test
     fun `restore master seed error test`() {
         val result =
             repository.restoreMasterSeed("dasdasd change resource act wife lamp tower quick dilemma clay receive attract")
         (result as SeedError).apply {
             error.message shouldBeEqualTo "word(dasdasd) not in known word list"
+        }
+    }
+
+    @Test
+    fun `restore master seed with password test`() {
+        val result =
+            repository.restoreMasterSeed("winter wear license spatial history oxygen spell leg wealth stay tornado olympic supersecretpassword")
+        (result as SeedWithKeys).apply {
+            seed shouldBeEqualTo "fc1f0e04e846c33cb44bfaf83a9f95cd"
+        }
+    }
+
+    @Test
+    fun `restore master seed with password and derive keys for main nets test`() {
+        val result =
+            repository.restoreMasterSeed("mimic taste discover must column hurdle come pig hip decade exhaust vocal superdupersecretpw")
+        val seedWithKeys = (result as SeedWithKeys);
+        val test = repository.calculateDerivedKeysSingle(seedWithKeys.seed, seedWithKeys.password, 0, mainNetPath).test()
+        test.assertValue {
+            it.index == 0 && it.address == "0x6191a349f4bbb4d00b99f190e96deda9e2207b7d"
         }
     }
 
@@ -115,8 +145,22 @@ class CryptographyRepositoryTest {
     }
 
     @Test
+    fun `test mnemonic validator with password`() {
+        val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture thisisapassword"
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, true)
+    }
+
+    @Test
     fun `test mnemonic validator collecting invalid words`() {
         val mnemonic = "vessel *$ alter error federal HEHE chat ability sun Test valve picture"
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, false)
+    }
+
+    @Test
+    fun `test mnemonic validator collecting invalid words and password`() {
+        val mnemonic = "vessel *$ alter error federal HEHE chat ability sun Test valve picture anotherpassword"
         val validation = repository.areMnemonicWordsValid(mnemonic)
         assertEquals(validation, false)
     }

@@ -10,6 +10,7 @@ import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.ChainId
@@ -58,9 +59,9 @@ abstract class BaseWalletConnectScannerViewModel(
         }
 
     var requestedNetwork: BaseNetworkData = BaseNetworkData(Int.InvalidId, String.Empty)
-    internal lateinit var topic: Topic
+    internal var topic: Topic = Topic()
     private var handshakeId: Long = 0L
-    internal lateinit var currentSession: WalletConnectSession
+    internal var currentSession: WalletConnectSession = WalletConnectSession()
 
     private val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
 
@@ -134,7 +135,34 @@ abstract class BaseWalletConnectScannerViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onComplete = { closeScanner(isMobileWalletConnect) },
+                        onComplete = {
+                            //set default value for showing empty list of network in future
+                            requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                            closeScanner(isMobileWalletConnect)
+                        },
+                        onError = { setLiveDataError(it) }
+                    )
+            }
+        }
+    }
+
+    /**
+     * Update Session - update account for current wallet api connection
+     * @param connectionPeerId - id of socket client connection
+     */
+    fun updateSession(connectionPeerId: String) {
+        if (account.id != Int.InvalidId) {
+            launchDisposable {
+                walletConnectRepository.updateSession(
+                    connectionPeerId,
+                    account.address,
+                    account.chainId,
+                    account.name,
+                    account.network.name
+                )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
                         onError = { setLiveDataError(it) }
                     )
             }

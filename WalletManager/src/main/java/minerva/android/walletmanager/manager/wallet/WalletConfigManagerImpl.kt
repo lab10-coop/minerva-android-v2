@@ -55,8 +55,7 @@ class WalletConfigManagerImpl(
 ) : WalletConfigManager {
 
     private var walletConfigExecutor = Executors.newSingleThreadExecutor()
-    override lateinit var masterSeed: MasterSeed
-    override fun isMasterSeedInitialised() = ::masterSeed.isInitialized
+    override var masterSeed: MasterSeed = MasterSeed()
     private var disposable: Disposable? = null
 
     //TODO delete saving WalletConfig as reference - use Room for handling it - MinervaDatabase
@@ -356,7 +355,12 @@ class WalletConfigManagerImpl(
         return Observable.fromIterable(identitiesResponse)
             .filter { identityPayload -> !identityPayload.isDeleted }
             .flatMapSingle { identityPayload ->
-                cryptographyRepository.calculateDerivedKeysSingle(masterSeed.seed, identityPayload.index, DID_PATH)
+                cryptographyRepository.calculateDerivedKeysSingle(
+                    masterSeed.seed,
+                    masterSeed.password,
+                    identityPayload.index,
+                    DID_PATH
+                )
             }
             .toList()
             .map { keys -> completeIdentitiesKeys(payload, keys) }
@@ -366,6 +370,7 @@ class WalletConfigManagerImpl(
                 .flatMapSingle {
                     cryptographyRepository.calculateDerivedKeysSingle(
                         masterSeed.seed,
+                        masterSeed.password,
                         accountsResponse[it].index,
                         getDerivationPath(accountsResponse, it),
                         isTestNet(accountsResponse, it)

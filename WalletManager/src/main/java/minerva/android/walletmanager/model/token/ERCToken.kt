@@ -19,10 +19,12 @@ data class ERCToken(
     val decimals: String = String.Empty,
     var accountAddress: String = String.Empty,
     var tokenId: String? = null,
-    val type: TokenType,
+    var type: TokenType,
     var logoURI: String? = null,
     var tag: String = String.Empty,
     var isError: Boolean = false,
+    // todo: isStreamActive could be inferred from consNetFlow
+    // most ofter you would just use type.isSuperToken() instead.
     var isStreamActive: Boolean = false,
     @Embedded var nftContent: NftContent = NftContent(),
     var consNetFlow: BigInteger = BigInteger.ZERO,
@@ -65,6 +67,10 @@ data class ERCToken(
         if(ercToken.nftContent.tokenUri.isNotEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
         if(ercToken.nftContent.description.isNotEmpty()) nftContent.description = ercToken.nftContent.description
     }
+
+    fun mergeSuperTokenDetailsAfterTokenDiscovery(ercToken: ERCToken) {
+        type = ercToken.type
+    }
 }
 
 enum class TokenType {
@@ -76,6 +82,6 @@ enum class TokenType {
         ERC721, ERC1155 -> false
         else -> true
     }
-
+    fun isSuperToken() = this == SUPER_TOKEN
     fun isNft() = isERC1155() || isERC721()
 }

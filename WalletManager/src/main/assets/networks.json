@@ -29,7 +29,7 @@
     "color": "#04795B",
     "testNet": false,
     "chainId": 100,
-    "explore": "https://blockscout.com/poa/xdai/",
+    "explore": "https://gnosisscan.io/",
     "superfluid": {
       "host": "0x2dFe937cD98Ab92e59cF3139138f18c823a4efE7",
       "cfav1": "0xEbdA4ceF883A7B12c4E669Ebc58927FBa8447C7D"
@@ -217,7 +217,7 @@
   },
   {
     "name": "Kovan",
-    "isActive": true,
+    "isActive": false,
     "token": "kETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
@@ -294,6 +294,22 @@
       "host": "0xF2B4E81ba39F5215Db2e05B2F66f482BB8e87FD2",
       "cfav1": "0xaD2F1f7cd663f6a15742675f975CcBD42bb23a88"
     }
+  },
+  {
+    "name": "Chiado",
+    "isActive": false,
+    "token": "xDAI",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rpc.chiadochain.net",
+    "wsRpc": "",
+    "gasPriceOracle": "https://rpc.chiadochain.net",
+    "gasPrice": "20000000000",
+    "minGasPrice": "1000000000",
+    "tokens": [],
+    "color": "#666666",
+    "testNet": true,
+    "chainId": 10200,
+    "explore": "https://blockscout.chiadochain.net/"
   },
   {
     "name": "Mumbai",

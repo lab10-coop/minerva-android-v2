@@ -163,11 +163,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success when tagged tokens are not empty test`() {
-        whenever(transactionRepository.getTaggedTokensUpdate())
+        whenever(transactionRepository.getTokensUpdate())
             .thenReturn(Flowable.just(listOf(ERCToken(1, "token", type = TokenType.ERC20))))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
-        whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
+        whenever(transactionRepository.updateTokens()).thenReturn(Completable.complete())
         viewModel.refreshTokensBalances()
         viewModel.balanceStateLiveData.observeForever(balanceObserver)
         balanceCaptor.run {
@@ -177,7 +177,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success when tagged tokens are empty test`() {
-        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(emptyList()))
+        whenever(transactionRepository.getTokensUpdate()).thenReturn(Flowable.just(emptyList()))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
         viewModel.refreshTokensBalances()
@@ -189,13 +189,13 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success when tagged tokens are not empty and check tokens visibility test`() {
-        whenever(transactionRepository.getTaggedTokensUpdate())
+        whenever(transactionRepository.getTokensUpdate())
             .thenReturn(
                 Flowable.just(listOf(ERCToken(1, "name1", address = "tokenAddress1", tag = "tag", type = TokenType.ERC20)))
             )
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
-        whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
+        whenever(transactionRepository.updateTokens()).thenReturn(Completable.complete())
 
         whenever(accountManager.activeAccounts).thenReturn(
             listOf(
@@ -229,7 +229,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.getTokenBalance()).thenReturn(Flowable.error(error))
-        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(
+        whenever(transactionRepository.getTokensUpdate()).thenReturn(
             Flowable.just(
                 listOf(
                     ERCToken(
@@ -255,7 +255,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Single.just(false),
             Single.error(Throwable("Refresh tokens list error"))
         )
-        whenever(transactionRepository.getTaggedTokensUpdate())
+        whenever(transactionRepository.getTokensUpdate())
             .thenReturn(Flowable.just(listOf(ERCToken(1, "token", type = TokenType.ERC20))))
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
@@ -321,81 +321,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
             verify(errorObserver).onChanged(capture())
             firstValue.peekContent() == NoFunds
         }
-    }
-
-    @Test
-    fun `get first active artis account`() {
-        NetworkManager.initialize(networks)
-        val account = viewModel.getAccountForFreeATS(accounts)
-        assertEquals(true, account.id == 2)
-    }
-
-    @Test
-    fun `adding free ATS correct`() {
-        NetworkManager.initialize(networks)
-        whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.complete())
-        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
-        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
-        whenever(accountManager.activeAccounts)
-            .thenReturn(
-                listOf(
-                    Account(
-                        1, chainId =
-                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
-                    )
-                )
-            )
-        viewModel.apply {
-            addAtsToken()
-        }
-        verify(accountManager, times(1)).saveFreeATSTimestamp()
-    }
-
-    @Test
-    fun `adding free ATS error`() {
-        NetworkManager.initialize(networks)
-        whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.error(Throwable("Some error")))
-        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
-        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
-        whenever(accountManager.activeAccounts)
-            .thenReturn(
-                listOf(
-                    Account(
-                        1, chainId =
-                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
-                    )
-                )
-            )
-        viewModel.apply {
-            errorLiveData.observeForever(errorObserver)
-            addAtsToken()
-        }
-
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
-        }
-    }
-
-    @Test
-    fun `check that last free ATS was at least 24 hours (86400000 mills) ago`() {
-        NetworkManager.initialize(networks)
-        whenever(accountManager.currentTimeMills()).thenReturn(1610120569428)
-        accountManager.currentTimeMills().let { time ->
-            whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(
-                time - 96400000,
-                time - 86400001,
-                time - 86299933,
-                time - 500,
-                time - 96400000,
-                time - 303
-            )
-        }
-        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
     }
 
     @Test

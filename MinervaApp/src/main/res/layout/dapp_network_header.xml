@@ -35,7 +35,7 @@
 
     <org.apmem.tools.layouts.FlowLayout
         android:id="@+id/network_layout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/margin_xsmall"
         android:gravity="center"
@@ -53,7 +53,6 @@
             android:layout_marginEnd="@dimen/margin_xsmall"
             android:background="@drawable/network_border"
             android:drawablePadding="@dimen/margin_xsmall"
-            android:ellipsize="end"
             android:fontFamily="@font/rubik_medium"
             android:gravity="center"
             android:lines="1"
@@ -68,10 +67,8 @@
             android:id="@+id/network_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_xsmall"
             android:layout_marginTop="@dimen/margin_xsmall"
             android:layout_marginEnd="@dimen/margin_xsmall"
-            android:elevation="@dimen/cardview_default_elevation"
             android:gravity="center"
             android:spinnerMode="dropdown"
             android:textAlignment="center"

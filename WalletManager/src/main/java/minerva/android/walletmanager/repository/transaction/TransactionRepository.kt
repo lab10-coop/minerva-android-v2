@@ -6,7 +6,6 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.minervaprimitives.account.*
-import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
@@ -18,7 +17,7 @@ import java.math.BigInteger
 import java.net.ConnectException
 
 interface TransactionRepository {
-    var newTaggedTokens: MutableList<ERCToken>
+    var newTokens: MutableList<ERCToken>
     val assetBalances: MutableList<AssetBalance>
     val masterSeed: MasterSeed
     fun getCoinBalance(): Flowable<Coin>
@@ -56,13 +55,13 @@ interface TransactionRepository {
     fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>
     fun getFiatSymbol(): String
     fun isProtectTransactionEnabled(): Boolean
-    fun getTaggedTokensUpdate(): Flowable<List<ERCToken>>
-    fun updateTaggedTokens(): Completable
+    fun getTokensUpdate(): Flowable<List<ERCToken>>
+    fun updateTokens(): Completable
 
-    var isSuperTokenStreamAvailable: Boolean
-    var activeSuperTokenStreams: MutableList<ActiveSuperToken>
     fun getSuperTokenStreamInitBalance(): Flowable<Asset>
     fun startSuperTokenStreaming(chainId: Int): Flowable<Asset>
-    fun disconnectFromSuperTokenStreaming()
     val ratesMapLiveData: LiveData<Event<Unit>>
+
+    fun getActiveAccounts(): List<Account>
+    fun getActiveAccountsWithSuperfluidSupport(): List<Account>
 }

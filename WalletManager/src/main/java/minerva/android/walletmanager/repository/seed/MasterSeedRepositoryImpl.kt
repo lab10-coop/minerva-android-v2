@@ -35,7 +35,7 @@ class MasterSeedRepositoryImpl(
     override fun getWalletConfig(): WalletConfig = walletConfigManager.getWalletConfig()
     override fun isMasterSeedAvailable(): Boolean = walletConfigManager.isMasterSeedSaved()
     override fun isMnemonicRemembered(): Boolean = walletConfigManager.isMnemonicRemembered()
-    override fun areMnemonicWordsValid(mnemonic: String): Boolean = cryptographyRepository.areMnemonicWordsValid(mnemonic)
+    override fun areMnemonicWordsValid(mnemonicAndPassword: String): Boolean = cryptographyRepository.areMnemonicWordsValid(mnemonicAndPassword)
 
     override fun getMnemonic(): String =
         cryptographyRepository.getMnemonicForMasterSeed(walletConfigManager.masterSeed.seed)
@@ -48,9 +48,9 @@ class MasterSeedRepositoryImpl(
         walletConfigManager.dispose()
     }
 
-    override fun restoreMasterSeed(mnemonic: String): MasterKeys =
-        when (val seedAndKeys = cryptographyRepository.restoreMasterSeed(mnemonic)) {
-            is SeedWithKeys -> MasterSeed(seedAndKeys.seed, seedAndKeys.publicKey, seedAndKeys.privateKey)
+    override fun restoreMasterSeed(mnemonicAndPassword: String): MasterKeys =
+        when (val seedAndKeys = cryptographyRepository.restoreMasterSeed(mnemonicAndPassword)) {
+            is SeedWithKeys -> MasterSeed(seedAndKeys.seed, seedAndKeys.password, seedAndKeys.publicKey, seedAndKeys.privateKey)
             else -> MasterSeedError((seedAndKeys as SeedError).error)
         }
 
@@ -70,7 +70,7 @@ class MasterSeedRepositoryImpl(
         }.orElse {
             cryptographyRepository.createMasterSeed()
                 .flatMapCompletable { (seed, publicKey, privateKey) ->
-                    walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
+                    walletConfigManager.createWalletConfig(MasterSeed(seed, "", publicKey, privateKey))
                 }
         }
 }

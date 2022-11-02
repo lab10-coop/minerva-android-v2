@@ -4,12 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.google.android.material.button.MaterialButton
 import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
@@ -33,6 +31,7 @@ import minerva.android.widget.dialog.*
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
 import minerva.android.wrapped.startManageTokensWrappedActivity
+import minerva.android.wrapped.startNewAccountWrappedActivity
 import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.android.ext.android.inject
@@ -60,7 +59,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             interactor.changeActionBarColor(R.color.lightGray)
             viewModel.apply {
                 onResume()
-                refreshAddCryptoButton()
                 if (arePendingAccountsEmpty) {
                     accountAdapter.stopPendingTransactions()
                 }
@@ -219,7 +217,14 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             viewModel.apply {
                 logToFirebaseIfNotSynced()
                 networksHeader.text = getHeader(areMainNetsEnabled)
-                addCryptoButton.apply { text = getBuyCryptoButtonText(this) }
+                addCryptoButton.apply {
+                    if (viewModel.areMainNetsEnabled) {
+                        this.setBackgroundColor( ContextCompat.getColor(this.context, R.color.colorPrimary) )
+                        text = getString(R.string.buy_crypto)
+                    } else {
+                        this.visibility = View.GONE
+                    }
+                }
                 if (!appUIState.shouldShowSplashScreen && isFirstLaunch) {
                     SelectPredefinedAccountDialog(
                         requireContext(),
@@ -229,25 +234,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             }
         }
     }
-
-    private fun getBuyCryptoButtonText(materialButton: MaterialButton): String =
-        if (viewModel.areMainNetsEnabled) {
-            materialButton.setBackgroundColor(
-                ContextCompat.getColor(
-                    materialButton.context,
-                    R.color.colorPrimary
-                )
-            )
-            getString(R.string.buy_crypto)
-        } else {
-            materialButton.setBackgroundColor(
-                ContextCompat.getColor(
-                    materialButton.context,
-                    R.color.artis
-                )
-            )
-            getString(R.string.add_tats)
-        }
 
     private fun setupRecycleView(view: View) {
         binding.apply {
@@ -317,7 +303,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             errorLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking { errorState ->
                 when (errorState) {
                     BaseError -> {
-                        refreshAddCryptoButton()
                         showErrorFlashbar(R.string.error_header, R.string.unexpected_error)
                     }
                     BalanceIsNotEmptyAndHasMoreOwnersError ->
@@ -350,16 +335,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
             accountHideLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
                 activity?.invalidateOptionsMenu()
-                refreshAddCryptoButton()
             })
-
-            addFreeAtsLiveData.observe(
-                viewLifecycleOwner,
-                EventObserverWithSyncChecking { success ->
-                    val message = if (success) R.string.refresh_balance_to_check_transaction_status
-                    else R.string.free_ats_warning
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                })
         }
     }
 
@@ -377,34 +353,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
-    private fun refreshAddCryptoButton() {
-        viewModel.apply {
-            isAddingFreeATSAvailable(activeAccounts).let { isAvailable ->
-                binding.addCryptoButton.apply {
-                    if (!viewModel.areMainNetsEnabled) {
-                        val color = if (isAvailable) R.color.artis else R.color.inactiveButtonColor
-                        setBackgroundColor(ContextCompat.getColor(context, color))
-                    }
-                }
+    private fun setTatsButtonListener() = binding.apply {
+        addCryptoButton.setOnClickListener { view ->
+            viewModel.apply {
+                if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
             }
+        }
+        addAccountDuplicateButton.setOnClickListener {
+            startNewAccountWrappedActivity(requireContext(), getString(R.string.add_account))
         }
     }
 
-    private fun setTatsButtonListener() =
-        binding.addCryptoButton.setOnClickListener { view ->
-            viewModel.apply {
-                if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
-                else {
-                    view.setBackgroundColor(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            R.color.inactiveButtonColor
-                        )
-                    )
-                    addAtsToken()
-                }
-            }
-        }
 
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))

@@ -77,6 +77,8 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/create_new_account"
             style="@style/OutlinedButtonStyle"
+            app:icon="@drawable/ic_add_account"
+            app:iconGravity="textStart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"

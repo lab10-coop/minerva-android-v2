@@ -14,6 +14,7 @@
     <dimen name="margin_average">14dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
+    <dimen name="margin_ysmall">10dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
     <dimen name="margin_xxsmall">4dp</dimen>
     <dimen name="margin_xxxsmall">2dp</dimen>
@@ -102,4 +103,6 @@
     <dimen name="unmaintained_network_flag_container_width">156dp</dimen>
     <dimen name="unmaintained_network_flag_container_margin_left">156dp</dimen>
     <dimen name="unmaintained_network_flag_letter_spacing">0.05</dimen>
+    <dimen name="one_hundred_forty_dp">140dp</dimen>
+    <dimen name="forty_eight_dp">48dp</dimen>
 </resources>

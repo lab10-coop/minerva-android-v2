@@ -42,7 +42,6 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.*
-import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.UpdateTokensResult
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -77,10 +76,8 @@ class TransactionRepositoryImpl(
     private val assetBalanceRepository: AssetBalanceRepository
 ) : TransactionRepository {
     override val masterSeed: MasterSeed get() = walletConfigManager.masterSeed
-    override var newTaggedTokens: MutableList<ERCToken> = mutableListOf()
+    override var newTokens: MutableList<ERCToken> = mutableListOf()
     override val assetBalances: MutableList<AssetBalance> get() = assetBalanceRepository.assetBalances
-    override var isSuperTokenStreamAvailable: Boolean = tokenManager.activeSuperTokenStreams.isEmpty()
-    override var activeSuperTokenStreams: MutableList<ActiveSuperToken> = tokenManager.activeSuperTokenStreams
     private val currentFiatCurrency: String get() = localStorage.loadCurrentFiat()
     private val ratesMap: HashMap<Int, Markets> = hashMapOf()
 
@@ -148,8 +145,7 @@ class TransactionRepositoryImpl(
 
     override fun getSuperTokenStreamInitBalance(): Flowable<Asset> {
         accountsForTokenBalanceRefresh.let { accounts ->
-            val accountsWithActiveStreams: List<Account> =
-                getAccountsWithActiveStreams(accounts, tokenManager.activeSuperTokenStreams)
+            val accountsWithActiveStreams: List<Account> = getActiveAccountsWithSuperfluidSupport()
             return Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams))
                 .flatMap { asset -> handleSuperTokens(asset) }
         }
@@ -158,29 +154,17 @@ class TransactionRepositoryImpl(
     @Throws(ConnectException::class)
     override fun startSuperTokenStreaming(chainId: Int): Flowable<Asset> {
         accountsForTokenBalanceRefresh.let { accounts ->
-            val accountsWithActiveStreams: List<Account> =
-                getAccountsWithActiveStreams(accounts, tokenManager.activeSuperTokenStreams)
+            val accountsWithActiveStreams: List<Account> = getActiveAccountsWithSuperfluidSupport()
                     .filter { account -> account.chainId == chainId }
-            return webSocketRepository.subscribeToBlockCreation(chainId)
-                .flatMap { Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams)) }
+            return Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams))
                 .flatMap { asset -> handleSuperTokens(asset) }
         }
-    }
-
-    private fun getAccountsWithActiveStreams(
-        accounts: List<Account>,
-        activeStreamAccounts: MutableList<ActiveSuperToken>
-    ) = accounts.filter { account ->
-        activeStreamAccounts.find { activeSuperToken ->
-            activeSuperToken.accountAddress.equals(account.address, true) &&
-                    activeSuperToken.chainId == account.chainId
-        } != null
     }
 
     private fun handleSuperTokens(asset: Asset) =
         when (asset) {
             is AssetBalance -> Flowable.just(asset)
-                .filter { assetBalance -> assetBalance.accountToken.token.isStreamActive }
+                .filter { assetBalance -> assetBalance.accountToken.token.type.isSuperToken() }
             else -> Flowable.just(asset as AssetError)
         }
 
@@ -190,33 +174,31 @@ class TransactionRepositoryImpl(
             accounts.forEach { account -> add(tokenManager.getSuperTokenBalance(account).subscribeOn(Schedulers.io())) }
         }
 
-    override fun disconnectFromSuperTokenStreaming() {
-        webSocketRepository.disconnect()
-        tokenManager.activeSuperTokenStreams.clear()
-    }
-
     override fun getTokenBalance(): Flowable<Asset> =
         accountsForTokenBalanceRefresh.let { accounts ->
             assetBalances.clear()
             Flowable.mergeDelayError(getTokenBalanceFlowables(accounts))
                 .flatMap { asset ->
                     when (asset) {
-                        is AssetBalance -> handleNewAddedTaggedTokens(asset, accounts)
+                        is AssetBalance -> handleNewAddedTokens(asset, accounts)
                             .also { assetBalances.add(asset) }
-                            .filter { assetBalance -> !assetBalance.accountToken.token.isStreamActive }
+                            .filter { assetBalance ->
+                                !assetBalance.accountToken.token.type.isSuperToken()
+                            }
                         else -> Flowable.just(asset as AssetError)
                     }
                 }
         }
 
-    private fun handleNewAddedTaggedTokens(assetBalance: AssetBalance, accounts: List<Account>): Flowable<AssetBalance> =
+    private fun handleNewAddedTokens(assetBalance: AssetBalance, accounts: List<Account>): Flowable<AssetBalance> =
         if (isAccountAddressMissing(assetBalance)) {
             accounts.forEach { account ->
                 if (isTokenWithPositiveBalance(account, assetBalance)) {
-                    newTaggedTokens.add(
+                    newTokens.add(
                         assetBalance.accountToken.token.copy(
                             accountAddress = account.address,
-                            tag = assetBalance.accountToken.token.tag
+                            tag = assetBalance.accountToken.token.tag,
+                            type = assetBalance.accountToken.token.type
                         )
                     )
                 }
@@ -234,9 +216,8 @@ class TransactionRepositoryImpl(
     private fun isAccountAddressMissing(assetBalance: AssetBalance): Boolean =
         assetBalance.accountToken.currentBalance > BigDecimal.ZERO && assetBalance.accountToken.token.accountAddress.isBlank()
 
-    //test
-    override fun updateTaggedTokens(): Completable {
-        return if (newTaggedTokens.isNotEmpty()) {
+    override fun updateTokens(): Completable {
+        return if (newTokens.isNotEmpty()) {
             val walletConfig = walletConfigManager.getWalletConfig()
             return walletConfigManager.updateWalletConfig(
                 walletConfig.copy(
@@ -244,7 +225,7 @@ class TransactionRepositoryImpl(
                     erc20Tokens = getTokensWithAccountAddress(walletConfig.erc20Tokens)
                 )
 
-            ).doOnComplete { newTaggedTokens.clear() }
+            ).doOnComplete { newTokens.clear() }
         } else {
             Completable.complete()
         }
@@ -252,7 +233,7 @@ class TransactionRepositoryImpl(
 
     internal fun getTokensWithAccountAddress(erc20Tokens: Map<Int, List<ERCToken>>): Map<Int, List<ERCToken>> {
         val allLocalTokensMap: MutableMap<Int, List<ERCToken>> = erc20Tokens.toMutableMap()
-        val newTokensMap: Map<Int, List<ERCToken>> = newTaggedTokens.groupBy { token -> token.chainId }
+        val newTokensMap: Map<Int, List<ERCToken>> = newTokens.groupBy { token -> token.chainId }
 
         for ((chainId, newTokens) in newTokensMap) {
             val localTokensPerChainId = allLocalTokensMap[chainId] ?: listOf()
@@ -287,15 +268,19 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig().erc20Tokens.values
             .any { tokens -> tokens.find { token -> token.accountAddress.isBlank() } != null }
 
-    private fun getActiveAccounts(): List<Account> =
+    override fun getActiveAccounts(): List<Account> =
         walletConfigManager.getWalletConfig()
             .accounts.filter { account -> accountsFilter(account) && account.network.isAvailable() }
+
+    override fun getActiveAccountsWithSuperfluidSupport(): List<Account> =
+        getActiveAccounts()
+            .filter { account -> account.hasSuperfluidSupport() }
 
     private fun accountsFilter(account: Account) =
         refreshBalanceFilter(account) && account.network.testNet == !localStorage.areMainNetworksEnabled
 
     private fun refreshBalanceFilter(account: Account) = !account.isHide && !account.isDeleted && !account.isPending
-    override fun getTaggedTokensUpdate(): Flowable<List<ERCToken>> = tokenManager.getTaggedTokensUpdate()
+    override fun getTokensUpdate(): Flowable<List<ERCToken>> = tokenManager.getTokensUpdate()
 
     override fun getTokensRates(): Completable =
         walletConfigManager.getWalletConfig().let { config -> tokenManager.getTokensRates(config.erc20Tokens) }
@@ -384,7 +369,7 @@ class TransactionRepositoryImpl(
                 ChainId.ARB_ONE -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 ChainId.OPT -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 ChainId.POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
-                ChainId.XDAI -> fetchCoinRate(MarketIds.XDAI).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
+                ChainId.GNO -> fetchCoinRate(MarketIds.GNO).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
                 ChainId.MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
                 ChainId.BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
                 ChainId.CELO -> fetchCoinRate(MarketIds.CELO).map { markets -> markets.celoFiatPrice?.getRate(currentFiat) }
