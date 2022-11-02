@@ -836,10 +836,6 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
-            Single.just(updatedTokensMap),
-            Single.error(Throwable("Stop thread"))
-        )
         whenever(tokenManager.updateMissingNFTTokensDetails(any(), any())).thenReturn(
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
@@ -865,7 +861,6 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
         whenever(tokenManager.saveTokens(any(), any())).thenReturn(
             Single.just(true),
             Single.error(Throwable("Stop thread"))
