@@ -473,7 +473,7 @@
   },
   {
     "name": "LUKSO (L14 Testnet)",
-    "isActive": true,
+    "isActive": false,
     "token": "tLYX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.l14.lukso.network",
@@ -485,6 +485,22 @@
     "color": "#FFFBCDC5",
     "testNet": true,
     "chainId": 22,
+    "explore": ""
+  },
+  {
+    "name": "LUKSO (L16 Testnet)",
+    "isActive": true,
+    "token": "LYXt",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rpc.l16.lukso.network",
+    "wsRpc": "wss://ws.rpc.l16.lukso.network",
+    "gasPriceOracle": "https://rpc.l16.lukso.network",
+    "gasPrice": "10000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#FFFBCDC5",
+    "testNet": true,
+    "chainId": 2828,
     "explore": ""
   },
   {
