@@ -368,6 +368,22 @@
     "explore": "https://goerli.optimism.io"
   },
   {
+    "name": "Optimism Bedrock",
+    "isActive": true,
+    "token": "ETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://alpha-1-replica-2.bedrock-goerli.optimism.io/",
+    "wsRpc": "",
+    "gasPriceOracle": "https://alpha-1-replica-2.bedrock-goerli.optimism.io/",
+    "gasPrice": "20000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#ff0420",
+    "testNet": true,
+    "chainId": 28528,
+    "explore": ""
+  },
+  {
     "name": "Arbitrum Rinkeby",
     "isActive": true,
     "token": "ARETH",

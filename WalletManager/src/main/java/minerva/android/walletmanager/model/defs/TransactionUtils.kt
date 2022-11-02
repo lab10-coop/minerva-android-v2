@@ -22,6 +22,7 @@ fun getTransactionType(chainId: Int): TxType =
         ChainId.OPT -> TxType.OPT
         ChainId.OPT_KOV -> TxType.OPT
         ChainId.OPT_GOR -> TxType.OPT
+        ChainId.OPT_BED -> TxType.OPT
         ChainId.CELO -> TxType.CELO
         ChainId.CELO_ALF -> TxType.CELO
         ChainId.CELO_BAK -> TxType.CELO
