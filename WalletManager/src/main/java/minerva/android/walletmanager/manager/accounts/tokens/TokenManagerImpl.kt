@@ -55,6 +55,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_BED
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ALPHA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
@@ -509,7 +510,7 @@ class TokenManagerImpl(
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
             ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, GNO_CHAI, BSC_TESTNET -> getTokensFromTx(account)
-            MUMBAI, LUKSO_16, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, OPT_GOR, OPT_BED, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
+            MUMBAI, LUKSO_16, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, OPT_GOR, OPT_BED, ZKS_ALPHA, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
             GNO, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
