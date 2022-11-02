@@ -9,6 +9,7 @@ fun getTransactionType(chainId: Int): TxType =
         ChainId.ETH_RIN -> TxType.ETH_RIN
         ChainId.ETH_KOV -> TxType.ETH_KOVAN
         ChainId.LUKSO_14 -> TxType.LUKSO
+        ChainId.LUKSO_16 -> TxType.LUKSO
         ChainId.POA_SKL -> TxType.SOKOL
         ChainId.ETH_GOR -> TxType.GORLI
         ChainId.ETH_SEP -> TxType.ETH_SEP
@@ -21,6 +22,9 @@ fun getTransactionType(chainId: Int): TxType =
         ChainId.ARB_RIN -> TxType.ARB
         ChainId.OPT -> TxType.OPT
         ChainId.OPT_KOV -> TxType.OPT
+        ChainId.OPT_GOR -> TxType.OPT
+        ChainId.OPT_BED -> TxType.OPT
+        ChainId.ZKS_ALPHA -> TxType.ZKS
         ChainId.CELO -> TxType.CELO
         ChainId.CELO_ALF -> TxType.CELO
         ChainId.CELO_BAK -> TxType.CELO
@@ -33,5 +37,5 @@ enum class TxType(val time: String) {
     RAPID("~15 sec"), FAST("~1 min"), STANDARD("~3 min"), SLOW(">10min"),
     ARTIS_TAU("~5 sec"), ETH_RIN("~15 sec"), ETH_KOVAN("~4 sec"), LUKSO("~5 sec"), SOKOL("~5 sec"),
     GORLI("~14 sec"), ETH_ROPSTEN("~15 sec"), GNO("~5.2 sec"), POA_CORE("~5 sec"), ATS_SIGMA("~5 sec"),
-    ARB("~2 sec"), OPT("~5 sec"), CELO("~5 sec"), AVA("~2 sec"), ETH_SEP("~5 sec")
+    ARB("~2 sec"), OPT("~5 sec"), ZKS("~2 sec"), CELO("~5 sec"), AVA("~2 sec"), ETH_SEP("~5 sec")
 }

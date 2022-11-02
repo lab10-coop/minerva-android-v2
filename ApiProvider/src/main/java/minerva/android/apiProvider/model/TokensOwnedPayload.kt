@@ -31,7 +31,9 @@ data class TokensOwnedPayload(
         @SerializedName("types")
         val types: List<String>,
         @SerializedName("tokenJson")
-        val tokenJson: TokenJson? = TokenJson.Empty
+        val tokenJson: TokenJson? = TokenJson.Empty,
+        @SerializedName("logoURI")
+        val logoURI: String?
     ) {
 
         companion object {

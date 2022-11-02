@@ -43,7 +43,6 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.ERCToken
-import minerva.android.walletmanager.model.token.UpdateTokensResult
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
@@ -302,15 +301,8 @@ class TransactionRepositoryImpl(
                                 .map { newTokensPerChainIdMap ->
                                     tokenManager.mergeWithLocalTokensList(newTokensPerChainIdMap)
                                 }
-                                .flatMap { (shouldUpdateIcon, newAndLocalTokensPerChainIdMap) ->
-                                    tokenManager.updateTokenIcons(shouldUpdateIcon, newAndLocalTokensPerChainIdMap)
-                                        .onErrorReturn {
-                                            Timber.e(it)
-                                            UpdateTokensResult(false, newAndLocalTokensPerChainIdMap)
-                                        }
-                                }
-                                .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
-                                    tokenManager.saveTokens(shouldSafeNewTokens, newAndLocalTokensPerChainIdMap)
+                                .flatMap { (shouldUpdateLogosURI, newAndLocalTokensPerChainIdMap) ->
+                                    tokenManager.saveTokens(true, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
                                             false
