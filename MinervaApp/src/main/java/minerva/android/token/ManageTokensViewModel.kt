@@ -40,6 +40,7 @@ class ManageTokensViewModel(
         ).apply {
             account.accountTokens
                 .distinctBy { token -> token.token.address }
+                .filter { token -> token.currentBalance > BigDecimal.ZERO }
                 .sortedWith(
                     compareBy(
                         {
