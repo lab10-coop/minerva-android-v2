@@ -357,7 +357,7 @@
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli.optimism.io",
-    "wsRpc": "wss://ws-goerli.optimism.io",
+    "wsRpc": "",
     "gasPriceOracle": "https://goerli.optimism.io",
     "gasPrice": "20000000000",
     "minGasPrice": "0",
