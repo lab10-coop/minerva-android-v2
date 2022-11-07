@@ -225,7 +225,15 @@ class AccountsViewModel(
                     accountToken.shouldShowAccountToken(account, tokenVisibilitySettings)
                 }
         }
-        return tokens.sortedByDescending { accountToken -> accountToken.fiatBalance }
+        return tokens
+            .sortedWith(
+                compareBy(
+                    { !it.token.logoURI.isNullOrEmpty() },
+                    { it.fiatBalance },
+                    { it.currentBalance }
+                )
+            )
+            .reversed()
     }
 
     fun refreshCoinBalances() =
