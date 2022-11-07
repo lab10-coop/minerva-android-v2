@@ -38,17 +38,26 @@ class ManageTokensViewModel(
                 logoRes = getMainTokenIconRes(network.chainId)
             )
         ).apply {
-            tokenManager.getActiveTokensPerAccount(account)
-                .distinctBy { token -> token.address }
-                .forEach { activeToken ->
-                    if (tokenManager.hasTokenExplorer(network.chainId)) {
-                        transactionRepository.assetBalances
-                            .find { it.accountToken.token == activeToken }
-                            ?.takeIf { it.currentBalance > BigDecimal.ZERO }
-                            ?.let { add(activeToken) }
-                    } else {
-                        add(activeToken)
-                    }
+            account.accountTokens
+                .distinctBy { token -> token.token.address }
+                .filter { token -> token.currentBalance > BigDecimal.ZERO }
+                .sortedWith(
+                    compareBy(
+                        {
+                            if (it.token.type.isERC20()) {
+                                1
+                            } else if (it.token.type.isNft()) {
+                                2
+                            } else {
+                                3
+                            }
+                        },
+                        { it.token.logoURI.isNullOrEmpty() },
+                        { it.token.symbol }
+                    )
+                )
+                .forEach { token ->
+                    add(token.token)
                 }
         }
     }

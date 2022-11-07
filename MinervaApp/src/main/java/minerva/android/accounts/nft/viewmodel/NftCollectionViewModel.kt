@@ -337,7 +337,10 @@ class NftCollectionViewModel(
 
     private fun updateList() {
         _loadingLiveData.value = false
-        _nftListLiveData.value = nftList.filter { !it.wasSent || it.balance > BigDecimal.ZERO}.sortedBy { it.tokenId }
+        _nftListLiveData.value = nftList
+            .filter { !it.wasSent || it.balance > BigDecimal.ZERO}
+            .sortedBy { it.tokenId }
+            .reversed()
     }
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {

@@ -23,9 +23,6 @@ data class ERCToken(
     var logoURI: String? = null,
     var tag: String = String.Empty,
     var isError: Boolean = false,
-    // todo: isStreamActive could be inferred from consNetFlow
-    // most ofter you would just use type.isSuperToken() instead.
-    var isStreamActive: Boolean = false,
     @Embedded var nftContent: NftContent = NftContent(),
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null,
