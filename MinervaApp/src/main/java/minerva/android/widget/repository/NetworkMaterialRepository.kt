@@ -72,7 +72,7 @@ private fun getMainIcon(chainId: Int): Int =
         CELO_BAK -> R.drawable.ic_celo
         AVA_C -> R.drawable.ic_avalanche
         AVA_FUJ -> R.drawable.ic_avalanche
-        else -> Int.InvalidId
+        else -> R.drawable.ic_default_token
     }
 
 fun getMainTokenIconRes(chainId: Int): Int =
