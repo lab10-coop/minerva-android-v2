@@ -297,7 +297,7 @@
   },
   {
     "name": "Chiado",
-    "isActive": false,
+    "isActive": true,
     "token": "xDAI",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.chiadochain.net",
