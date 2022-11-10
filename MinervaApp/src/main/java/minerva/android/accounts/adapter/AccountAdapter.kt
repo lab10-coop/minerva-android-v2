@@ -4,41 +4,53 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import minerva.android.R
+import minerva.android.accounts.AccountsFragment.Companion.ADD_ITEM
+import minerva.android.accounts.AccountsFragment.Companion.ITEM
 import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.accounts.transaction.model.DappSessionData
-import minerva.android.extension.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.state.AccountWidgetState
 
 class AccountAdapter(
     private val listener: AccountsFragmentToAdapterListener
-) : RecyclerView.Adapter<AccountViewHolder>(), AccountsAdapterListener {
-
+) : RecyclerView.Adapter<ViewHolder>(), AccountsAdapterListener {
     private val differ: AsyncListDiffer<Account> = AsyncListDiffer(this, AccountDiffCallback())
     private var fiatSymbol: String = String.Empty
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
-        AccountViewHolder(
+    override fun getItemViewType(position: Int): Int = if (differ.currentList[position].id != ADD_ITEM) ITEM else ADD_ITEM
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = when (viewType) {
+        ITEM -> AccountViewHolder( // create usual account
             LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
             parent
         )
+        ADD_ITEM -> AddAccountButtonViewHolder(LayoutInflater.from(parent.context) // create add account button item
+            .inflate(R.layout.add_account_list_row, parent, false), listener)
+        else -> error(parent.context.getString(R.string.unknown_type))
+    }
 
-    override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
-        val account = differ.currentList[position]
-        with(holder) {
-            setupListener(this@AccountAdapter)
-            setupAccountIndex(listener.indexOf(account))
-            setupAccountView(account, fiatSymbol, listener.getTokens(account))
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        if (ITEM == getItemViewType(position)) { // usual case (account item)
+            with(holder as AccountViewHolder) {
+                val account = differ.currentList[position]
+                setupListener(this@AccountAdapter)
+                setupAccountIndex(listener.indexOf(account))
+                setupAccountView(account, fiatSymbol, listener.getTokens(account))
+            }
         }
     }
 
     override fun getItemCount(): Int = differ.currentList.size
 
     fun updateList(accounts: List<Account>) {
-        differ.submitList(accounts)
+        var accountsWithAddButton = accounts.toMutableList() // added "add account" button item
+        //using this flag(id=-1) for specifying where "add button" item will be placed
+        accountsWithAddButton.add(Account(id = ADD_ITEM))
+        differ.submitList(accountsWithAddButton)
         notifyDataSetChanged()
     }
 

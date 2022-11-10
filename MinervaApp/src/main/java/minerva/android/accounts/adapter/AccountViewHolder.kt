@@ -12,8 +12,10 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
+import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.databinding.AccountListRowBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
@@ -235,5 +237,18 @@ class AccountViewHolder(
         private const val NO_FRAME = 0f
         private const val FRAME_WIDTH = 1.5f
         private const val UNMAINTAINED_NETWORK_BG_COLOR = "#C9C8D3"
+    }
+}
+
+/**
+ * Add Account Button View Holder - class which holds "add account" button item
+ * @param itemView View - layout which contains "add account" button
+ * @param listener - listener which calls "add account" functional from main activity
+ */
+class AddAccountButtonViewHolder(itemView: View, listener: AccountsFragmentToAdapterListener) : RecyclerView.ViewHolder(itemView) {
+    init {
+        itemView.findViewById<MaterialButton>(R.id.add_account_duplicate_button).setOnClickListener {
+            listener.addAccount()
+        }
     }
 }
