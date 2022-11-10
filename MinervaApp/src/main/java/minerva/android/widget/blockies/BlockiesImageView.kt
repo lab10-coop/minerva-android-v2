@@ -50,20 +50,24 @@ open class BlockiesImageView(context: Context, attributeSet: AttributeSet?) : Ap
     }
 
     private fun prepareERCTokenIcon(token: ERCToken) {
-        token.logoURI?.let { uri ->
-            val icon = when {
-                uri.isEmpty() && token.symbol == USDT_SYMBOL -> {
-                    R.drawable.ic_coin_usdt
+        if (token.type.isNft() && token.logoURI.isNullOrEmpty()) {
+            this.setImageResource(R.drawable.ic_collectible_square)//set default logo for nft
+        } else {
+            token.logoURI?.let { uri ->
+                val icon = when {
+                    uri.isEmpty() && token.symbol == USDT_SYMBOL -> {
+                        R.drawable.ic_coin_usdt
+                    }
+                    uri.isEmpty() && token.symbol == DAI_SYMBOL -> {
+                        R.drawable.ic_coin_dai
+                    }
+                    else -> uri
                 }
-                uri.isEmpty() && token.symbol == DAI_SYMBOL -> {
-                    R.drawable.ic_coin_dai
-                }
-                else -> uri
+                Glide.with(this).load(icon).apply(RequestOptions.circleCropTransform()).into(this)
+                return
             }
-            Glide.with(this).load(icon).apply(RequestOptions.circleCropTransform()).into(this)
-            return
+            blockies = Blockies.fromAddress(token.address)
         }
-        blockies = Blockies.fromAddress(token.address)
         invalidate()
     }
 
