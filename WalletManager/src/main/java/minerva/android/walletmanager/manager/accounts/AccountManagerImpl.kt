@@ -448,7 +448,7 @@ class AccountManagerImpl(
 
     override fun getAllFreeAccountForNetwork(chainId: Int): List<AddressWrapper> {
         //get all accounts
-        val accounts = getAllAccounts().filter { !it.isDeleted }
+        val accounts = getAllAccounts().filter { !it.isDeleted && it.isTestNetwork == !areMainNetworksEnabled}
         //filtering accounts which chain already uses
         val usedAccounts: List<Account> = accounts.filter { it.chainId == chainId }
         //id of account which chain already uses to integer list
