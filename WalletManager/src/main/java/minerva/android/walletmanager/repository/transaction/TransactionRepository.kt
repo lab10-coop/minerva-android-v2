@@ -50,7 +50,7 @@ interface TransactionRepository {
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun checkMissingTokensDetails(): Completable
     fun getCoinFiatRate(chainId: Int): Single<Double>
-    fun getTokenFiatRate(tokenHash: String): Single<Double>
+    fun getTokenFiatRate(chainId: Int, address: String): Single<Double>
     fun toUserReadableFormat(value: BigDecimal): BigDecimal
     fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>
     fun getFiatSymbol(): String

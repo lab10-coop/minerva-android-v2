@@ -444,7 +444,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `getting token rate test`() {
         whenever(rateStorage.getRate(any())).thenReturn(3.3)
-        tokenManager.getSingleTokenRate("somesome") shouldBeEqualTo 3.3
+        tokenManager.getSingleTokenRate(1, "somesome") shouldBeEqualTo 3.3
     }
 
     @Test
@@ -538,7 +538,7 @@ class TokenManagerTest : RxTest() {
         tokens.forEach { (chainId, tokens) ->
             tokens.forEach { token ->
                 whenever(rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address)))
-                    .thenReturn(true, false, false, false)
+                    .thenReturn(true, true, true, true)
                 whenever(tokenManager.getTokenVisibility(token.accountAddress, token.address)).thenReturn(true)
             }
         }
@@ -844,7 +844,10 @@ class TokenManagerTest : RxTest() {
                             "Symbol",
                             "uri",
                             listOf("ERC-1155"),
-                            logoURI = "logo.png"
+                            logoURI = "logo.png",
+                            underlyingTokens = emptyList(),
+                            underlyingBalances = emptyList(),
+                            underlyingSymbols = emptyList()
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "10",
@@ -856,7 +859,10 @@ class TokenManagerTest : RxTest() {
                             "Symbol",
                             "uri",
                             listOf("ERC-721"),
-                            logoURI = "logo.png"
+                            logoURI = "logo.png",
+                            underlyingTokens = emptyList(),
+                            underlyingBalances = emptyList(),
+                            underlyingSymbols = emptyList()
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "1000",
@@ -869,7 +875,10 @@ class TokenManagerTest : RxTest() {
                             "uri",
                             listOf("ERC-20"),
                             TokensOwnedPayload.TokenOwned.TokenJson.Empty,
-                            logoURI = "logo.png"
+                            logoURI = "logo.png",
+                            underlyingTokens = emptyList(),
+                            underlyingBalances = emptyList(),
+                            underlyingSymbols = emptyList()
                         )
                     ),
                     ""

@@ -32,7 +32,7 @@ interface TokenManager {
     fun downloadTokensList(account: Account): Single<List<ERCToken>>
     fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable
     fun updateTokensRate(account: Account)
-    fun getSingleTokenRate(tokenHash: String): Double
+    fun getSingleTokenRate(chainId: Int, address: String): Double
     fun getTokensUpdate(): Flowable<List<ERCToken>>
     fun getSuperTokenBalance(account: Account): Flowable<Asset>
     fun mergeNFTDetailsWithRemoteConfig(

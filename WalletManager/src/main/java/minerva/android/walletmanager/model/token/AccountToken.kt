@@ -10,7 +10,8 @@ import java.math.RoundingMode
 data class AccountToken(
     override var token: ERCToken,
     var currentRawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
-    var tokenPrice: Double? = Double.InvalidValue
+    var tokenPrice: Double? = Double.InvalidValue,
+    var underlyingPrices: List<Double>? = emptyList()
 ) : TokenWithBalances {
 
     override fun equals(other: Any?): Boolean =
@@ -24,13 +25,38 @@ data class AccountToken(
         )
 
     override val fiatBalance: BigDecimal
-        get() =
-            tokenPrice?.let { price ->
-                when (price) {
-                    Double.InvalidValue -> Double.InvalidValue.toBigDecimal()
-                    else -> BigDecimal(price).multiply(currentBalance).setScale(FIAT_SCALE, RoundingMode.HALF_UP)
-                }
-            }.orElse { Double.InvalidValue.toBigDecimal() }
+        get() {
+            if (tokenPrice != Double.InvalidValue) {
+                return tokenPrice
+                    ?.let { BigDecimal(it).multiply(currentBalance).setScale(FIAT_SCALE, RoundingMode.HALF_UP) }
+                    .orElse { Double.InvalidValue.toBigDecimal() }
+            }
+            if (underlyingPrices!!.isNotEmpty()) {
+                // todo: improve this, average is not correct, should be the sum and mutliply to get 100%
+                return token.underlyingBalances?.let {
+                    underlyingPrices!!
+                        .zip(it)
+                        .filter { (underlyingPrice, underlyingBalance ) -> underlyingPrice != Double.InvalidValue }
+                        .map { (underlyingPrice, underlyingBalance) ->
+                            BigDecimal(underlyingPrice)
+                                .multiply(BigDecimal(underlyingBalance))
+                                .setScale(FIAT_SCALE, RoundingMode.HALF_UP)
+                        }
+                        .reduce { acc, fiatBalance -> acc.add(fiatBalance) }
+                        // todo: assumes same percentage, fix this
+                        .multiply(
+                            BigDecimal(
+                                underlyingPrices!!.size /
+                                underlyingPrices!!
+                                .filter { underlyingPrice -> underlyingPrice != Double.InvalidValue }
+                                .size
+                            )
+                        )
+                }.orElse { Double.InvalidValue.toBigDecimal() }
+            }
+            return Double.InvalidValue.toBigDecimal()
+        }
+
 
 
     private fun getBalanceForTokenWithDecimals(rawBalance: BigDecimal) =
