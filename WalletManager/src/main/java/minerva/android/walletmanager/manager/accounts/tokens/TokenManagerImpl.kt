@@ -433,7 +433,7 @@ class TokenManagerImpl(
                             }
                             .map { address -> address.toLowerCase(Locale.ROOT) }
                             .distinct()
-                            .filter { shouldUpdateRate(chainId, it) }
+                            .filter { address -> shouldUpdateRate(chainId, address) }
                             .chunked(TOKEN_LIMIT_PER_CALL)
                             .forEach { chunkedTokens ->
                                 observables.add(
