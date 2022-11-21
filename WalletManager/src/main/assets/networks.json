@@ -325,7 +325,7 @@
     "color": "#8247e5",
     "testNet": true,
     "chainId": 80001,
-    "explore": "https://mumbai.polygonscan.com/",
+    "explore": "",
     "superfluid": {
       "host": "0xEB796bdb90fFA0f28255275e16936D25d3418603",
       "cfav1": "0x49e565Ed1bdc17F3d220f72DF0857C26FA83F873"
@@ -365,7 +365,7 @@
     "color": "#ff0420",
     "testNet": true,
     "chainId": 420,
-    "explore": "https://goerli.optimism.io/"
+    "explore": "https://goerli.optimism.io"
   },
   {
     "name": "Optimism Bedrock",
@@ -381,7 +381,7 @@
     "color": "#ff0420",
     "testNet": true,
     "chainId": 28528,
-    "explore": "https://blockscout.com/optimism/bedrock-alpha/"
+    "explore": ""
   },
   {
     "name": "zkSync alpha testnet",
@@ -413,7 +413,7 @@
     "color": "#28a0f0",
     "testNet": true,
     "chainId": 421611,
-    "explore": "https://rinkeby-explorer.arbitrum.io/",
+    "explore": "",
     "superfluid": {
       "host": "0xE01F8743677Da897F4e7De9073b57Bf034FC2433",
       "cfav1": "0xcA0569223e56B479FaC6d554FA0D3867A4384657"
@@ -433,7 +433,7 @@
     "color": "#ff0420",
     "testNet": true,
     "chainId": 43113,
-    "explore": "https://testnet.snowtrace.io/",
+    "explore": "",
     "superfluid": {
       "host": "0xf04F2C525819691ed9ABD3D2B7109E1633795e68",
       "cfav1": "0xED74d30B8034152b0638CB03cc5c3c906dd1c482"
@@ -453,7 +453,7 @@
     "color": "#f3ba2f",
     "testNet": true,
     "chainId": 97,
-    "explore": "https://testnet.bscscan.com/"
+    "explore": ""
   },
   {
     "name": "Celo Alfajores Testnet",
@@ -469,7 +469,7 @@
     "color": "#35d07f",
     "testNet": true,
     "chainId": 44787,
-    "explore": "https://alfajores.celoscan.io/"
+    "explore": ""
   },
   {
     "name": "Celo Baklava Testnet",
@@ -485,7 +485,7 @@
     "color": "#35d07f",
     "testNet": true,
     "chainId": 62320,
-    "explore": "https://explorer.celo.org/baklava/"
+    "explore": ""
   },
   {
     "name": "LUKSO (L14 Testnet)",
@@ -517,7 +517,7 @@
     "color": "#FFFBCDC5",
     "testNet": true,
     "chainId": 2828,
-    "explore": "https://explorer.execution.l16.lukso.network/"
+    "explore": ""
   },
   {
     "name": "ARTIS (τ1)",
