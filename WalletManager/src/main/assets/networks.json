@@ -216,9 +216,29 @@
     "explore": "https://sepolia.etherscan.io/"
   },
   {
+    "name": "Kovan",
+    "isActive": false,
+    "token": "kETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://kovan.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "wsRpc": "wss://kovan.infura.io/ws/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "gasPriceOracle": "https://kovan.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "gasPrice": "10000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#FF6535c9",
+    "testNet": true,
+    "chainId": 42,
+    "explore": "https://kovan.etherscan.io/",
+    "superfluid": {
+      "host": "0xF0d7d1D47109bA426B9D8A3Cde1941327af1eea3",
+      "cfav1": "0xECa8056809e7e8db04A8fF6e4E82cD889a46FE2F"
+    }
+  },
+  {
     "name": "Görli",
     "isActive": true,
-    "token": "ETH",
+    "token": "gETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
     "wsRpc": "wss://goerli.infura.io/ws/v3/f85c084ebd2e46b6868f6dfa6444dd82",
@@ -233,6 +253,46 @@
     "superfluid": {
       "host": "0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9",
       "cfav1": "0xEd6BcbF6907D4feEEe8a8875543249bEa9D308E8"
+    }
+  },
+  {
+    "name": "Rinkeby",
+    "isActive": false,
+    "token": "tETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rinkeby.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "wsRpc": "wss://rinkeby.infura.io/ws/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "gasPriceOracle": "https://rinkeby.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "gasPrice": "10000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#FF6535c9",
+    "testNet": true,
+    "chainId": 4,
+    "explore": "",
+    "superfluid": {
+      "host": "0xeD5B5b32110c3Ded02a07c8b8e97513FAfb883B6",
+      "cfav1": "0xF4C5310E51F6079F601a5fb7120bC72a70b96e2A"
+    }
+  },
+  {
+    "name": "Ropsten",
+    "isActive": false,
+    "token": "tETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://ropsten.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "wsRpc": "wss://ropsten.infura.io/ws/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "gasPriceOracle": "https://ropsten.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
+    "gasPrice": "10000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#FF6535c9",
+    "testNet": true,
+    "chainId": 3,
+    "explore": "",
+    "superfluid": {
+      "host": "0xF2B4E81ba39F5215Db2e05B2F66f482BB8e87FD2",
+      "cfav1": "0xaD2F1f7cd663f6a15742675f975CcBD42bb23a88"
     }
   },
   {
@@ -292,7 +352,7 @@
     }
   },
   {
-    "name": "Optimism Görli",
+    "name": "Optimism Goerli",
     "isActive": true,
     "token": "ETH",
     "isSafeAccountAvailable": "false",
@@ -340,23 +400,23 @@
     "explore": "https://zksync2-testnet.zkscan.io/"
   },
   {
-    "name": "Arbitrum Görli",
+    "name": "Arbitrum Rinkeby",
     "isActive": true,
-    "token": "AGOR",
+    "token": "ARETH",
     "isSafeAccountAvailable": "false",
-    "httpRpc": "https://goerli-rollup.arbitrum.io/rpc",
-    "wsRpc": "",
-    "gasPriceOracle": "https://goerli-rollup.arbitrum.io/rpc",
+    "httpRpc": "https://rinkeby.arbitrum.io/rpc",
+    "wsRpc": "wss://speedy-nodes-nyc.moralis.io/368f5973bec9aa708b0b18b8/arbitrum/testnet/ws",
+    "gasPriceOracle": "https://rinkeby.arbitrum.io/rpc",
     "gasPrice": "20000000000",
     "minGasPrice": "0",
     "tokens": [],
     "color": "#28a0f0",
     "testNet": true,
-    "chainId": 421613,
-    "explore": "https://goerli.arbiscan.io/",
+    "chainId": 421611,
+    "explore": "https://rinkeby-explorer.arbitrum.io/",
     "superfluid": {
-      "host": "0xE40983C2476032A0915600b9472B3141aA5B5Ba9",
-      "cfav1": "0xff48668fa670A85e55A7a822b352d5ccF3E7b18C"
+      "host": "0xE01F8743677Da897F4e7De9073b57Bf034FC2433",
+      "cfav1": "0xcA0569223e56B479FaC6d554FA0D3867A4384657"
     }
   },
   {
@@ -428,6 +488,22 @@
     "explore": "https://explorer.celo.org/baklava/"
   },
   {
+    "name": "LUKSO (L14 Testnet)",
+    "isActive": false,
+    "token": "tLYX",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rpc.l14.lukso.network",
+    "wsRpc": "",
+    "gasPriceOracle": "https://rpc.l14.lukso.network",
+    "gasPrice": "10000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#FFFBCDC5",
+    "testNet": true,
+    "chainId": 22,
+    "explore": ""
+  },
+  {
     "name": "LUKSO (L16 Testnet)",
     "isActive": true,
     "token": "LYXt",
@@ -457,102 +533,6 @@
     "color": "#FFF97599",
     "testNet": true,
     "chainId": 246785,
-    "explore": ""
-  },
-  {
-    "name": "Kovan",
-    "isActive": false,
-    "token": "kETH",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://kovan.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "wsRpc": "wss://kovan.infura.io/ws/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "gasPriceOracle": "https://kovan.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "gasPrice": "10000000000",
-    "minGasPrice": "0",
-    "tokens": [],
-    "color": "#FF6535c9",
-    "testNet": true,
-    "chainId": 42,
-    "explore": "https://kovan.etherscan.io/",
-    "superfluid": {
-      "host": "0xF0d7d1D47109bA426B9D8A3Cde1941327af1eea3",
-      "cfav1": "0xECa8056809e7e8db04A8fF6e4E82cD889a46FE2F"
-    }
-  },
-  {
-    "name": "Rinkeby",
-    "isActive": false,
-    "token": "tETH",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://rinkeby.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "wsRpc": "wss://rinkeby.infura.io/ws/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "gasPriceOracle": "https://rinkeby.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "gasPrice": "10000000000",
-    "minGasPrice": "0",
-    "tokens": [],
-    "color": "#FF6535c9",
-    "testNet": true,
-    "chainId": 4,
-    "explore": "",
-    "superfluid": {
-      "host": "0xeD5B5b32110c3Ded02a07c8b8e97513FAfb883B6",
-      "cfav1": "0xF4C5310E51F6079F601a5fb7120bC72a70b96e2A"
-    }
-  },
-  {
-    "name": "Ropsten",
-    "isActive": false,
-    "token": "tETH",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://ropsten.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "wsRpc": "wss://ropsten.infura.io/ws/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "gasPriceOracle": "https://ropsten.infura.io/v3/f85c084ebd2e46b6868f6dfa6444dd82",
-    "gasPrice": "10000000000",
-    "minGasPrice": "0",
-    "tokens": [],
-    "color": "#FF6535c9",
-    "testNet": true,
-    "chainId": 3,
-    "explore": "",
-    "superfluid": {
-      "host": "0xF2B4E81ba39F5215Db2e05B2F66f482BB8e87FD2",
-      "cfav1": "0xaD2F1f7cd663f6a15742675f975CcBD42bb23a88"
-    }
-  },
-  {
-    "name": "Arbitrum Rinkeby",
-    "isActive": false,
-    "token": "ARETH",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://rinkeby.arbitrum.io/rpc",
-    "wsRpc": "wss://speedy-nodes-nyc.moralis.io/368f5973bec9aa708b0b18b8/arbitrum/testnet/ws",
-    "gasPriceOracle": "https://rinkeby.arbitrum.io/rpc",
-    "gasPrice": "20000000000",
-    "minGasPrice": "0",
-    "tokens": [],
-    "color": "#28a0f0",
-    "testNet": true,
-    "chainId": 421611,
-    "explore": "https://rinkeby-explorer.arbitrum.io/",
-    "superfluid": {
-      "host": "0xE01F8743677Da897F4e7De9073b57Bf034FC2433",
-      "cfav1": "0xcA0569223e56B479FaC6d554FA0D3867A4384657"
-    }
-  },
-  {
-    "name": "LUKSO (L14 Testnet)",
-    "isActive": false,
-    "token": "tLYX",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://rpc.l14.lukso.network",
-    "wsRpc": "",
-    "gasPriceOracle": "https://rpc.l14.lukso.network",
-    "gasPrice": "10000000000",
-    "minGasPrice": "0",
-    "tokens": [],
-    "color": "#FFFBCDC5",
-    "testNet": true,
-    "chainId": 22,
     "explore": ""
   },
   {
