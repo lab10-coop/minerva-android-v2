@@ -340,6 +340,26 @@
     "explore": "https://zksync2-testnet.zkscan.io/"
   },
   {
+    "name": "Arbitrum Görli",
+    "isActive": true,
+    "token": "ETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://goerli-rollup.arbitrum.io/rpc",
+    "wsRpc": "",
+    "gasPriceOracle": "https://goerli-rollup.arbitrum.io/rpc",
+    "gasPrice": "20000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#28a0f0",
+    "testNet": true,
+    "chainId": 421613,
+    "explore": "https://goerli.arbiscan.io/",
+    "superfluid": {
+      "host": "0xE40983C2476032A0915600b9472B3141aA5B5Ba9",
+      "cfav1": "0xff48668fa670A85e55A7a822b352d5ccF3E7b18C"
+    }
+  },
+  {
     "name": "Avalanche Fuji Testnet",
     "isActive": true,
     "token": "AVAX",
