@@ -52,7 +52,7 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
                 cryptoAmount.text =
                     BalanceUtils.getSuperTokenFormatBalance(animatedValue as BigDecimal)
             }
-        }, 0, 50)
+        }, 0, 250)
     }
 
     fun endStreamAnimation() {
