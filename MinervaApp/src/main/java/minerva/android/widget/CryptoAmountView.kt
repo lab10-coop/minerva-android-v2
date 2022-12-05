@@ -34,7 +34,7 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
     fun startStreamAnimation() {
         cryptoAmount.setTextColor(ContextCompat.getColor(context, R.color.bodyColor))
 
-        timer.schedule(object : TimerTask() {
+        /*timer.schedule(object : TimerTask() {
             var duration: BigDecimal = BigDecimal.ZERO
             var animatedValue = start
 
@@ -52,7 +52,7 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
                 cryptoAmount.text =
                     BalanceUtils.getSuperTokenFormatBalance(animatedValue as BigDecimal)
             }
-        }, 0, 250)
+        }, 0, 250)*/
     }
 
     fun endStreamAnimation() {
