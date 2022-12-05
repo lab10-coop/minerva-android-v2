@@ -231,9 +231,6 @@ abstract class BaseWalletConnectScannerViewModel(
                 .subscribeBy(
                     onSuccess = { chainName ->
                         updateWCState(BaseNetworkData(chainId, chainName), WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING)
-                    },
-                    onError = {
-                        setLiveDataError(it)
                     }
                 )
         }
