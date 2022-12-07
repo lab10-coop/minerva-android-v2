@@ -376,8 +376,6 @@
     <string name="grid">Grid view</string>
     <string name="more_label"> more</string>
     <string name="amount_label">Amount: %s</string>
-    <string name="address_text">address</string>
-    <string name="slash_text">/</string>
 
     <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="default_dapp_dialog_confirm">Open</string>
