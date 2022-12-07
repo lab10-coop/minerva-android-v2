@@ -332,7 +332,7 @@ class NftCollectionViewModel(
         accountToken.token.address.equals(
             collectionAddress,
             true
-        ) && accountToken.token.type.isNft() && accountToken.currentRawBalance > BigDecimal.ZERO
+        ) && accountToken.token.type.isNft() && accountToken.rawBalance > BigDecimal.ZERO
     }
 
     private fun updateList() {

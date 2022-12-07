@@ -749,7 +749,7 @@ class TransactionRepositoryTest : RxTest() {
         val accountToken =
             AccountToken(
                 ERCToken(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", type = TokenType.ERC20),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
@@ -774,7 +774,7 @@ class TransactionRepositoryTest : RxTest() {
         val accountToken =
             AccountToken(
                 ERCToken(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = "", type = TokenType.ERC20),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
         whenever(tokenManager.getTokenBalance(any())).thenReturn(
             Flowable.just(AssetBalance(ChainId.ETH_RIN, "privateKey", accountToken))
@@ -953,7 +953,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     type = TokenType.SUPER_TOKEN
                 ),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(
@@ -1021,7 +1021,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     type = TokenType.SUPER_TOKEN
                 ),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
@@ -1058,7 +1058,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     type = TokenType.SUPER_TOKEN
                 ),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
