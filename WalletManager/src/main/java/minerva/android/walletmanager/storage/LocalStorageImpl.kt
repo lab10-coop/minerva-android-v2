@@ -89,13 +89,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         sharedPreferences.edit().putLong(FREE_ATS_TIMESTAMP, timestamp).apply()
     }
 
-    override fun saveTokenIconsUpdateTimestamp(timestamp: Long) {
-        sharedPreferences.edit().putLong(ICON_UPDATE_TIMESTAMP, timestamp).apply()
-    }
-
-    override fun loadTokenIconsUpdateTimestamp(): Long =
-        sharedPreferences.getLong(ICON_UPDATE_TIMESTAMP, Long.InvalidValue)
-
     override fun saveDappDetailsUpdateTimestamp(timestamp: Long) {
         sharedPreferences.edit().putLong(DAPPS_UPDATE_TIMESTAMP, timestamp).apply()
     }

@@ -248,8 +248,8 @@ class WalletConnectRepositoryImpl(
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
 
-    override fun updateDappSession(peerId: String, address: String, chainId: Int, accountName: String): Completable =
-        dappDao.update(peerId, address, chainId, accountName)
+    override fun updateDappSession(peerId: String, address: String, chainId: Int, accountName: String, networkName: String): Completable =
+        dappDao.update(peerId, address, chainId, accountName, networkName)
 
     override fun deleteDappSession(peerId: String): Completable =
         dappDao.delete(peerId)
@@ -290,12 +290,13 @@ class WalletConnectRepositoryImpl(
         connectionPeerId: String,
         accountAddress: String,
         accountChainId: Int,
-        accountName: String
+        accountName: String,
+        networkName: String
     ): Completable =
         if (clientMap[connectionPeerId]?.approveSession(listOf(accountAddress), accountChainId, connectionPeerId) == true) {
             logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} ${connectionPeerId}")
             //update specified dapp session db record by specified parameters
-            updateDappSession(connectionPeerId, accountAddress, accountChainId, accountName)
+            updateDappSession(connectionPeerId, accountAddress, accountChainId, accountName, networkName)
         } else {
             Completable.error(Throwable("Update of Session not approved"))
         }

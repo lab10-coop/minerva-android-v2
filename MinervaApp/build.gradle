@@ -57,8 +57,8 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 167
-            versionName "1.7.97"
+            versionCode 177
+            versionName "1.8.7"
             dimension 'enviroment'
             versionNameSuffix '-staging'
             matchingFallbacks = ["staging"]
@@ -68,12 +68,14 @@ android {
 
             buildConfigField "String", "RAMP_API_URL", '"ri-widget-staging.firebaseapp.com"'
             buildConfigField "String", "RAMP_API_KEY", System.env.RAMP_STAGING_API_KEY ?: localProperty("ramp.staging.api.key")
+
+            resConfigs("en", "de")
         }
 
         production {
             applicationId "digital.minerva"
-            versionCode 21
-            versionName "1.7.9"
+            versionCode 22
+            versionName "1.8.0"
             dimension 'enviroment'
             matchingFallbacks = ["production"]
 
@@ -82,6 +84,8 @@ android {
 
             buildConfigField "String", "RAMP_API_URL", '"buy.ramp.network"'
             buildConfigField "String", "RAMP_API_KEY", System.env.RAMP_PROD_API_KEY ?: localProperty("ramp.prod.api.key")
+
+            resConfigs("en")
         }
     }
 

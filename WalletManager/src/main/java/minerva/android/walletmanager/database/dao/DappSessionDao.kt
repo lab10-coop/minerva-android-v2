@@ -21,10 +21,11 @@ interface DappSessionDao {
      * @param address - address of account which was specified
      * @param chainId - chainId of account which was specified
      * @param accountName - name (with index) of account which was specified
+     * @param networkName - network name of account which was specified
      * @return Completable
      */
-    @Query("UPDATE dapp_sessions SET address = :address, account_name = :accountName, chain_id = :chainId WHERE peer_id = :peerId")
-    fun update(peerId: String, address: String, chainId: Int,  accountName: String): Completable
+    @Query("UPDATE dapp_sessions SET address = :address, account_name = :accountName, network_name = :networkName, chain_id = :chainId WHERE peer_id = :peerId")
+    fun update(peerId: String, address: String, chainId: Int,  accountName: String, networkName: String): Completable
 
     @Query("DELETE FROM dapp_sessions WHERE peer_id = :itemId")
     fun delete(itemId: String): Completable

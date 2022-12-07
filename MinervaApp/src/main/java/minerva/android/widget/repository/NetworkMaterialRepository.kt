@@ -18,6 +18,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_16
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
@@ -28,14 +29,17 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO_CHAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_RIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_BED
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_ALF
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_BAK
 import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
 import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_FUJ
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ALPHA
 
 fun getNetworkIcon(context: Context, chainId: Int, isSafeAccount: Boolean = false): Drawable? =
     prepareSafeAccountBadge(context, getMainIcon(chainId), isSafeAccount)
@@ -49,24 +53,19 @@ private fun getMainIcon(chainId: Int): Int =
         POA_CORE -> R.drawable.ic_poa_core
         ATS_TAU -> R.drawable.ic_artis
         POA_SKL -> R.drawable.ic_poa
-        LUKSO_14 -> R.drawable.ic_lukso
+        LUKSO_14, LUKSO_16 -> R.drawable.ic_lukso
         ETH_KOV, ETH_RIN, ETH_ROP -> R.drawable.ic_etherium_test
         ETH_GOR -> R.drawable.ic_gorli
         ETH_SEP -> R.drawable.ic_ethereum_l2
         MATIC, MUMBAI -> R.drawable.ic_polygon_matic
         BSC, BSC_TESTNET -> R.drawable.ic_bsc
         RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk
-        ARB_ONE -> R.drawable.ic_arbitrum
-        ARB_RIN -> R.drawable.ic_arbitrum
-        OPT -> R.drawable.ic_optimism
-        OPT_KOV -> R.drawable.ic_optimism
-        OPT_GOR -> R.drawable.ic_optimism
-        CELO -> R.drawable.ic_celo
-        CELO_ALF -> R.drawable.ic_celo
-        CELO_BAK -> R.drawable.ic_celo
-        AVA_C -> R.drawable.ic_avalanche
-        AVA_FUJ -> R.drawable.ic_avalanche
-        else -> Int.InvalidId
+        ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_arbitrum
+        OPT, OPT_KOV, OPT_GOR, OPT_BED -> R.drawable.ic_optimism
+        ZKS_ALPHA -> R.drawable.ic_zksync
+        CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo
+        AVA_C, AVA_FUJ -> R.drawable.ic_avalanche
+        else -> R.drawable.ic_default_token
     }
 
 fun getMainTokenIconRes(chainId: Int): Int =
@@ -79,20 +78,15 @@ fun getMainTokenIconRes(chainId: Int): Int =
         ATS_TAU -> R.drawable.ic_artis_token
         ETH_KOV, ETH_RIN, ETH_ROP, ETH_GOR, ETH_SEP -> R.drawable.ic_ethereum_token_test
         POA_SKL -> R.drawable.ic_skl_token
-        LUKSO_14 -> R.drawable.ic_lukso
+        LUKSO_14, LUKSO_16 -> R.drawable.ic_lukso
         MATIC, MUMBAI -> R.drawable.ic_polygon_matic_token
         BSC, BSC_TESTNET -> R.drawable.ic_bsc_token
         RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk_token
-        ARB_ONE -> R.drawable.ic_ethereum_l2
-        ARB_RIN -> R.drawable.ic_ethereum_l2
-        OPT -> R.drawable.ic_ethereum_l2
-        OPT_KOV -> R.drawable.ic_ethereum_l2
-        OPT_GOR -> R.drawable.ic_ethereum_l2
-        CELO -> R.drawable.ic_celo_coin
-        CELO_ALF -> R.drawable.ic_celo_coin
-        CELO_BAK -> R.drawable.ic_celo_coin
-        AVA_C -> R.drawable.ic_avalanche
-        AVA_FUJ -> R.drawable.ic_avalanche
+        ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_ethereum_l2
+        OPT, OPT_KOV, OPT_GOR, OPT_BED -> R.drawable.ic_ethereum_l2
+        ZKS_ALPHA -> R.drawable.ic_ethereum_l2
+        CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo_coin
+        AVA_C, AVA_FUJ -> R.drawable.ic_avalanche
         else -> R.drawable.ic_default_token
     }
 

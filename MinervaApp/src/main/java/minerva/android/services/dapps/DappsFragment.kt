@@ -48,6 +48,7 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
 
     override fun onResume() {
         super.onResume()
+        viewModel.updateDapps()
         viewModel.getDapps()
     }
 

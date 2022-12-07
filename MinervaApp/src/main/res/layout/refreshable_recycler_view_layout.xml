@@ -78,6 +78,7 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            tools:itemCount="2"
             tools:listitem="@layout/account_list_row" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

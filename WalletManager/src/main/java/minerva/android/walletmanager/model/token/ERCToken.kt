@@ -23,9 +23,6 @@ data class ERCToken(
     var logoURI: String? = null,
     var tag: String = String.Empty,
     var isError: Boolean = false,
-    // todo: isStreamActive could be inferred from consNetFlow
-    // most ofter you would just use type.isSuperToken() instead.
-    var isStreamActive: Boolean = false,
     @Embedded var nftContent: NftContent = NftContent(),
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null,
@@ -46,6 +43,10 @@ data class ERCToken(
         tokenType,
         collectionName = if (tokenType.isNft()) tokenTx.tokenName else null
     )
+
+    fun mergeLogoURI(ercToken: ERCToken){
+        logoURI = ercToken.logoURI
+    }
 
     fun mergeNftDetailsAfterTokenDiscovery(ercToken: ERCToken){
         mergePropertiesWithLocalFirstStrategy(ercToken)

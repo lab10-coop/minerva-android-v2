@@ -4,12 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.google.android.material.button.MaterialButton
 import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
@@ -33,6 +31,7 @@ import minerva.android.widget.dialog.*
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
 import minerva.android.wrapped.startManageTokensWrappedActivity
+import minerva.android.wrapped.startNewAccountWrappedActivity
 import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.android.ext.android.inject
@@ -354,12 +353,15 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
-    private fun setTatsButtonListener() =
-        binding.addCryptoButton.setOnClickListener { view ->
+    private fun setTatsButtonListener() = binding.apply {
+        addCryptoButton.setOnClickListener { view ->
             viewModel.apply {
                 if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
             }
         }
+    }
+
+    override fun addAccount() = startNewAccountWrappedActivity(requireContext(), getString(R.string.add_account))
 
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))
@@ -396,6 +398,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     companion object {
         @JvmStatic
         fun newInstance() = AccountsFragment()
+        const val ITEM = 1 //token info(item) case
+        const val ADD_ITEM = -1 //add new account (button) case
         private const val RECEIVE_TRANSACTION_INDEX = 1
     }
 }

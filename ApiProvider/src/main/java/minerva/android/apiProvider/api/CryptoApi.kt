@@ -81,7 +81,7 @@ interface CryptoApi {
         private const val IDS = "ids"
         private const val VS_CURRENCIES = "vs_currencies"
         private const val CONTRACT_ADDRESSES = "contract_addresses"
-        private const val CHAIN_DETAILS_URL = "https://chainlist.org/chains.json"
+        private const val CHAIN_DETAILS_URL = "https://chainid.network/chains_mini.json"
         private const val NFT_COLLECTION_DETAILS_URL =
             "https://raw.githubusercontent.com/lab10-coop/minerva-nft-list/main/all.json"
     }

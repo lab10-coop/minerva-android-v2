@@ -28,14 +28,6 @@ interface TokenManager {
      */
     fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERCToken>>): UpdateTokensResult
 
-    /**
-     * return statement: Map<ChainId, List<ERC20Token>>
-     */
-    fun updateTokenIcons(
-        shouldBeUpdated: Boolean,
-        tokensPerChainIdMap: Map<Int, List<ERCToken>>
-    ): Single<UpdateTokensResult>
-
     fun getTokenBalance(account: Account): Flowable<Asset>
     fun downloadTokensList(account: Account): Single<List<ERCToken>>
     fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable
