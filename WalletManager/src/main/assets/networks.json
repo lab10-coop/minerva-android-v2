@@ -305,7 +305,7 @@
     "color": "#ff0420",
     "testNet": true,
     "chainId": 420,
-    "explore": "https://goerli.optimism.io/"
+    "explore": "https://goerli-optimism.etherscan.io/"
   },
   {
     "name": "Optimism Bedrock",
