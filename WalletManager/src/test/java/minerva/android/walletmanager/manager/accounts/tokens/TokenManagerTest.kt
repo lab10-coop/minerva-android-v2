@@ -518,7 +518,7 @@ class TokenManagerTest : RxTest() {
                             tag = "",
                             type = TokenType.ERC20,
                             isError = false
-                        ), currentRawBalance = BigDecimal(10000), tokenPrice = 2.0
+                        ), rawBalance = BigDecimal(10000), tokenPrice = 2.0
                     )
                 )
             )
@@ -613,7 +613,7 @@ class TokenManagerTest : RxTest() {
                 asset is AssetBalance &&
                         asset.chainId == ATS_TAU &&
                         asset.accountToken.tokenPrice == 3.3 &&
-                        asset.accountToken.currentRawBalance == BigDecimal.TEN
+                        asset.accountToken.rawBalance == BigDecimal.TEN
             }
     }
 

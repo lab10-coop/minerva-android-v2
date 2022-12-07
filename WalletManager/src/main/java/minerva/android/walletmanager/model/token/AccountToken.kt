@@ -9,7 +9,7 @@ import java.math.RoundingMode
 
 data class AccountToken(
     override var token: ERCToken,
-    var currentRawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
+    var rawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var tokenPrice: Double? = Double.InvalidValue,
     var underlyingPrices: List<Double> = emptyList()
 ) : TokenWithBalances {
@@ -20,8 +20,8 @@ data class AccountToken(
             .orElse { false }
 
     override val currentBalance: BigDecimal
-        get() = if (token.type.isERC721() || token.decimals.isBlank()) currentRawBalance else getBalanceForTokenWithDecimals(
-            currentRawBalance
+        get() = if (token.type.isERC721() || token.decimals.isBlank()) rawBalance else getBalanceForTokenWithDecimals(
+            rawBalance
         )
 
     override val fiatBalance: BigDecimal
