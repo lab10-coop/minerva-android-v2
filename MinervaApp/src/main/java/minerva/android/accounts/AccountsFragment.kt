@@ -399,7 +399,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     companion object {
         @JvmStatic
         fun newInstance() = AccountsFragment()
-        const val ADDRESS = 'address'
+        const val ADDRESS = "address"
         const val ITEM = 1 //token info(item) case
         const val ADD_ITEM = -1 //add new account (button) case
         private const val RECEIVE_TRANSACTION_INDEX = 1
