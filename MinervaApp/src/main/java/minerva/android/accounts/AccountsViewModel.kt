@@ -500,7 +500,7 @@ class AccountsViewModel(
                         newCachedTokens.add(
                             AccountToken(
                                 it,
-                                currentRawBalance = cachedBalance.balance.cryptoBalance,
+                                rawBalance = cachedBalance.balance.cryptoBalance,
                                 tokenPrice = cachedBalance.rate
                             )
                         )
@@ -608,7 +608,7 @@ class AccountsViewModel(
         balance: AssetBalance,
         accountToken: AccountToken
     ) = with(accountToken) {
-        currentRawBalance = balance.accountToken.currentRawBalance
+        rawBalance = balance.accountToken.rawBalance
         token.isError = false
         token.consNetFlow = balance.accountToken.token.consNetFlow
     }
@@ -622,7 +622,7 @@ class AccountsViewModel(
             Flowable.just(updateSuperTokenStreamAndReturnIndex(accountToken, balance, index))
         } else {
             with(accountToken) {
-                currentRawBalance = balance.accountToken.currentRawBalance
+                rawBalance = balance.accountToken.rawBalance
                 setNewTokenPrice(balance, cachedAccountTokens)
                 token.isError = false
                 insertTokenBalance(balance, accountToken.token.accountAddress)
@@ -642,7 +642,7 @@ class AccountsViewModel(
         CoinBalance(
             chainId = accountToken.token.chainId,
             address = accountToken.token.address,
-            balance = Balance(balance.accountToken.currentRawBalance),
+            balance = Balance(balance.accountToken.rawBalance),
             rate = accountToken.tokenPrice
         )
 
