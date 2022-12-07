@@ -1,24 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
-    <minerva.android.widget.blockies.BlockiesImageView
-        android:id="@+id/token_logo"
-        android:layout_width="@dimen/xsmall_logo_size"
-        android:layout_height="@dimen/xsmall_logo_size"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_default_token"
-        tools:ignore="ContentDescription" />
+    <View
+        android:id="@+id/type_separator"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/margin_xxxxsmall"
+        android:background="@color/dappDragColorGray"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_marginBottom="@dimen/margin_xsmall"/>
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/token_switch"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/margin_small"
-        android:textColor="@color/gray" />
+        android:orientation="horizontal">
 
-</merge>
+        <minerva.android.widget.blockies.BlockiesImageView
+            android:id="@+id/token_logo"
+            android:layout_width="@dimen/xsmall_logo_size"
+            android:layout_height="@dimen/xsmall_logo_size"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_default_token"
+            tools:ignore="ContentDescription" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/token_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/margin_small"
+            android:textColor="@color/gray" />
+    </LinearLayout>
+</LinearLayout>
