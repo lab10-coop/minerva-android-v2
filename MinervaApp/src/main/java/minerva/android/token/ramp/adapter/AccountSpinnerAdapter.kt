@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.spinner_network_add_item.view.*
 import minerva.android.R
+import minerva.android.accounts.AccountsFragment.Companion.ADD_ITEM
+import minerva.android.accounts.AccountsFragment.Companion.ITEM
 import minerva.android.databinding.SpinnerNetworkAddItemBinding
 import minerva.android.databinding.SpinnerNetworkBinding
 import minerva.android.kotlinUtils.InvalidId
@@ -69,7 +71,5 @@ class AccountSpinnerAdapter(
 
     companion object {
         private const val NO_ICON = 0
-        private const val ITEM = 1 //token info(item) case
-        private const val ADD_ITEM = -1 //add new account (button) case
     }
 }

@@ -41,4 +41,9 @@ interface AccountsFragmentToAdapterListener {
      * @param account - Account which info we need to show
      */
     fun openInExplorer(account: Account)
+
+    /**
+     * Add Account - method which calls "add account" functional from parent activity
+     */
+    fun addAccount()
 }

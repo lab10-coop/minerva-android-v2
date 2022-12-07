@@ -21,7 +21,6 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
-import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
@@ -145,28 +144,6 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
-    }
-
-    @Test
-    fun `Test tokens with online logos data without error`() {
-        NetworkManager.initialize(MockDataProvider.networks)
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(tokenRawData))
-        tokenManager.updateTokenIcons(false, map).test().assertComplete().assertNoErrors()
-            .assertValue {
-                map[1]?.get(0)?.logoURI == null
-            }
-        tokenManager.updateTokenIcons(true, map).test().assertComplete().assertNoErrors()
-            .assertValue {
-                map[1]?.get(0)?.logoURI == "someIconAddress"
-                map[1]?.get(1)?.logoURI == "someIconAddressII"
-            }
-    }
-
-    @Test
-    fun `Test tokens with online logos data with error`() {
-        NetworkManager.initialize(MockDataProvider.networks)
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.error(Throwable("No data here!")))
-        tokenManager.updateTokenIcons(true, map).test().assertErrorMessage("No data here!")
     }
 
     @Test
@@ -311,21 +288,21 @@ class TokenManagerTest : RxTest() {
     fun `Check merging ERC20Token maps`() {
         val tokensSetOne = tokenManager.sortTokensByChainId(
             listOf(
-                ERCToken(1, "tokenOneOne1", address = "theSame", accountAddress = "accountAddress1", type = TokenType.ERC20),
-                ERCToken(1, "tokenOneOne5", address = "0x0NE0N3", accountAddress = "accountAddress0", type = TokenType.ERC20),
+                ERCToken(1, "tokenOneOne1", address = "theSame", accountAddress = "accountAddress1", type = TokenType.ERC20, logoURI = "logoOneOne"),
+                ERCToken(1, "tokenOneOne5", address = "0x0NE0N3", accountAddress = "accountAddress0", type = TokenType.ERC20, logoURI = "logoOneOne"),
 
                 ERCToken(2, "tokenTwoOne", address = "0xTW00N3", accountAddress = "accountAddress1", type = TokenType.ERC20),
                 ERCToken(2, "tokenTwoTwo", address = "0xTW0TW0", accountAddress = "accountAddress2", type = TokenType.ERC20),
 
                 ERCToken(3, "tokenThreeOne", address = "0xTHR330N3", accountAddress = "accountAddress4", type = TokenType.ERC20),
                 ERCToken(3, "tokenThreeTwo", address = "0xTHR33TW0", accountAddress = "accountAddress2", type = TokenType.ERC20),
-                ERCToken(3, "tokenThreeThree", address = "0xTHR33THR33", accountAddress = "accountAddress1", type = TokenType.ERC721)
+                ERCToken(3, "tokenThreeThree", address = "0xTHR33THR33", accountAddress = "accountAddress1", type = TokenType.ERC721, logoURI = "new")
             )
         )
 
         val tokenSetTwo = tokenManager.sortTokensByChainId(
             listOf(
-                ERCToken(1, "tokenOneOne", address = "0x0NE0N3", type = TokenType.ERC20)
+                ERCToken(1, "tokenOneOne", address = "0x0NE0N3", type = TokenType.ERC20, logoURI = "logoOneOne")
             )
         )
 
@@ -415,7 +392,7 @@ class TokenManagerTest : RxTest() {
 
         mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 5
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.name shouldBeEqualTo "tokenThreeThree"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "bb1"
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "new"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeThree2"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.logoURI shouldBeEqualTo "bb"
 
@@ -432,42 +409,6 @@ class TokenManagerTest : RxTest() {
         mergedTokenMap03.tokensPerChainIdMap[1]?.size shouldBeEqualTo 3
         mergedTokenMap03.tokensPerChainIdMap[2]?.size shouldBeEqualTo 2
         mergedTokenMap03.tokensPerChainIdMap[3]?.size shouldBeEqualTo 2
-    }
-
-    @Test
-    fun `Check that tokens list has icon updates`() {
-        val tokens = tokenManager.sortTokensByChainId(
-            listOf(
-                ERCToken(1, "tokenOneOne", address = "0x0NE0N3", logoURI = "logoOne", type = TokenType.ERC20),
-                ERCToken(2, "tokenTwo", address = "0xS2Two01", logoURI = "logoTwo", type = TokenType.ERC20),
-                ERCToken(3, "tokenThreeThree", address = "0xTHR33THR33", logoURI = null, type = TokenType.ERC20)
-            )
-        )
-
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
-        val updatedIcons = tokenManager.updateTokenIcons(true, tokens)
-        val updatedIcons2 = tokenManager.updateTokenIcons(false, tokens)
-
-        updatedIcons
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.shouldSafeNewTokens &&
-                        it.tokensPerChainIdMap.size == 3 &&
-                        it.tokensPerChainIdMap[1]?.get(0)?.logoURI == "logoOneOne" &&
-                        it.tokensPerChainIdMap[2]?.get(0)?.logoURI == "logoTwo" &&
-                        it.tokensPerChainIdMap[3]?.get(0)?.logoURI == null
-            }
-        updatedIcons2
-            .test()
-            .assertComplete()
-            .assertValue {
-                !it.shouldSafeNewTokens &&
-                        it.tokensPerChainIdMap.size == 3 &&
-                        it.tokensPerChainIdMap[1]?.get(0)?.logoURI == "logoOneOne" &&
-                        it.tokensPerChainIdMap[2]?.get(0)?.logoURI == "logoTwo" &&
-                        it.tokensPerChainIdMap[3]?.get(0)?.logoURI == null
-            }
     }
 
     private val data = listOf(
@@ -504,35 +445,6 @@ class TokenManagerTest : RxTest() {
     fun `getting token rate test`() {
         whenever(rateStorage.getRate(any())).thenReturn(3.3)
         tokenManager.getSingleTokenRate("somesome") shouldBeEqualTo 3.3
-    }
-
-    @Test
-    fun `Check mapping last commit data to last commit timestamp`() {
-        NetworkManager.initialize(MockDataProvider.networks)
-        whenever(cryptoApi.getLastCommitFromTokenList(any())).thenReturn(Single.just(commitData))
-        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(Single.just(emptyList()))
-        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
-        whenever(localStorage.loadTokenIconsUpdateTimestamp()).thenReturn(333L, 1611950162000, 1611950162333)
-        whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
-        whenever(tokenDao.getTaggedTokens()).thenReturn(
-            Single.just(
-                listOf(
-                    ERCToken(
-                        ATS_TAU,
-                        "CookieTokenATS",
-                        "Cookie",
-                        "0xS0m3T0k3N",
-                        "13",
-                        type = TokenType.ERC20
-                    )
-                )
-            )
-        )
-        doNothing().whenever(tokenDao).updateTaggedTokens(any())
-        doNothing().whenever(localStorage).saveFreeATSTimestamp(any())
-        tokenManager.checkMissingTokensDetails().test().assertComplete()
-        tokenManager.checkMissingTokensDetails().test().assertNotComplete()
-        tokenManager.checkMissingTokensDetails().test().assertNotComplete()
     }
 
     @Test
@@ -607,7 +519,7 @@ class TokenManagerTest : RxTest() {
                             tag = "",
                             type = TokenType.ERC20,
                             isError = false
-                        ), currentRawBalance = BigDecimal(10000), tokenPrice = 2.0
+                        ), rawBalance = BigDecimal(10000), tokenPrice = 2.0
                     )
                 )
             )
@@ -702,7 +614,7 @@ class TokenManagerTest : RxTest() {
                 asset is AssetBalance &&
                         asset.chainId == ATS_TAU &&
                         asset.accountToken.tokenPrice == 3.3 &&
-                        asset.accountToken.currentRawBalance == BigDecimal.TEN
+                        asset.accountToken.rawBalance == BigDecimal.TEN
             }
     }
 
@@ -931,7 +843,8 @@ class TokenManagerTest : RxTest() {
                             "Name",
                             "Symbol",
                             "uri",
-                            listOf("ERC-1155")
+                            listOf("ERC-1155"),
+                            logoURI = "logo.png"
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "10",
@@ -942,7 +855,8 @@ class TokenManagerTest : RxTest() {
                             "n4m8",
                             "Symbol",
                             "uri",
-                            listOf("ERC-721")
+                            listOf("ERC-721"),
+                            logoURI = "logo.png"
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "1000",
@@ -954,7 +868,8 @@ class TokenManagerTest : RxTest() {
                             "Symb0l",
                             "uri",
                             listOf("ERC-20"),
-                            TokensOwnedPayload.TokenOwned.TokenJson.Empty
+                            TokensOwnedPayload.TokenOwned.TokenJson.Empty,
+                            logoURI = "logo.png"
                         )
                     ),
                     ""

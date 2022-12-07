@@ -4,47 +4,62 @@ import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.crypto_amount_layout.view.*
 import minerva.android.R
 import minerva.android.walletmanager.utils.BalanceUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.math.RoundingMode
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
 
 class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
     LinearLayout(context, attributeSet) {
 
     private var animator: ValueAnimator? = null
+    private var startTime: Long = 0
+    private var start: BigDecimal = BigDecimal.ZERO
+    private var speed: BigInteger = BigInteger.ZERO
 
     init {
         inflate(context, R.layout.crypto_amount_layout, this)
         orientation = VERTICAL
     }
 
-    fun startStreamingAnimation(start: BigDecimal, speed: BigInteger) {
+    fun setStreamingValues(_start: BigDecimal, _speed: BigInteger) {
+        // startTime should be the block timestamp when balance was requested
+        startTime = System.currentTimeMillis()
+        start = _start
+        speed = _speed
+    }
+
+    fun startStreamAnimation() {
         cryptoAmount.setTextColor(ContextCompat.getColor(context, R.color.bodyColor))
-        var durationSeconds = 600
-        var end: BigDecimal = start.add(
+
+        var timePassedMillis = BigDecimal(System.currentTimeMillis() - startTime)
+            .divide(BigDecimal(1000))
+        var durationMillis = BigDecimal(86_400_000) // 1 day
+
+        var startValue = start.add(
             speed
                 .toBigDecimal()
-                .divide(BigDecimal("10E17"))
-                .times(BigDecimal(durationSeconds))
-        );
-        with(ValueAnimator.ofObject(BigDecimalEvaluator(), start, end)) {
+                .divide(BigDecimal("10E17")) // to seconds
+                .times(timePassedMillis.divide(BigDecimal(1000)))
+            )
+        var endValue: BigDecimal = startValue.add(
+            speed
+                .toBigDecimal()
+                .divide(BigDecimal("10E17")) // to seconds
+                .times(durationMillis.divide(BigDecimal(1000)))
+        )
+
+        with(ValueAnimator.ofObject(BigDecimalEvaluator(), startValue, endValue)) {
             animator = this
-            duration = durationSeconds * 1000.toLong()
+            duration = durationMillis.toLong()
             addUpdateListener { animation ->
                 cryptoAmount.text =
                     BalanceUtils.getSuperTokenFormatBalance(animation.animatedValue as BigDecimal)
+
             }
             interpolator = LinearInterpolator()
             start()
@@ -82,7 +97,4 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
         }
     }
 
-    companion object {
-        const val NEGATIVE = -1
-    }
 }

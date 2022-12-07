@@ -1,6 +1,5 @@
 package minerva.android.accounts
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,7 +16,6 @@ import minerva.android.accounts.state.*
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
@@ -29,7 +27,6 @@ import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowa
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.HIDE
@@ -50,7 +47,6 @@ import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.net.ConnectException
-import java.util.concurrent.TimeUnit
 
 class AccountsViewModel(
     private val accountManager: AccountManager,
@@ -225,7 +221,15 @@ class AccountsViewModel(
                     accountToken.shouldShowAccountToken(account, tokenVisibilitySettings)
                 }
         }
-        return tokens.sortedByDescending { accountToken -> accountToken.fiatBalance }
+        return tokens
+            .sortedWith(
+                compareBy(
+                    { !it.token.logoURI.isNullOrEmpty() },
+                    { it.fiatBalance },
+                    { it.currentBalance }
+                )
+            )
+            .reversed()
     }
 
     fun refreshCoinBalances() =
@@ -495,8 +499,9 @@ class AccountsViewModel(
                     ?.let {
                         newCachedTokens.add(
                             AccountToken(
-                                it, currentRawBalance =
-                                cachedBalance.balance.cryptoBalance, tokenPrice = cachedBalance.rate
+                                it,
+                                rawBalance = cachedBalance.balance.cryptoBalance,
+                                tokenPrice = cachedBalance.rate
                             )
                         )
                         cachedAccountTokens = newCachedTokens
@@ -595,38 +600,15 @@ class AccountsViewModel(
         balance: AssetBalance,
         index: Int
     ): Int = with(accountToken) {
-        when {
-            nextBalance == Double.InvalidValue.toBigDecimal() -> {
-                updateInitSuperTokenStreamBalance(balance, accountToken)
-                index
-            }
-            nextBalance != balance.accountToken.nextBalance -> {
-                updateNextSuperTokenStreamBalance(balance, accountToken)
-                index
-            }
-            else -> Int.InvalidIndex
-        }
-    }
-
-    private fun updateNextSuperTokenStreamBalance(
-        balance: AssetBalance,
-        accountToken: AccountToken
-    ) = with(accountToken) {
-        currentRawBalance = nextRawBalance
-        nextRawBalance = balance.accountToken.nextRawBalance
-        token.isStreamActive = balance.accountToken.token.isStreamActive
-        isInitStream = false
-        token.isError = false
-        token.consNetFlow = balance.accountToken.token.consNetFlow
+        updateInitSuperTokenStreamBalance(balance, accountToken)
+        index
     }
 
     private fun updateInitSuperTokenStreamBalance(
         balance: AssetBalance,
         accountToken: AccountToken
     ) = with(accountToken) {
-        currentRawBalance = balance.accountToken.currentRawBalance
-        nextRawBalance = balance.accountToken.nextRawBalance
-        isInitStream = true
+        rawBalance = balance.accountToken.rawBalance
         token.isError = false
         token.consNetFlow = balance.accountToken.token.consNetFlow
     }
@@ -640,7 +622,7 @@ class AccountsViewModel(
             Flowable.just(updateSuperTokenStreamAndReturnIndex(accountToken, balance, index))
         } else {
             with(accountToken) {
-                currentRawBalance = balance.accountToken.currentRawBalance
+                rawBalance = balance.accountToken.rawBalance
                 setNewTokenPrice(balance, cachedAccountTokens)
                 token.isError = false
                 insertTokenBalance(balance, accountToken.token.accountAddress)
@@ -660,23 +642,13 @@ class AccountsViewModel(
         CoinBalance(
             chainId = accountToken.token.chainId,
             address = accountToken.token.address,
-            balance = Balance(balance.accountToken.currentRawBalance),
+            balance = Balance(balance.accountToken.rawBalance),
             rate = accountToken.tokenPrice
         )
 
     fun stopStreaming() {
         if (::streamingDisposable.isInitialized) {
             streamingDisposable.dispose()
-        }
-        resetStreamingAnimation()
-    }
-
-    private fun resetStreamingAnimation() {
-        activeAccounts.forEach { account ->
-            account.accountTokens.forEach { accountToken ->
-                accountToken.nextRawBalance = Double.InvalidValue.toBigDecimal()
-                accountToken.isInitStream = true
-            }
         }
     }
 
