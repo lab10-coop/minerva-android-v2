@@ -61,7 +61,7 @@ fun AccountToken.shouldShowAccountToken(
 fun BigDecimal.hasFunds() = this > BigDecimal.ZERO
 
 fun AccountToken.shouldUpdateBalance(balance: AssetBalance): Boolean =
-    currentRawBalance != balance.accountToken.currentRawBalance || tokenPrice != balance.accountToken.tokenPrice
+    rawBalance != balance.accountToken.rawBalance || tokenPrice != balance.accountToken.tokenPrice
 
 fun AccountToken.isTokenError(balance: AssetError) =
     isTheSameToken(balance.tokenAddress, balance.accountAddress, balance.tokenId) && !token.isError

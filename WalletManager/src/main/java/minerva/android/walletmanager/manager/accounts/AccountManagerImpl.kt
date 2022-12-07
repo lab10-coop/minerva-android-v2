@@ -596,7 +596,7 @@ class AccountManagerImpl(
 
     private fun areFundsOnValue(balance: BigDecimal, accountTokens: List<AccountToken>): Boolean {
         accountTokens.forEach { accountToken ->
-            if (accountToken.currentRawBalance.toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
+            if (accountToken.rawBalance.toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
         return unitConverter.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }
