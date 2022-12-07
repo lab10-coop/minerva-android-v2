@@ -429,7 +429,7 @@ class TokenManagerImpl(
                         tokens
                             .filter { token -> getTokenVisibility(token.accountAddress, token.address) ?: true }
                             .flatMap { token ->
-                                listOf(token.address) + token.underlyingTokens!!
+                                listOf(token.address) + token.underlyingTokens
                             }
                             .map { address -> address.toLowerCase(Locale.ROOT) }
                             .distinct()

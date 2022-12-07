@@ -11,7 +11,7 @@ data class AccountToken(
     override var token: ERCToken,
     var currentRawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var tokenPrice: Double? = Double.InvalidValue,
-    var underlyingPrices: List<Double>? = emptyList()
+    var underlyingPrices: List<Double> = emptyList()
 ) : TokenWithBalances {
 
     override fun equals(other: Any?): Boolean =
@@ -31,10 +31,10 @@ data class AccountToken(
                     ?.let { BigDecimal(it).multiply(currentBalance).setScale(FIAT_SCALE, RoundingMode.HALF_UP) }
                     .orElse { Double.InvalidValue.toBigDecimal() }
             }
-            if (underlyingPrices!!.isNotEmpty()) {
+            if (underlyingPrices.isNotEmpty()) {
                 // todo: improve this, average is not correct, should be the sum and mutliply to get 100%
                 return token.underlyingBalances?.let {
-                    underlyingPrices!!
+                    underlyingPrices
                         .zip(it)
                         .filter { (underlyingPrice, underlyingBalance ) -> underlyingPrice != Double.InvalidValue }
                         .map { (underlyingPrice, underlyingBalance) ->
@@ -46,8 +46,8 @@ data class AccountToken(
                         // todo: assumes same percentage, fix this
                         .multiply(
                             BigDecimal(
-                                underlyingPrices!!.size /
-                                underlyingPrices!!
+                                underlyingPrices.size /
+                                underlyingPrices
                                 .filter { underlyingPrice -> underlyingPrice != Double.InvalidValue }
                                 .size
                             )

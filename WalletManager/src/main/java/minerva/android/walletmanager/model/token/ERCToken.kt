@@ -27,9 +27,9 @@ data class ERCToken(
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null,
     var isFavorite: Boolean = false, //isFavorite - used for nft status
-    var underlyingTokens: List<String>? = emptyList(),
-    var underlyingBalances: List<String>? = emptyList(),
-    var underlyingSymbols: List<String>? = emptyList()
+    var underlyingTokens: List<String> = emptyList(),
+    var underlyingBalances: List<String> = emptyList(),
+    var underlyingSymbols: List<String> = emptyList()
 ) : Token {
 
     override fun equals(other: Any?): Boolean =
