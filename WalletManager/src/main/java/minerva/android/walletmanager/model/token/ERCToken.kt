@@ -26,7 +26,10 @@ data class ERCToken(
     @Embedded var nftContent: NftContent = NftContent(),
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null,
-    var isFavorite: Boolean = false //isFavorite - used for nft status
+    var isFavorite: Boolean = false, //isFavorite - used for nft status
+    var underlyingTokens: List<String> = emptyList(),
+    var underlyingBalances: List<String> = emptyList(),
+    var underlyingSymbols: List<String> = emptyList()
 ) : Token {
 
     override fun equals(other: Any?): Boolean =
@@ -71,6 +74,8 @@ data class ERCToken(
 
     fun mergeSuperTokenDetailsAfterTokenDiscovery(ercToken: ERCToken) {
         type = ercToken.type
+        underlyingTokens = ercToken.underlyingTokens
+        underlyingSymbols = ercToken.underlyingSymbols
     }
 }
 

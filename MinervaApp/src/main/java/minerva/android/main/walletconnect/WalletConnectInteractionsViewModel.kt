@@ -204,13 +204,13 @@ class WalletConnectInteractionsViewModel(
         else Double.InvalidBigDecimal
 
     private fun getFiatRate(chainId: Int, transferType: TransferType, status: OnEthSendTransaction): Single<Double> =
-        if (isTokenTransaction(transferType)) transactionRepository.getTokenFiatRate(getTokenHash(chainId, status))
+        if (isTokenTransaction(transferType)) transactionRepository.getTokenFiatRate(chainId, getAddress(status))
         else transactionRepository.getCoinFiatRate(chainId)
 
-    private fun getTokenHash(chainId: Int, status: OnEthSendTransaction): String =
+    private fun getAddress(status: OnEthSendTransaction): String =
         currentAccount.accountTokens
             .find { it.token.symbol == status.transaction.tokenTransaction.tokenSymbol }?.token?.address
-            .let { tokenAddress -> generateTokenHash(chainId, tokenAddress ?: String.Empty) }
+            ?: String.Empty
 
     private fun isTokenTransaction(transferType: TransferType) =
         (transferType == TransferType.TOKEN_SWAP || transferType == TransferType.TOKEN_TRANSFER)
