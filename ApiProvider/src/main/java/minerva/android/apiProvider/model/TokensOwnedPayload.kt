@@ -33,13 +33,7 @@ data class TokensOwnedPayload(
         @SerializedName("tokenJson")
         val tokenJson: TokenJson? = TokenJson.Empty,
         @SerializedName("logoURI")
-        val logoURI: String?,
-        @SerializedName("underlyingTokens")
-        val underlyingTokens: List<String>,
-        @SerializedName("underlyingBalances")
-        val underlyingBalances: List<String>,
-        @SerializedName("underlyingSymbols")
-        val underlyingSymbols: List<String>
+        val logoURI: String?
     ) {
 
         companion object {

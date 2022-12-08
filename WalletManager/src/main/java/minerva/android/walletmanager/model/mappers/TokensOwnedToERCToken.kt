@@ -27,10 +27,7 @@ object TokensOwnedToERCToken {
             tag = mapToTag(tokenType),
             type = tokenType,
             collectionName = if (tokenType.isNft()) token.name else null,
-            tokenId = if (tokenType.isNft()) token.id else null,
-            underlyingTokens = token.underlyingTokens,
-            underlyingSymbols = token.underlyingSymbols,
-            underlyingBalances = token.underlyingBalances
+            tokenId = if (tokenType.isNft()) token.id else null
         ).apply {
             applyPayload(token)
         }
