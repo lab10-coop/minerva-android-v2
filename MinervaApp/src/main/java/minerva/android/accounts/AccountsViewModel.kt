@@ -224,12 +224,12 @@ class AccountsViewModel(
         return tokens
             .sortedWith(
                 compareBy(
-                    { !it.token.logoURI.isNullOrEmpty() },
-                    { it.fiatBalance },
-                    { it.currentBalance }
+                    { it.token.logoURI.isNullOrEmpty() },
+                    { it.fiatBalance.negate() },
+                    { it.currentBalance.negate() },
+                    { it.token.symbol }
                 )
             )
-            .reversed()
     }
 
     fun refreshCoinBalances() =
