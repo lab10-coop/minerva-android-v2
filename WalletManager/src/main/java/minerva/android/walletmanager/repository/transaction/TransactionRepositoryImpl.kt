@@ -370,8 +370,8 @@ class TransactionRepositoryImpl(
             }
         }
 
-    override fun getTokenFiatRate(tokenHash: String): Single<Double> =
-        Single.just(tokenManager.getSingleTokenRate(tokenHash))
+    override fun getTokenFiatRate(chainId: Int, address: String): Single<Double> =
+        Single.just(tokenManager.getSingleTokenRate(chainId, address))
 
     override fun toUserReadableFormat(value: BigDecimal): BigDecimal = unitConverter.toEther(value)
 

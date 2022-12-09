@@ -441,7 +441,10 @@ class MapperTest {
             "uri",
             listOf("ERC-1155"),
             logoURI = "logo.png",
-            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi", null)
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi", null),
+            underlyingTokens = emptyList(),
+            underlyingBalances = emptyList(),
+            underlyingSymbols = emptyList()
         )
         val tokenOwned02 = TokensOwnedPayload.TokenOwned(
             "10",
@@ -454,7 +457,10 @@ class MapperTest {
             "uri",
             listOf("ERC-721"),
             logoURI = "logo.png",
-            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi", "123456")
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi", "123456"),
+            underlyingTokens = emptyList(),
+            underlyingBalances = emptyList(),
+            underlyingSymbols = emptyList()
         )
         val tokenOwned03 = TokensOwnedPayload.TokenOwned(
             "1000",
@@ -467,7 +473,10 @@ class MapperTest {
             "uri",
             listOf("ERC-20"),
             logoURI = "logo.png",
-            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, null, null, null, null)
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, null, null, null, null),
+            underlyingTokens = emptyList(),
+            underlyingBalances = emptyList(),
+            underlyingSymbols = emptyList()
         )
 
         val result01 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned01, "key")

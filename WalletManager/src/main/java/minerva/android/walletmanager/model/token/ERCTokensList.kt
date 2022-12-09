@@ -12,9 +12,12 @@ data class ERCTokensList(
         .map { accountToken -> accountToken to account.getTokenBalance(accountToken, accountToken.token.type) }
         .distinctBy { pair -> pair.first.token.address }
         .sortedWith(
-            compareBy( { !it.first.token.logoURI.isNullOrEmpty() }, { it.second } )
+            compareBy(
+                { it.first.token.logoURI.isNullOrEmpty() },
+                { it.second.negate() },
+                { it.first.token.symbol }
+            )
         )
-        .reversed()
 
     fun getERC20Tokens() = list.filter { accountToken -> accountToken.token.type.isERC20() }
 

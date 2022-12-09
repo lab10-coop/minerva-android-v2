@@ -112,7 +112,9 @@ class TransactionViewModel(
                 account.accountTokens
                     .filter { token -> token.token.type.isERC20() }
                     .sortedWith(
-                        compareBy( { it.token.logoURI.isNullOrEmpty() }, { it.token.symbol } )
+                        compareBy(
+                            { it.token.logoURI.isNullOrEmpty() },
+                            { it.token.symbol } )
                     )
                     .forEach { add(it) }
             }
