@@ -15,6 +15,7 @@ import minerva.android.databinding.FragmentScannerBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.widget.getStringFromClipboard
 
 abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
 
@@ -32,7 +33,7 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
         setupCodeScanner()
         checkCameraPermission()
         setOnCloseButtonAction()
-        setupCallbackAction()
+        setupCallbackActions()
     }
 
     override fun onResume() {
@@ -46,7 +47,7 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
         super.onPause()
     }
 
-    private fun setupCallbackAction() {
+    private fun setupCallbackActions() {
         codeScanner.apply {
             decodeCallback = DecodeCallback { result ->
                 requireActivity().runOnUiThread {
@@ -57,6 +58,16 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
                 }
             }
             errorCallback = ErrorCallback { handleCameraError(it) }
+        }
+
+        binding.pasteAction.setOnClickListener {//setup listener for paste action
+            requireActivity().runOnUiThread {
+                if (shouldScan) {
+                    val textToPaste: String = getStringFromClipboard(requireActivity())//get data from clipboard (buffered)
+                    showProgress()
+                    onCallbackAction(textToPaste)//set data from clipboard (buffered) to callback
+                }
+            }
         }
     }
 

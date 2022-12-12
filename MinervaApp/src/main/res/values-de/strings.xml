@@ -420,6 +420,7 @@
     <string name="change">Ändern</string>
     <string name="connect">Verbinden</string>
     <string name="unknown_type">Unknown Type</string>
+    <string name="paste_button_text">Paste from clipboard</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
