@@ -36,6 +36,15 @@ fun setupCopyButton(copyButton: ActionButton, stringToCopy: String, message: Str
     }
 }
 
+/**
+ * Get String From Clipboard - method which get and return data from clipboard (buffered)
+ * @return String - data from clipboard or empty string
+ */
+fun getStringFromClipboard(context: Context): String {
+    val clipboard: ClipboardManager? = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+    return clipboard?.primaryClip?.getItemAt(0)?.text.toString()
+}
+
 private fun copyStringToClipBoard(context: Context, stringToCopy: String) {
     (context.getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
         ClipData.newPlainText(FORMAT, stringToCopy)
