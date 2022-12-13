@@ -30,6 +30,7 @@ import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.OneElement
 import minerva.android.kotlinUtils.event.EventObserver
@@ -37,6 +38,7 @@ import minerva.android.services.dapps.dialog.OpenDappDialog
 import minerva.android.services.dapps.model.Dapp
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.defs.WalletActionStatus
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.utils.BalanceUtils
@@ -299,7 +301,20 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), Op
                     adapter =
                         TokenAdapter(context, R.layout.spinner_token, tokens, viewModel.account, viewModel.fiatSymbol)
                             .apply { setDropDownViewResource(R.layout.spinner_dropdown_view) }
-                    setSelection(viewModel.spinnerPosition, false)
+
+                    var spinnerPosition: Int = viewModel.spinnerPosition//get from Account.accountTokens without applying (last) sorting
+
+                    //get correct token index from sorting cloned list (cloned from Account.accountTokens and sorting)
+                    tokens.forEachIndexed { index, token ->
+                        if (index != Int.FirstIndex) {//first element is native coin which wasn't included in token list(for showing on send/receive page)
+                            val currentToken = token as AccountToken
+                            if (currentToken.token.address == viewModel.tokenAddress) {
+                                spinnerPosition = index
+                            }
+                        }
+                    }
+
+                    setSelection(spinnerPosition, false)
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(
