@@ -111,7 +111,7 @@ class AccountManagerImpl(
                 account.id
             )
         }
-            .minBy { account -> account.id }!!.id
+            .minByOrNull { account -> account.id }!!.id
     }
 
     override fun createEmptyAccounts(numberOfAccounts: Int) =

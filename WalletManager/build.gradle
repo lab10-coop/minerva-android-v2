@@ -7,14 +7,12 @@ plugins {
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion _compileSdkVersion
+    compileSdk _compileSdk
     buildToolsVersion _buildToolsVersion
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion _targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        targetSdk _targetSdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
         buildConfigField "String", "ENS_TEST_URL", '"https://ropsten.infura.io/v3/"'
@@ -72,6 +70,7 @@ android {
             matchingFallbacks = ["production"]
         }
     }
+    namespace 'minerva.android.walletmanager'
 }
 
 dependencies {
@@ -83,6 +82,9 @@ dependencies {
     implementation project(':ApiProvider')
     implementation project(':BlockchainProvider')
     implementation project(':WalletConnect')
+    implementation(platform("com.walletconnect:android-bom:1.0.1"))
+    implementation("com.walletconnect:android-core")
+    implementation("com.walletconnect:sign")
 
     implementation('com.google.firebase:firebase-crashlytics') {
         transitive = true

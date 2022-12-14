@@ -17,8 +17,8 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.mappers.*
 import net.glxn.qrgen.android.QRCode
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class ClubCard(context: Context, private val credential: Credential) : Dialog(context, R.style.DataDialog), KoinComponent,
     ClubCardStateCallback {
