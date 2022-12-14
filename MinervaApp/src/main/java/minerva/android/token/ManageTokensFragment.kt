@@ -77,7 +77,9 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
         //filtered tokens list for deleting main network token (it should be display separately)
         val filteredTokens: List<ERCToken> = tokens.drop(FIRST_ELEMENT)
         //get type of first element for hide/show separator(between tokens) when type (isERC20() || isNFT()) changes; saves previous type buffer state
-        var typeBuffer: Boolean = filteredTokens.get(Int.FirstIndex).type.isERC20()
+        var typeBuffer: Boolean = false
+        if (filteredTokens.isNotEmpty())
+            typeBuffer = filteredTokens.get(Int.FirstIndex).type.isERC20()
         //buffer for showing (some) previous state of separator view; saves previous logo buffer state
         var logoBuffer: Boolean = true
 
