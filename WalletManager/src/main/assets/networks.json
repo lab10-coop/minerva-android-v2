@@ -149,7 +149,7 @@
     "color": "#35d07f",
     "testNet": false,
     "chainId": 42220,
-    "explore": "https://explorer.celo.org/"
+    "explore": "https://celoscan.io/"
   },
   {
     "name": "ARTIS Σ1",
