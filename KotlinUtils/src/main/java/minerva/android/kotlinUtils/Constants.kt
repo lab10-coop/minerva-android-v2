@@ -2,6 +2,9 @@ package minerva.android.kotlinUtils
 
 import java.math.BigDecimal
 
+val String.Companion.ONE: String
+    get() = "1"
+
 val String.Companion.Empty: String
     get() = ""
 
@@ -25,6 +28,15 @@ val Int.Companion.NO_PADDING: Int
 
 val Int.Companion.FirstIndex: Int
     get() = 0
+
+val Int.Companion.ONE: Int
+    get() = 1
+
+val Int.Companion.TWO: Int
+    get() = 2
+
+val Int.Companion.THREE: Int
+    get() = 3
 
 val Int.Companion.OneElement: Int
     get() = 1

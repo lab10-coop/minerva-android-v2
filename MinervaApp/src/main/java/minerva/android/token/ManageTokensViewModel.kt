@@ -2,6 +2,7 @@ package minerva.android.token
 
 import androidx.annotation.VisibleForTesting
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.*
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -15,11 +16,10 @@ import java.math.BigDecimal
 class ManageTokensViewModel(
     private val accountManager: AccountManager,
     private val localStorage: LocalStorage,
-    private val tokenManager: TokenManager,
-    private val transactionRepository: TransactionRepository
+    private val tokenManager: TokenManager
 ) : BaseViewModel() {
 
-    lateinit var account: Account
+    var account: Account = Account(id = Int.InvalidId)
 
     @VisibleForTesting
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
@@ -38,18 +38,27 @@ class ManageTokensViewModel(
                 logoRes = getMainTokenIconRes(network.chainId)
             )
         ).apply {
-            account.accountTokens
+            //AccountToken list for wrapping ERCToken account list (for using it for filtering below)
+            val ercTokensToAccountTokens: MutableList<AccountToken> = mutableListOf()
+            //get ERCToken(s) of current account
+            tokenManager.getActiveTokensPerAccount(account).forEach { ercToken ->
+                //wrapping ERCToken(s) like AccountToken(s)
+                ercTokensToAccountTokens
+                    .add(AccountToken(ercToken, BigDecimal(String.ONE)/*must specify value more than "o" for getting in filter*/))
+            }
+
+            ercTokensToAccountTokens
                 .distinctBy { token -> token.token.address }
                 .filter { token -> token.currentBalance > BigDecimal.ZERO }
                 .sortedWith(
                     compareBy(
                         {
                             if (it.token.type.isERC20()) {
-                                1
+                                Int.ONE
                             } else if (it.token.type.isNft()) {
-                                2
+                                Int.TWO
                             } else {
-                                3
+                                Int.THREE
                             }
                         },
                         { it.token.logoURI.isNullOrEmpty() },
