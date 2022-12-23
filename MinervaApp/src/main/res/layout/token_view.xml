@@ -29,6 +29,9 @@
         android:layout_alignBottom="@id/amount_view"
         android:layout_marginStart="@dimen/margin_small"
         android:layout_toEndOf="@id/token_logo"
+        android:layout_toStartOf="@id/amount_view"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:gravity="center_vertical"
         android:textColor="@color/gray"
         tools:text="sDai" />

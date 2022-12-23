@@ -1,5 +1,6 @@
 package minerva.android.accounts.nft.viewmodel
 
+import android.annotation.SuppressLint
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -238,6 +239,7 @@ class NftCollectionViewModel(
         token
 
 
+    @SuppressLint("WrongConstant")
     private fun getAccountsWalletAction(
         transaction: Transaction,
         token: String,
