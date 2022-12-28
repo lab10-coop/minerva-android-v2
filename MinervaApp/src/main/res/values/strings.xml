@@ -475,6 +475,19 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.8.1</item>
+        <item>* Added Gnosis Chiado testnet support</item>
+        <item>* Added Optimism Bedrock &amp; Görli testnet support</item>
+        <item>* Set Optimism Kovan testnet to unmaintained</item>
+        <item>* WalletConnect: Open connections with pasted links</item>
+        <item>* Paste addresses on the scanner from Clipboard</item>
+        <item>* NFT Favorites collection</item>
+        <item>* Manual refresh screen for NFTs</item>
+        <item>* Improved token and NFT sorting</item>
+        <item>* Improved Manage Assets Screen</item>
+        <item>* Account status in \'Add account\' (free - used - hidden)</item>
+        <item>* Superfluid Streams on Ethereum Mainnet</item>
+        <item>* UI adjustments &amp; bug fixes</item>
         <item>1.8.0</item>
         <item>* WalletConnect: Change account on existing connections</item>
         <item>* Onboarding screen: Added Celo as main option</item>
