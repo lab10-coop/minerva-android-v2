@@ -1,6 +1,6 @@
 # This docker image should be only used to build applications in CI!!!
 
-FROM openjdk:8-jdk
+FROM openjdk:11
 
 WORKDIR /usr/src/builder
 
