@@ -384,15 +384,14 @@ class TokenManagerImpl(
         AccountToken(
             ercToken,
             balance,
-            getSingleTokenRate(ercToken.chainId, ercToken.address)
+            rateStorage.getRate(generateTokenHash(ercToken.chainId, ercToken.address))
         )
 
     override fun getTokensUpdate(): Flowable<List<ERCToken>> =
         Flowable.just(walletManager.getWalletConfig().erc20Tokens
             .flatMap { (id, tokenList) -> tokenList })
 
-    override fun getSingleTokenRate(chainId: Int, address: String): Double =
-        rateStorage.getRate(generateTokenHash(chainId, address))
+    override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
 
     private fun getNftCollectionDetails(): Single<Map<String, NftCollectionDetailsResult>> =
         cryptoApi.getNftCollectionDetails().map { data ->
@@ -417,8 +416,13 @@ class TokenManagerImpl(
             else -> getTokensForAccount(account)
         }
 
-    private fun shouldUpdateRate(chainId: Int, address: String) =
-        rateStorage.shouldUpdateRate(generateTokenHash(chainId, address))
+    private fun prepareContractAddresses(tokens: List<ERCToken>): String =
+        tokens.joinToString(TOKEN_ADDRESS_SEPARATOR) { token -> token.address }
+
+    private fun shouldUpdateRate(token: ERCToken) =
+        rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address))
+            .and(getTokenVisibility(token.accountAddress, token.address) ?: true)
+
 
     override fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
@@ -426,22 +430,16 @@ class TokenManagerImpl(
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getTokenGeckoMarketId(chainId)
                     if (marketId != String.Empty) {
-                        tokens
-                            .filter { token -> getTokenVisibility(token.accountAddress, token.address) ?: true }
-                            .flatMap { token ->
-                                listOf(token.address) + token.underlyingTokens
-                            }
-                            .map { address -> address.toLowerCase(Locale.ROOT) }
-                            .distinct()
-                            .filter { address -> shouldUpdateRate(chainId, address) }
+                        tokens.distinctBy { it.address }
+                            .filter { shouldUpdateRate(it) }
                             .chunked(TOKEN_LIMIT_PER_CALL)
                             .forEach { chunkedTokens ->
                                 observables.add(
                                     updateAccountTokensRate(
                                         marketId,
                                         chainId,
-                                        chunkedTokens.joinToString(TOKEN_ADDRESS_SEPARATOR),
-                                        chunkedTokens.map { it.toLowerCase(Locale.ROOT) }
+                                        prepareContractAddresses(chunkedTokens),
+                                        chunkedTokens.map { it.address.toLowerCase(Locale.ROOT) }
                                             .toMutableList()
                                     )
                                 )
@@ -506,10 +504,8 @@ class TokenManagerImpl(
         account.apply {
             accountTokens.forEach { accountToken ->
                 with(accountToken) {
-                    tokenPrice = getSingleTokenRate(token.chainId, token.address)
-                    underlyingPrices = this.token.underlyingTokens
-                        ?.map { getSingleTokenRate(token.chainId, it) }
-                        .orElse { emptyList() }
+                    tokenPrice =
+                        rateStorage.getRate(generateTokenHash(token.chainId, token.address))
                 }
             }
         }

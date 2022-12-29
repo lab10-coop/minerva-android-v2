@@ -37,6 +37,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MockDataProvider
 import minerva.android.walletmanager.utils.RxTest
+import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -443,7 +444,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `getting token rate test`() {
         whenever(rateStorage.getRate(any())).thenReturn(3.3)
-        tokenManager.getSingleTokenRate(1, "somesome") shouldBeEqualTo 3.3
+        tokenManager.getSingleTokenRate("somesome") shouldBeEqualTo 3.3
     }
 
     @Test
@@ -536,7 +537,7 @@ class TokenManagerTest : RxTest() {
         whenever(rateStorage.getRates()).thenReturn(rates)
         tokens.forEach { (chainId, tokens) ->
             tokens.forEach { token ->
-                whenever(rateStorage.shouldUpdateRate(any()))
+                whenever(rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address)))
                     .thenReturn(true, false, false, false)
                 whenever(tokenManager.getTokenVisibility(token.accountAddress, token.address)).thenReturn(true)
             }
@@ -557,7 +558,7 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
 
-        verify(rateStorage, times(2)).saveRate(any(), any())
+        verify(rateStorage, times(3)).saveRate(any(), any())
         verify(rateStorage, times(4)).shouldUpdateRate(any())
         verify(cryptoApi, times(1)).getTokensRate(any(), any(), any())
     }
@@ -843,10 +844,7 @@ class TokenManagerTest : RxTest() {
                             "Symbol",
                             "uri",
                             listOf("ERC-1155"),
-                            logoURI = "logo.png",
-                            underlyingTokens = emptyList(),
-                            underlyingBalances = emptyList(),
-                            underlyingSymbols = emptyList()
+                            logoURI = "logo.png"
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "10",
@@ -858,10 +856,7 @@ class TokenManagerTest : RxTest() {
                             "Symbol",
                             "uri",
                             listOf("ERC-721"),
-                            logoURI = "logo.png",
-                            underlyingTokens = emptyList(),
-                            underlyingBalances = emptyList(),
-                            underlyingSymbols = emptyList()
+                            logoURI = "logo.png"
                         ),
                         TokensOwnedPayload.TokenOwned(
                             "1000",
@@ -874,10 +869,7 @@ class TokenManagerTest : RxTest() {
                             "uri",
                             listOf("ERC-20"),
                             TokensOwnedPayload.TokenOwned.TokenJson.Empty,
-                            logoURI = "logo.png",
-                            underlyingTokens = emptyList(),
-                            underlyingBalances = emptyList(),
-                            underlyingSymbols = emptyList()
+                            logoURI = "logo.png"
                         )
                     ),
                     ""
