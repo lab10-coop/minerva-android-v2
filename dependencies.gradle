@@ -1,7 +1,7 @@
 ext {
-    _compileSdkVersion = 30
+    _compileSdkVersion = 31
     _buildToolsVersion = "30.0.3"
-    _targetSdkVersion = 30
+    _targetSdkVersion = 31
     kotlinVersion = '1.3.72'
 
     constraintVersion = '2.0.0-beta4'
