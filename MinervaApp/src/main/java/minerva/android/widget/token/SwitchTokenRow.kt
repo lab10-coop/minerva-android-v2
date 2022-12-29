@@ -15,7 +15,7 @@ class SwitchTokenRow(context: Context, attributeSet: AttributeSet? = null) : Lin
         inflate(context, R.layout.switch_token_row, this)
     )
 
-    fun initView(token: ERCToken, isChecked: Boolean, onCheckChangeAction: (address: String, isChecked: Boolean) -> Unit) {
+    fun initView(token: ERCToken, isChecked: Boolean, typeSeparatorVisibility: Boolean, onCheckChangeAction: (address: String, isChecked: Boolean) -> Unit) {
         binding.tokenSwitch.apply {
             text = token.symbol
             this.isChecked = isChecked
@@ -26,5 +26,6 @@ class SwitchTokenRow(context: Context, attributeSet: AttributeSet? = null) : Lin
         resources.getDimension(R.dimen.margin_xsmall).toInt().let { padding ->
             setPadding(Int.NO_PADDING, Int.NO_PADDING, Int.NO_PADDING, padding)
         }
+        binding.typeSeparator.visibility = if (typeSeparatorVisibility) VISIBLE else GONE
     }
 }

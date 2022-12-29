@@ -397,7 +397,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         with(viewModel.tokenVisibilitySettings) {
             whenever(getTokenVisibility("address1", "tokenAddress")).thenReturn(true)
         }
-        val account = Account(1, address = "address1", chainId = 1, accountTokens = mutableListOf(AccountToken(currentRawBalance = BigDecimal.TEN,token = token)))
+        val account = Account(1, address = "address1", chainId = 1, accountTokens = mutableListOf(AccountToken(rawBalance = BigDecimal.TEN,token = token)))
         val result = viewModel.getTokens(account)
         result[0].token.name shouldBeEqualTo "cachedToken"
     }
@@ -422,7 +422,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             chainId = 1,
             accountTokens = mutableListOf(
                 AccountToken(
-                    currentRawBalance = BigDecimal.TEN,
+                    rawBalance = BigDecimal.TEN,
                     tokenPrice = 2.0,
                     token = ERCToken(
                         1,
@@ -435,7 +435,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 ),
                 AccountToken(
                     tokenPrice = 3.0,
-                    currentRawBalance = BigDecimal.TEN,
+                    rawBalance = BigDecimal.TEN,
                     token = ERCToken(
                         1,
                         name = "cachedToken2",

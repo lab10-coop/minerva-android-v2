@@ -2,11 +2,11 @@ package minerva.android.token
 
 import com.nhaarman.mockitokotlin2.*
 import minerva.android.BaseViewModelTest
+import minerva.android.kotlinUtils.ONE
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERCToken
@@ -22,9 +22,8 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val localStorage: LocalStorage = mock()
     private val tokenManager: TokenManager = mock()
-    private val transactionRepository: TransactionRepository = mock()
     private val viewModel =
-        ManageTokensViewModel(accountManager, localStorage, tokenManager, transactionRepository)
+        ManageTokensViewModel(accountManager, localStorage, tokenManager)
 
     private val networks = listOf(
         Network(chainId = 1, httpRpc = "address", testNet = true),
@@ -41,83 +40,32 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         contractAddress = "aa",
         bindedOwner = "binded",
         accountTokens = mutableListOf(
-            AccountToken(
-                ERCToken(
-                    1,
-                    symbol = "SomeSymbol",
-                    type = TokenType.ERC20
-                ), BigDecimal.ZERO
-            )
+            AccountToken(ERCToken(1, symbol = "token1", address = "address1", type = TokenType.ERC20), BigDecimal.ONE),
+            AccountToken(ERCToken(3, symbol = "token2", address = "address2", type = TokenType.ERC20), BigDecimal.ONE),
+            AccountToken(ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721), BigDecimal.ONE),
+            AccountToken(ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721), BigDecimal.ONE),
+            AccountToken(ERCToken(3, symbol = "token4", address = "address4", type = TokenType.ERC20), BigDecimal.ZERO),
+            AccountToken(ERCToken(3, symbol = "token5", address = "address5", type = TokenType.ERC20), BigDecimal.ONE)
         )
     )
 
+    private val ercTokenList: List<ERCToken> = account.accountTokens.map { it.token }
+
     @Test
-    fun `Check loading correct tokens list for account with no token discovery`() {
+    fun `Check loading correct tokens list for account`() {
         NetworkManager.initialize(networks)
         whenever(accountManager.loadAccount(any())).thenReturn(account)
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
-        whenever(tokenManager.hasTokenExplorer(any())).thenReturn(false)
-        whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(
-            listOf(
-                ERCToken(1, symbol = "token1", address = "address1", type = TokenType.ERC20),
-                ERCToken(3, symbol = "token2", address = "address2", type = TokenType.ERC20),
-                ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721),
-                ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721),
-                ERCToken(3, symbol = "token4", address = "address4", type = TokenType.ERC20)
-            )
-        )
+        whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(ercTokenList)
         viewModel.initViewModel(0)
 
         val tokens = viewModel.loadTokens()
-        tokens.size shouldBeEqualTo 5
+        tokens.size shouldBeEqualTo 6
         tokens[0].symbol shouldBeEqualTo "cookie"
         tokens[1].symbol shouldBeEqualTo "token1"
         tokens[2].symbol shouldBeEqualTo "token2"
-        tokens[3].symbol shouldBeEqualTo "token3"
-        tokens[4].symbol shouldBeEqualTo "token4"
-    }
-
-    @Test
-    fun `Check loading correct tokens list for account with token discovery`() {
-        NetworkManager.initialize(networks)
-        whenever(accountManager.loadAccount(any())).thenReturn(account)
-        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
-        whenever(tokenManager.hasTokenExplorer(any())).thenReturn(true)
-        val positiveBalanceTokens = listOf(
-            ERCToken(1, symbol = "token1", address = "address1", type = TokenType.ERC20),
-            ERCToken(3, symbol = "token2", address = "address2", type = TokenType.ERC20),
-            ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721),
-            ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721)
-        )
-        val zeroBalanceTokens = listOf(ERCToken(3, symbol = "token4", address = "address4", type = TokenType.ERC20))
-        val activeTokens = positiveBalanceTokens + zeroBalanceTokens
-        whenever(transactionRepository.assetBalances).thenReturn(
-            (positiveBalanceTokens.map { token ->
-                AssetBalance(
-                    token.chainId,
-                    "",
-                    AccountToken(token, currentRawBalance = BigDecimal.ONE)
-                )
-            } + zeroBalanceTokens.map { token ->
-                AssetBalance(
-                    token.chainId,
-                    "",
-                    AccountToken(token, currentRawBalance = BigDecimal.ZERO)
-                )
-            }).toMutableList()
-
-        )
-        whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(
-            activeTokens
-        )
-        viewModel.initViewModel(0)
-
-        val tokens = viewModel.loadTokens()
-        tokens.size shouldBeEqualTo 4
-        tokens[0].symbol shouldBeEqualTo "cookie"
-        tokens[1].symbol shouldBeEqualTo "token1"
-        tokens[2].symbol shouldBeEqualTo "token2"
-        tokens[3].symbol shouldBeEqualTo "token3"
+        tokens[3].symbol shouldBeEqualTo "token4"
+        tokens[4].symbol shouldBeEqualTo "token5"
     }
 
     @Test

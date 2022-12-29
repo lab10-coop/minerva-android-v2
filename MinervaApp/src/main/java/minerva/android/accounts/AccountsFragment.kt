@@ -194,7 +194,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         //check all necessary data is filled
         if (!account.network.explore.isEmpty() && !account.address.isEmpty()) {
             //build full web path to explore transaction
-            val path = "${account.network.explore}${getString(R.string.address_text)}${getString(R.string.slash_text)}${account.address}"
+            val base = if (account.network.explore.endsWith('/')) account.network.explore else "${account.network.explore}/"
+            val path = "${base}${ADDRESS}/${account.address}"
             //create web Intent
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(path))
             startActivity(browserIntent)
@@ -359,11 +360,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
             }
         }
-        addAccountDuplicateButton.setOnClickListener {
-            startNewAccountWrappedActivity(requireContext(), getString(R.string.add_account))
-        }
     }
 
+    override fun addAccount() = startNewAccountWrappedActivity(requireContext(), getString(R.string.add_account))
 
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))
@@ -400,6 +399,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     companion object {
         @JvmStatic
         fun newInstance() = AccountsFragment()
+        const val ADDRESS = "address"
+        const val ITEM = 1 //token info(item) case
+        const val ADD_ITEM = -1 //add new account (button) case
         private const val RECEIVE_TRANSACTION_INDEX = 1
     }
 }

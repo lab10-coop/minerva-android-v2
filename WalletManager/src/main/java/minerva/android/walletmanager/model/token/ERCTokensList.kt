@@ -11,7 +11,13 @@ data class ERCTokensList(
     fun getCollectionsWithBalance(account: Account) = getCollectibles()
         .map { accountToken -> accountToken to account.getTokenBalance(accountToken, accountToken.token.type) }
         .distinctBy { pair -> pair.first.token.address }
-        .sortedByDescending { pair -> pair.second }
+        .sortedWith(
+            compareBy(
+                { it.first.token.logoURI.isNullOrEmpty() },
+                { it.second.negate() },
+                { it.first.token.symbol }
+            )
+        )
 
     fun getERC20Tokens() = list.filter { accountToken -> accountToken.token.type.isERC20() }
 

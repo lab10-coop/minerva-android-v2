@@ -749,7 +749,7 @@ class TransactionRepositoryTest : RxTest() {
         val accountToken =
             AccountToken(
                 ERCToken(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", type = TokenType.ERC20),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
@@ -774,7 +774,7 @@ class TransactionRepositoryTest : RxTest() {
         val accountToken =
             AccountToken(
                 ERCToken(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = "", type = TokenType.ERC20),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
         whenever(tokenManager.getTokenBalance(any())).thenReturn(
             Flowable.just(AssetBalance(ChainId.ETH_RIN, "privateKey", accountToken))
@@ -836,10 +836,6 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
-            Single.just(updatedTokensMap),
-            Single.error(Throwable("Stop thread"))
-        )
         whenever(tokenManager.updateMissingNFTTokensDetails(any(), any())).thenReturn(
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
@@ -865,7 +861,6 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
         whenever(tokenManager.saveTokens(any(), any())).thenReturn(
             Single.just(true),
             Single.error(Throwable("Stop thread"))
@@ -958,7 +953,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     type = TokenType.SUPER_TOKEN
                 ),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(
@@ -1026,7 +1021,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     type = TokenType.SUPER_TOKEN
                 ),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
@@ -1063,7 +1058,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     type = TokenType.SUPER_TOKEN
                 ),
-                currentRawBalance = BigDecimal.TEN
+                rawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))

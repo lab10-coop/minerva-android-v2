@@ -98,7 +98,7 @@ class DappsViewModel(
         }
     }
 
-    private fun updateDapps() {
+    fun updateDapps() {
         launchDisposable {
             dappsRepository.getAllDappsDetailsFromDB()
                 .zipWith(dappsRepository.getFavoriteDapps())

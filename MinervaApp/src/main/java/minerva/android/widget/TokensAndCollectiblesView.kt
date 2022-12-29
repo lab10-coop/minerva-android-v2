@@ -77,7 +77,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     private fun initTokensList(account: Account, fiatSymbol: String, tokens: List<AccountToken>, isWidgetOpen: Boolean) {
         binding.apply {
-            tokensContainer.children.forEach { view -> (view as TokenView).endStreamAnimation() }
+            endStreamAnimations()
             tokens.isNotEmpty().let { areTokensVisible ->
                 tokensHeader.visibleOrGone(areTokensVisible)
                 tokensContainer.visibleOrGone(areTokensVisible)
@@ -93,6 +93,12 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                 }
                 setHeaderArrow(tokensHeader, tokensContainer)
             }
+        }
+    }
+
+    fun startStreamAnimations() {
+        binding.tokensContainer.children.forEach { view ->
+            (view as TokenView).startStreamAnimation()
         }
     }
 
@@ -113,6 +119,11 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         header.setOnClickListener {
             TransitionManager.beginDelayedTransition(parent)
             container.toggleVisibleOrGone()
+            if (container.isVisible) {
+                startStreamAnimations()
+            } else {
+                endStreamAnimations()
+            }
             setHeaderArrow(header, container)
         }
     }

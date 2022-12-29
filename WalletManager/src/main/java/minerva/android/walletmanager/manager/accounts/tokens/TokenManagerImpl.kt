@@ -8,9 +8,7 @@ import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.NftDetails
-import minerva.android.apiProvider.model.TokenDetails
 import minerva.android.apiProvider.model.TokenTx
 import minerva.android.blockchainprovider.model.Token
 import minerva.android.blockchainprovider.model.TokenWithBalance
@@ -19,7 +17,6 @@ import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenReposit
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepository
 import minerva.android.blockchainprovider.repository.superToken.SuperTokenRepository
-import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
@@ -48,10 +45,14 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_16
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_BED
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ALPHA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
@@ -131,39 +132,11 @@ class TokenManagerImpl(
         } else Single.just(shouldSafeNewTokens)
 
     override fun checkMissingTokensDetails(): Completable =
-        cryptoApi.getLastCommitFromTokenList(url = ERC20_TOKEN_DATA_LAST_COMMIT)
-            .filter { (commit) -> isNewCommit(commit) }
-            .flatMapSingle { getMissingTokensDetails() }
-            .flatMapCompletable { tokenDetailsMap -> updateTokensIcons(tokenDetailsMap) }
-            .andThen(checkMissingNFTDetails())
-            .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }
+        checkMissingNFTDetails()
 
     private fun checkMissingNFTDetails(): Completable =
         getNftCollectionDetails()
             .flatMapCompletable { tokenDetailsMap -> updateNFTsIcons(tokenDetailsMap) }
-
-    private fun isNewCommit(commit: CommitElement): Boolean =
-        commit.lastCommitDate.let {
-            localStorage.loadTokenIconsUpdateTimestamp() < DateUtils.getTimestampFromDate(it)
-        }
-
-    private fun getMissingTokensDetails(): Single<Map<String, TokenDetails>> =
-        cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL)
-            .map { tokens ->
-                tokens.associateBy { tokenDetails ->
-                    generateTokenHash(tokenDetails.chainId, tokenDetails.address)
-                }
-            }
-
-    private fun updateTokensIcons(tokens: Map<String, TokenDetails>): Completable =
-        walletManager.getWalletConfig().run {
-            erc20Tokens.forEach { (id, tokenList) ->
-                tokenList.forEach { token ->
-                    token.logoURI = tokens[generateTokenHash(id, token.address)]?.logoURI
-                }
-            }
-            walletManager.updateWalletConfig(copy(version = updateVersion))
-        }
 
     private fun updateNFTsIcons(tokens: Map<String, NftCollectionDetailsResult>): Completable =
         walletManager.getWalletConfig().run {
@@ -242,12 +215,12 @@ class TokenManagerImpl(
             )
                 .flatMap { superTokenBalance ->
                     getSuperTokenNetFlow(superTokenBalance, account)
-                        .map { netFlow ->
+                        .map { consNetFlow ->
                             handleTokensBalances(
                                 superTokenBalance,
                                 getSuperTokensForAccount(supertokensPerAccount),
                                 account,
-                                netFlow
+                                consNetFlow
                             )
                         }
                 }
@@ -258,62 +231,11 @@ class TokenManagerImpl(
         token: Token,
         tokens: List<ERCToken>,
         account: Account,
-        netFlow: BigInteger = BigInteger.ZERO
+        constNetFlow: BigInteger? = null
     ): Asset =
         when (token) {
-            is TokenWithBalance -> getAssetBalance(tokens, token, account, netFlow)
+            is TokenWithBalance -> getAssetBalance(tokens, token, account, constNetFlow)
             else -> TokenToAssetBalanceErrorMapper.map(account, token as TokenWithError)
-        }
-
-    private fun getAssetBalance(
-        tokens: List<ERCToken>,
-        tokenWithBalance: TokenWithBalance,
-        account: Account,
-        netFlow: BigInteger
-    ): AssetBalance =
-        tokens.find { token -> token.address.equals(tokenWithBalance.address, true) }
-            ?.let { token ->
-                val isSuper = isSuperToken(token.type, account)
-                AssetBalance(
-                    account.chainId,
-                    account.privateKey,
-                    getAccountToken(
-                        token.copy(isStreamActive = isSuper, consNetFlow = netFlow),
-                        tokenWithBalance.balance,
-                        isSuper
-                    )
-                )
-            }
-            .orElse { throw NullPointerException() }
-
-    private fun getAccountToken(
-        erc20Token: ERCToken,
-        balance: BigDecimal,
-        isStreamActive: Boolean
-    ): AccountToken =
-        if (isStreamActive) {
-            AccountToken(
-                erc20Token,
-                tokenPrice = rateStorage.getRate(
-                    generateTokenHash(
-                        erc20Token.chainId,
-                        erc20Token.address
-                    )
-                ),
-                nextRawBalance = balance,
-                currentRawBalance = balance
-            )
-        } else {
-            AccountToken(
-                erc20Token,
-                currentRawBalance = balance,
-                tokenPrice = rateStorage.getRate(
-                    generateTokenHash(
-                        erc20Token.chainId,
-                        erc20Token.address
-                    )
-                )
-            )
         }
 
     private fun Account.getSuperTokensForAccount(
@@ -351,7 +273,7 @@ class TokenManagerImpl(
                 .flatMap { (token, type) ->
                     Flowable.just(token)
                 }
-                .map { token -> handleTokensBalances(token, tokens, account) }
+                .map { token -> handleTokensBalances(token, tokens, account, null) }
         }
     }
 
@@ -368,18 +290,6 @@ class TokenManagerImpl(
     private fun isSuperToken(type: TokenType, account: Account) =
         type.isSuperToken() && account.hasSuperfluidSupport()
 
-    private fun handleTokensBalances(
-        token: Token,
-        tokens: List<ERCToken>,
-        account: Account
-    ): Asset =
-        when (token) {
-            is TokenWithBalance -> {
-                getAssetBalance(tokens, token, account)
-            }
-            else -> TokenToAssetBalanceErrorMapper.map(account, token as TokenWithError)
-        }
-
     private fun String?.isEqualOrBothAreNullOrBlank(other: String?): Boolean {
         val areEqual = this == other
         val areBothNullOrBlank = (this.isNullOrBlank() && other.isNullOrBlank())
@@ -389,18 +299,23 @@ class TokenManagerImpl(
     private fun getAssetBalance(
         tokens: List<ERCToken>,
         tokenWithBalance: TokenWithBalance,
-        account: Account
+        account: Account,
+        consNetFlow: BigInteger?
     ): AssetBalance =
         tokens.find { token ->
             token.address.equals(tokenWithBalance.address, true)
                     && token.tokenId.isEqualOrBothAreNullOrBlank(tokenWithBalance.tokenId)
         }
             ?.let { token ->
+                var tokenCopy = token.copy()
+                if (consNetFlow != null) {
+                    tokenCopy = tokenCopy.copy(consNetFlow = consNetFlow)
+                }
                 AssetBalance(
                     account.chainId,
                     account.privateKey,
                     getAccountToken(
-                        token.copy(isStreamActive = isSuperToken(token.type, account)),
+                        tokenCopy,
                         tokenWithBalance.balance
                     )
                 )
@@ -478,16 +393,6 @@ class TokenManagerImpl(
 
     override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
 
-    private fun getTokenIconsURL(): Single<Map<String, String>> =
-        cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
-            data.associate { tokenDetails ->
-                generateTokenHash(
-                    tokenDetails.chainId,
-                    tokenDetails.address
-                ) to tokenDetails.logoURI
-            }
-        }
-
     private fun getNftCollectionDetails(): Single<Map<String, NftCollectionDetailsResult>> =
         cryptoApi.getNftCollectionDetails().map { data ->
             data.associate { details ->
@@ -506,7 +411,7 @@ class TokenManagerImpl(
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
             ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, GNO_CHAI, BSC_TESTNET -> getTokensFromTx(account)
-            MUMBAI, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
+            MUMBAI, LUKSO_16, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, OPT_GOR, OPT_BED, ZKS_ALPHA, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
             GNO, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
@@ -841,7 +746,6 @@ class TokenManagerImpl(
 
     override fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERCToken>>): UpdateTokensResult =
         walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
-            val shouldUpdateLogosURI = true
             val allLocalTokensMap = allLocalTokens.toMutableMap()
             for ((chainId, newTokens) in newTokensPerChainIdMap) {
                 val localChainTokens = allLocalTokensMap[chainId] ?: listOf()
@@ -850,7 +754,7 @@ class TokenManagerImpl(
                         allLocalTokensMap[chainId] = tokenList
                     }
             }
-            UpdateTokensResult(shouldUpdateLogosURI, allLocalTokensMap)
+            UpdateTokensResult(true, allLocalTokensMap)
         }
 
     private fun mergeNewTokensWithLocal(
@@ -870,6 +774,17 @@ class TokenManagerImpl(
         }
 
     private fun mergeNewTokenWithLocal(localChainTokens: List<ERCToken>, newToken: ERCToken) {
+        localChainTokens.find { localToken ->
+            localToken.address.equals(
+                newToken.address,
+                true
+            )
+        }?.apply {
+            mergeLogoURI(newToken)
+            if (newToken.type.isSuperToken()) {
+                mergeSuperTokenDetailsAfterTokenDiscovery(newToken)
+            }
+        }
         if (newToken.type.isNft()) {
             localChainTokens.find { localToken ->
                 localToken.address.equals(
@@ -878,16 +793,6 @@ class TokenManagerImpl(
                 ) && localToken.tokenId == newToken.tokenId && localToken.tokenId != null
             }?.apply {
                 mergeNftDetailsAfterTokenDiscovery(newToken)
-            }
-        }
-        if (newToken.type.isSuperToken()) {
-            localChainTokens.find { localToken ->
-                localToken.address.equals(
-                    newToken.address,
-                    true
-                )
-            }?.apply {
-                mergeSuperTokenDetailsAfterTokenDiscovery(newToken)
             }
         }
     }
@@ -917,27 +822,6 @@ class TokenManagerImpl(
         } else {
             find { localToken -> localToken.address.equals(newToken.address, true) } == null
         }
-
-    override fun updateTokenIcons(
-        shouldBeUpdated: Boolean,
-        tokensPerChainIdMap: Map<Int, List<ERCToken>>
-    ): Single<UpdateTokensResult> =
-        if (shouldBeUpdated) {
-            getTokenIconsURL().map { logoUrls ->
-                tokensPerChainIdMap.values.forEach { tokens ->
-                    tokens.forEach { token ->
-                        token.apply {
-                            if (this.type.isERC20()) {
-                                logoUrls[generateTokenHash(chainId, address)]?.let { newLogoURI ->
-                                    logoURI = newLogoURI
-                                }
-                            }
-                        }
-                    }
-                }
-                UpdateTokensResult(true, tokensPerChainIdMap)
-            }
-        } else Single.just(UpdateTokensResult(false, tokensPerChainIdMap))
 
     override fun mergeNFTDetailsWithRemoteConfig(
         shouldBeUpdated: Boolean,

@@ -44,7 +44,7 @@ class NftCollectionActivity : AppCompatActivity(), TransactionListener {
         initList()
     }
 
-    private fun initList() = viewModel.getNftForCollection()
+    fun initList() = viewModel.getNftForCollection()
 
     private fun setupObserver() = with(viewModel) {
         selectedItemLiveData.observe(this@NftCollectionActivity, Observer { item ->

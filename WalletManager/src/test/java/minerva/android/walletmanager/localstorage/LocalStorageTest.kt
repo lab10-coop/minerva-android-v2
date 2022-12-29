@@ -137,24 +137,6 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `save token icons update timestamp`() {
-        val timestamp = 333L
-        localStorage.saveTokenIconsUpdateTimestamp(timestamp)
-        every { localStorage.loadTokenIconsUpdateTimestamp() } returns timestamp
-        verify {
-            sharedPref.edit().putLong(any(), any()).apply()
-        }
-    }
-
-    @Test
-    fun `load token icons update timestamp`() {
-        localStorage.loadTokenIconsUpdateTimestamp()
-        verify {
-            sharedPref.getLong(any(), Long.InvalidValue)
-        }
-    }
-
-    @Test
     fun `check is authentication available`() {
         localStorage.run {
             isProtectKeysEnabled = false
