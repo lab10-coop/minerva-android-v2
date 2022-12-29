@@ -16,6 +16,7 @@ validateBranch:
       - master
       - production
   script:
+    - java -version
     - ./gradlew test
 
 validateLint:
