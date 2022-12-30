@@ -23,7 +23,7 @@ RUN wget -qO /usr/local/bin/firebase https://firebase.tools/bin/linux/latest && 
     chmod +x /usr/local/bin/firebase
 
 # Download and install Android command line tools
-RUN ANDROID_LINK="https://dl.google.com/android/repository/commandlinetools-linux-9123335_latest.zip" && \
+RUN ANDROID_LINK="https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip" && \
     wget --quiet --output-document=commandlinetools.zip $ANDROID_LINK && \
     unzip -d /android-sdk-linux commandlinetools.zip && \
     rm -rf commandlinetools.zip
