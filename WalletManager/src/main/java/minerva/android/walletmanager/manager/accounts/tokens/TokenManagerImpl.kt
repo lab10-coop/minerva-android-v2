@@ -84,7 +84,6 @@ class TokenManagerImpl(
     private val erc1155TokenRepository: ERC1155TokenRepository,
     private val rateStorage: RateStorage
 ) : TokenManager {
-    private val currentTimeProvider = CurrentTimeProviderImpl()
     private var currentFiat = String.Empty
 
     @VisibleForTesting
@@ -126,10 +125,10 @@ class TokenManagerImpl(
                         erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap)
                     )
                         .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
-                        .toSingle { shouldSafeNewTokens }
-                        .onErrorReturn { shouldSafeNewTokens }
+                        .toSingle { true }
+                        .onErrorReturn { true }
                 }
-        } else Single.just(shouldSafeNewTokens)
+        } else Single.just(false)
 
     override fun checkMissingTokensDetails(): Completable =
         checkMissingNFTDetails()
@@ -525,8 +524,8 @@ class TokenManagerImpl(
                         account.address
                     ).toObservable().onErrorReturn { true }
                 } else Observable.just(false),
-                BiFunction { token: TokenTx, isTokenOwner: Boolean ->
-                    Pair<TokenTx, Boolean>(token, isTokenOwner)
+                { token: TokenTx, isTokenOwner: Boolean ->
+                    Pair(token, isTokenOwner)
                 })
         }
         .toList()

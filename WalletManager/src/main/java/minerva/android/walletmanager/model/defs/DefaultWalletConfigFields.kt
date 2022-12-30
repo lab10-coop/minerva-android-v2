@@ -2,11 +2,15 @@ package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.StringDef
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_EMAIL
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_IDENTITY
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_NAME
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PHONE
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PRIVATE_KEY
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PUBLIC_KEY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.NEW_IDENTITY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.NEW_IDENTITY_LOGO_LETTER
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.NEW_IDENTITY_PUBLIC_KEY
 
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(
@@ -15,7 +19,11 @@ import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Compan
     INCOGNITO_NAME,
     INCOGNITO_PHONE,
     INCOGNITO_PRIVATE_KEY,
-    INCOGNITO_PUBLIC_KEY
+    INCOGNITO_PUBLIC_KEY,
+    INCOGNITO_EMAIL,
+    NEW_IDENTITY,
+    NEW_IDENTITY_PUBLIC_KEY,
+    NEW_IDENTITY_LOGO_LETTER
 )
 annotation class DefaultWalletConfigFields {
     companion object {
