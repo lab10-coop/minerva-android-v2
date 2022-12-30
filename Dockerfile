@@ -19,7 +19,7 @@ RUN wget -qO /usr/local/bin/firebase https://firebase.tools/bin/linux/latest; \
     chmod +x /usr/local/bin/firebase;
 
 # Get android SDK
-RUN ANDROID_COMPILE_SDK=30; \
+RUN ANDROID_COMPILE_SDK=31; \
     ANDROID_BUILD_TOOLS=30.0.3; \
     ANDROID_SDK_TOOLS=7583922; \
     ANDROID_LINK="https://dl.google.com/android/repository/sdk-tools-linux-$ANDROID_SDK_TOOLS.zip"; \
