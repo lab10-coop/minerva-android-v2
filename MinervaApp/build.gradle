@@ -6,7 +6,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion _compileSdkVersion
+    compileSdk _compileSdk
     buildToolsVersion _buildToolsVersion
 
     compileOptions {
@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion _targetSdkVersion
+        targetSdk _targetSdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "MARKETS_API_URL", '"https://api.coingecko.com/api/v3/"'
         buildConfigField "String", "LICENCE_TYPE", '"GPLv3"'
@@ -95,19 +95,23 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/license.txt'
+        exclude 'META-INF/LICENSE.md'
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
+        exclude 'META-INF/NOTICE.md'
         exclude 'META-INF/ASL2.0'
         exclude 'META-INF/spring.schemas'
         exclude 'META-INF/spring.tooling'
         exclude 'META-INF/spring.handlers'
+        exclude 'META-INF/INDEX.LIST'
         exclude("META-INF/*.kotlin_module")
     }
 
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    namespace 'minerva.android'
 }
 
 dependencies {
@@ -123,6 +127,7 @@ dependencies {
     implementation('com.google.firebase:firebase-crashlytics') {
         transitive = true
     }
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     implementation firebaseDepenedencies.values()
     implementation crashlyticsDependencies.values()
     implementation qrDependency.values()

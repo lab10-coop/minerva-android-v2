@@ -12,7 +12,8 @@ import me.uport.sdk.jwt.InvalidJWTException
 import me.uport.sdk.jwt.JWTEncodingException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
-import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
+import me.uport.sdk.signer.UNCOMPRESSED_PUBLIC_KEY_SIZE
+import me.uport.sdk.signer.normalize
 import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.MASTER_KEYS_PATH
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.cryptographyProvider.repository.model.Seed
@@ -25,6 +26,7 @@ import org.kethereum.bip39.model.MnemonicWords
 import org.kethereum.bip39.toKey
 import org.kethereum.bip39.wordlists.WORDLIST_ENGLISH
 import org.kethereum.crypto.toAddress
+import org.kethereum.extensions.toBytesPadded
 import org.kethereum.model.ECKeyPair
 import org.komputing.khex.extensions.toNoPrefixHexString
 import org.spongycastle.math.ec.custom.djb.Curve25519
@@ -84,6 +86,15 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
             Timber.e(exception)
             SeedError(exception)
         }
+
+    /**
+     * Decompresses the public key of this pair and returns the uncompressed version, including prefix
+     */
+    private fun ECKeyPair.getUncompressedPublicKeyWithPrefix(): ByteArray {
+        val pubBytes = this.publicKey.normalize().key.toBytesPadded(UNCOMPRESSED_PUBLIC_KEY_SIZE)
+        pubBytes[0] = 0x04
+        return pubBytes
+    }
 
     private fun ECKeyPair.getPublicKey(): String = getUncompressedPublicKeyWithPrefix().toBase64().padBase64()
 

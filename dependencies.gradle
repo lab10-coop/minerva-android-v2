@@ -1,15 +1,15 @@
 ext {
-    _compileSdkVersion = 31
+    _compileSdk = 31
     _buildToolsVersion = "30.0.3"
-    _targetSdkVersion = 31
+    _targetSdk = 31
     kotlinVersion = '1.6.20'
 
     constraintVersion = '2.0.0-beta4'
     timberVersion = '4.7.1'
     annotationVersion = '1.1.0'
 
-    androidxCoreVersion = '1.2.0-alpha02'
-    androidxFragmentVersion = '1.3.0-alpha02'
+    androidxCoreVersion = '1.8.0'
+    androidxFragmentVersion = '1.5.5'
     materialDesignVersion = '1.2.0-alpha05'
     swipeRefreshVersion = '1.0.0'
     recyclerVersion = '1.2.0-alpha04'
@@ -27,7 +27,7 @@ ext {
     retrofitVersion = '2.8.1'
     logginInterceptorVersion = '4.5.0'
 
-    koinVersion = '2.1.5'
+    koinVersion = '3.2.0'
     gsonVersion = '2.8.6'
 
     junitVersion = '4.13'
@@ -40,7 +40,7 @@ ext {
     androidxCoreTestingVersion = '2.0.1'
 
     didJwtVersion = "0.4.0"
-    kethereum_version = "0.81.4"
+    kethereum_version = "0.85.7"
 
     crashlyticsVersion = '2.10.1'
     scannerVersion = '2.1.0'
@@ -84,8 +84,7 @@ ext {
     ]
 
     koinDependencies = [
-            koinCore     : "org.koin:koin-android:$koinVersion",
-            koinViewModel: "org.koin:koin-androidx-viewmodel:$koinVersion"
+            koinCore     : "io.insert-koin:koin-android:$koinVersion",
     ]
 
     androidCoreDependencies = [
@@ -121,7 +120,7 @@ ext {
             mockwebserver: "com.squareup.okhttp:mockwebserver:$mockWebServerVersion",
             kotlin       : "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             kotlinTest   : "org.jetbrains.kotlin:kotlin-test-junit:$junitKotlinVersion",
-            koinTest     : "org.koin:koin-test:$koinVersion",
+            koinTest     : "io.insert-koin:koin-test:$koinVersion",
             mockk        : "io.mockk:mockk:$mockkVersion",
             kluent       : "org.amshove.kluent:kluent-android:$kluentVersion",
             androidxCore : "androidx.arch.core:core-testing:$androidxCoreTestingVersion",

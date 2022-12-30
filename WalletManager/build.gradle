@@ -7,12 +7,12 @@ plugins {
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion _compileSdkVersion
+    compileSdk _compileSdk
     buildToolsVersion _buildToolsVersion
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion _targetSdkVersion
+        targetSdk _targetSdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
         buildConfigField "String", "ENS_TEST_URL", '"https://ropsten.infura.io/v3/"'
@@ -70,6 +70,7 @@ android {
             matchingFallbacks = ["production"]
         }
     }
+    namespace 'minerva.android.walletmanager'
 }
 
 dependencies {
