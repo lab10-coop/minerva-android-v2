@@ -13,8 +13,6 @@ android {
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion _targetSdkVersion
-        versionCode 1
-        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
         buildConfigField "String", "ENS_TEST_URL", '"https://ropsten.infura.io/v3/"'

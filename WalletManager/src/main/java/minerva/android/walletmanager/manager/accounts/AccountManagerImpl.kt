@@ -111,7 +111,7 @@ class AccountManagerImpl(
                 account.id
             )
         }
-            .minBy { account -> account.id }!!.id
+            .minByOrNull { account -> account.id }!!.id
     }
 
     override fun createEmptyAccounts(numberOfAccounts: Int) =
@@ -218,7 +218,7 @@ class AccountManagerImpl(
         with(coinBalance) {
             tokenBalanceDao.insert(
                 TokenBalanceEntity(
-                    balanceHash = (address + accountAddress).toLowerCase(Locale.ROOT),
+                    balanceHash = (address + accountAddress).lowercase(Locale.ROOT),
                     address = address,
                     chainId = chainId,
                     cryptoBalance = coinBalance.balance.cryptoBalance,
@@ -252,10 +252,12 @@ class AccountManagerImpl(
 
     private fun updateAccount(existedAccount: Account, network: Network): Single<String> {
         val accountName =
-            if (existedAccount.name.isBlank()) CryptoUtils.prepareName(
-                network.name,
-                existedAccount.id
-            ) else existedAccount.name
+            existedAccount.name.ifBlank {
+                CryptoUtils.prepareName(
+                    network.name,
+                    existedAccount.id
+                )
+            }
         walletManager.getWalletConfig().run {
             val newAccountsList = if (existedAccount.chainId == Int.InvalidValue) {
                 changeAccountIndexToLast(accounts.toMutableList(), existedAccount)
@@ -448,7 +450,8 @@ class AccountManagerImpl(
 
     override fun getAllFreeAccountForNetwork(chainId: Int): List<AddressWrapper> {
         //get all accounts
-        val accounts = getAllAccounts().filter { !it.isDeleted && it.isTestNetwork == !areMainNetworksEnabled}
+        val accounts =
+            getAllAccounts().filter { !it.isDeleted && it.isTestNetwork == !areMainNetworksEnabled }
         //filtering accounts which chain already uses
         val usedAccounts: List<Account> = accounts.filter { it.chainId == chainId }
         //id of account which chain already uses to integer list
@@ -460,7 +463,8 @@ class AccountManagerImpl(
             .toMutableList()
         //replace same addresses from other chain - for get correct state af address
         usedAccounts.forEach { used ->
-            val equalAddressHashFromDiffChain: Account? = availableAccounts.find { used.address == it.address }
+            val equalAddressHashFromDiffChain: Account? =
+                availableAccounts.find { used.address == it.address }
             if (null != equalAddressHashFromDiffChain) {
                 availableAccounts.remove(equalAddressHashFromDiffChain)
             }
@@ -468,11 +472,10 @@ class AccountManagerImpl(
         //merge available and used addresses
         val allChainAccounts: Set<Account> = availableAccounts.union(usedAccounts)
         //wrapping addresses to AddressWrapper for put it forward
-        val allChainAccountsToAddressWrapper: List<AddressWrapper> = allChainAccounts
+
+        return allChainAccounts
             .map { account -> accountToAddressWrapper(account, usedIdsOfAccounts) }
             .sortedBy { account -> account.index }
-
-        return allChainAccountsToAddressWrapper
     }
 
     /**

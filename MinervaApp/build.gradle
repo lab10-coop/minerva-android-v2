@@ -105,10 +105,6 @@ android {
         exclude("META-INF/*.kotlin_module")
     }
 
-    dexOptions {
-        javaMaxHeapSize "4g"
-    }
-
     testOptions {
         unitTests.returnDefaultValues = true
     }
