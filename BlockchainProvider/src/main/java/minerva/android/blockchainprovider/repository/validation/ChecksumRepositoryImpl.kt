@@ -19,7 +19,7 @@ class ChecksumRepositoryImpl : ChecksumRepository {
             append(HEX_PREFIX)
             lowercaseAddress.indices.forEach { i ->
                 if (addressHash[i].toString().toInt(RADIX) >= THRESHOLD) {
-                    append(lowercaseAddress[i].toString().toUpperCase(Locale.ROOT))
+                    append(lowercaseAddress[i].toString().uppercase(Locale.ROOT))
                 } else {
                     append(lowercaseAddress[i])
                 }

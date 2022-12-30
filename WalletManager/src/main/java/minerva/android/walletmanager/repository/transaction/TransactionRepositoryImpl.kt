@@ -301,7 +301,7 @@ class TransactionRepositoryImpl(
                                 .map { newTokensPerChainIdMap ->
                                     tokenManager.mergeWithLocalTokensList(newTokensPerChainIdMap)
                                 }
-                                .flatMap { (shouldUpdateLogosURI, newAndLocalTokensPerChainIdMap) ->
+                                .flatMap { (_, newAndLocalTokensPerChainIdMap) ->
                                     tokenManager.saveTokens(true, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
@@ -388,11 +388,11 @@ class TransactionRepositoryImpl(
             shouldGetGasPriceFromApi(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
-                        var gasPrice = gasPrice.result
-                        if (gasPrice?.toBigInteger()!! < NetworkManager.getNetwork(chainId).minGasPrice) {
-                            gasPrice = NetworkManager.getNetwork(chainId).minGasPrice.toBigDecimal()
+                        var gasPriceResult = gasPrice.result
+                        if (gasPriceResult?.toBigInteger()!! < NetworkManager.getNetwork(chainId).minGasPrice) {
+                            gasPriceResult = NetworkManager.getNetwork(chainId).minGasPrice.toBigDecimal()
                         }
-                        getTxCosts(txCostPayload, null, gasPrice)
+                        getTxCosts(txCostPayload, null, gasPriceResult)
                     }
                     .onErrorResumeNext {
                         getTxCosts(txCostPayload, null, null)
