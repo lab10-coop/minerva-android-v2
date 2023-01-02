@@ -4,15 +4,13 @@ apply plugin: 'kotlin-android-extensions'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion _compileSdkVersion
+    compileSdk _compileSdk
     buildToolsVersion _buildToolsVersion
 
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion _targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion _minSdkVersion
+        targetSdk _targetSdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -24,6 +22,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'minerva.android.kotlinUtils'
 
 }
 

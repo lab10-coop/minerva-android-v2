@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.manager.order
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import minerva.android.kotlinUtils.event.Event

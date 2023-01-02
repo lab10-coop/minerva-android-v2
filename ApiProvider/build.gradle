@@ -4,15 +4,13 @@ apply plugin: 'kotlin-android-extensions'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion _compileSdkVersion
+    compileSdk _compileSdk
     buildToolsVersion _buildToolsVersion
 
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion _targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion _minSdkVersion
+        targetSdk _targetSdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -43,6 +41,7 @@ android {
             buildConfigField "String", "DAPPS_DETAILS_LAST_COMMIT", '"https://api.github.com/repos/lab10-coop/minerva-dapplist/commits?path=dapplist.json&page=1&per_page=1"'
         }
     }
+    namespace 'minerva.android.apiProvider'
 
 }
 

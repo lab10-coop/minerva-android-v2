@@ -37,10 +37,12 @@ class AddTokenViewModel(
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     private var token: ERCToken? = null
-        set(value) {
-            field = value
-            _tokenLiveData.value = value
+    set(value) {
+        field = value
+        if (value != null) {
+            _tokenLiveData.value = value as ERCToken
         }
+    }
 
     private val _tokenLiveData = MutableLiveData<ERCToken>()
     val tokenLiveData: LiveData<ERCToken> get() = _tokenLiveData

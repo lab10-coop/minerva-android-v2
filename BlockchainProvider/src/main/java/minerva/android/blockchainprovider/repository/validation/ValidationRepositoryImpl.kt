@@ -23,7 +23,7 @@ class ValidationRepositoryImpl(
                         isAddressWithoutChecksum(address))
 
     private fun isAddressWithoutChecksum(address: String) =
-        address.toLowerCase(Locale.ROOT) == address
+        address.lowercase(Locale.ROOT) == address
 
     override fun toChecksumAddress(address: String, chainId: Int?): String {
         return when (chainId) {
@@ -34,7 +34,7 @@ class ValidationRepositoryImpl(
 
     override fun toRecipientChecksum(address: String, chainId: Int?): String {
         return when (chainId) {
-            RSK_MAIN, RSK_TEST -> address.toLowerCase(Locale.ROOT)
+            RSK_MAIN, RSK_TEST -> address.lowercase(Locale.ROOT)
             else -> address
         }
     }

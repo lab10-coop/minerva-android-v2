@@ -1,5 +1,6 @@
 package minerva.android.main
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -224,11 +225,12 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
         else removeSettingsBadgeIcon()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
         return true
     }
 
+    @SuppressLint("WrongConstant")
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         with(viewModel) {
             menu?.apply {

@@ -84,7 +84,6 @@ class TokenManagerImpl(
     private val erc1155TokenRepository: ERC1155TokenRepository,
     private val rateStorage: RateStorage
 ) : TokenManager {
-    private val currentTimeProvider = CurrentTimeProviderImpl()
     private var currentFiat = String.Empty
 
     @VisibleForTesting
@@ -126,10 +125,10 @@ class TokenManagerImpl(
                         erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap)
                     )
                         .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
-                        .toSingle { shouldSafeNewTokens }
-                        .onErrorReturn { shouldSafeNewTokens }
+                        .toSingle { true }
+                        .onErrorReturn { true }
                 }
-        } else Single.just(shouldSafeNewTokens)
+        } else Single.just(false)
 
     override fun checkMissingTokensDetails(): Completable =
         checkMissingNFTDetails()
@@ -140,7 +139,7 @@ class TokenManagerImpl(
 
     private fun updateNFTsIcons(tokens: Map<String, NftCollectionDetailsResult>): Completable =
         walletManager.getWalletConfig().run {
-            erc20Tokens.forEach { (id, tokenList) ->
+            erc20Tokens.forEach { (_, tokenList) ->
                 mergeNFTDetails(tokenList, tokens)
             }
             walletManager.updateWalletConfig(copy(version = updateVersion))
@@ -270,7 +269,7 @@ class TokenManagerImpl(
             val tokens = getTokensForAccount(tokensPerAccount, this)
             return Flowable.mergeDelayError(getTokenBalanceFlowables(tokens, this))
                 // todo: can this be simplified?
-                .flatMap { (token, type) ->
+                .flatMap { (token, _) ->
                     Flowable.just(token)
                 }
                 .map { token -> handleTokensBalances(token, tokens, account, null) }
@@ -389,7 +388,7 @@ class TokenManagerImpl(
 
     override fun getTokensUpdate(): Flowable<List<ERCToken>> =
         Flowable.just(walletManager.getWalletConfig().erc20Tokens
-            .flatMap { (id, tokenList) -> tokenList })
+            .flatMap { (_, tokenList) -> tokenList })
 
     override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
 
@@ -439,7 +438,7 @@ class TokenManagerImpl(
                                         marketId,
                                         chainId,
                                         prepareContractAddresses(chunkedTokens),
-                                        chunkedTokens.map { it.address.toLowerCase(Locale.ROOT) }
+                                        chunkedTokens.map { it.address.lowercase(Locale.ROOT) }
                                             .toMutableList()
                                     )
                                 )
@@ -471,16 +470,16 @@ class TokenManagerImpl(
                 .map { tokenRateResponse ->
                     mutableListOf<Pair<String, Double>>().apply {
                         tokenRateResponse.forEach { (contractAddress, rate) ->
-                            (contractAddress.toLowerCase(Locale.ROOT)).let { contractAddressLowered ->
+                            (contractAddress.lowercase(Locale.ROOT)).let { contractAddressLowered ->
                                 add(
                                     Pair(
                                         generateTokenHash(chainId, contractAddressLowered),
-                                        rate[currentFiat.toLowerCase(Locale.ROOT)]?.toDoubleOrNull()
+                                        rate[currentFiat.lowercase(Locale.ROOT)]?.toDoubleOrNull()
                                             ?: Double.InvalidValue
                                     )
                                 )
                                 contractAddressesList.remove(
-                                    contractAddressLowered.toLowerCase(
+                                    contractAddressLowered.lowercase(
                                         Locale.ROOT
                                     )
                                 )
@@ -525,8 +524,8 @@ class TokenManagerImpl(
                         account.address
                     ).toObservable().onErrorReturn { true }
                 } else Observable.just(false),
-                BiFunction { token: TokenTx, isTokenOwner: Boolean ->
-                    Pair<TokenTx, Boolean>(token, isTokenOwner)
+                { token: TokenTx, isTokenOwner: Boolean ->
+                    Pair(token, isTokenOwner)
                 })
         }
         .toList()
@@ -558,13 +557,13 @@ class TokenManagerImpl(
                         if (token.type.isNft()) {
                             mutableListOf<ERCToken>().also { collectionTokens ->
                                 tokensTx
-                                    .filter { (tokenTx, isTokenOwner) ->
+                                    .filter { (tokenTx, _) ->
                                         tokenTx.address.equals(
                                             token.address,
                                             true
                                         )
                                     }
-                                    .distinctBy { (tokenTx, isTokenOwner) -> tokenTx.tokenId }
+                                    .distinctBy { (tokenTx, _) -> tokenTx.tokenId }
                                     .forEach { (tokenTx, isTokenOwner) ->
                                         if (isTokenOwner) {
                                             collectionTokens.add(token.copy(tokenId = tokenTx.tokenId))
@@ -603,7 +602,7 @@ class TokenManagerImpl(
                                 account.address
                             ) to tokenData.balance
                         }
-                        .filter { (token, balance) -> token.type != TokenType.INVALID }
+                        .filter { (token, _) -> token.type != TokenType.INVALID }
                         .forEach { (token, balance) -> add(token to balance) }
                 }
             }
@@ -1034,7 +1033,7 @@ class TokenManagerImpl(
         return mutableMapOf<Int, List<ERCToken>>().apply {
             for ((chainId, tokens) in newTokensWithIcons) {
                 tokens.onEach { token ->
-                    token.accountAddress = token.accountAddress.toLowerCase(Locale.ROOT)
+                    token.accountAddress = token.accountAddress.lowercase(Locale.ROOT)
                 }
                 this[chainId] = tokens.distinct()
             }

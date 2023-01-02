@@ -10,7 +10,7 @@ class ChecksumRepositoryImpl : ChecksumRepository {
     override fun toEIP55Checksum(address: String): String = Keys.toChecksumAddress(address)
 
     override fun toEIP1191Checksum(address: String, chainId: Int): String {
-        val lowercaseAddress = Numeric.cleanHexPrefix(address).toLowerCase(Locale.ROOT)
+        val lowercaseAddress = Numeric.cleanHexPrefix(address).lowercase(Locale.ROOT)
         val hashInput = chainId.toString() + HEX_PREFIX + lowercaseAddress
         val addressHash = Numeric.cleanHexPrefix(Hash.sha3String(hashInput))
 
@@ -19,7 +19,7 @@ class ChecksumRepositoryImpl : ChecksumRepository {
             append(HEX_PREFIX)
             lowercaseAddress.indices.forEach { i ->
                 if (addressHash[i].toString().toInt(RADIX) >= THRESHOLD) {
-                    append(lowercaseAddress[i].toString().toUpperCase(Locale.ROOT))
+                    append(lowercaseAddress[i].toString().uppercase(Locale.ROOT))
                 } else {
                     append(lowercaseAddress[i])
                 }

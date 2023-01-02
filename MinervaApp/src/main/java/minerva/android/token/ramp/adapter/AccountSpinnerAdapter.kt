@@ -59,7 +59,7 @@ class AccountSpinnerAdapter(
         }
         ADD_ITEM -> { //add new account (button) case
             LayoutInflater.from(context).inflate(R.layout.spinner_network_add_item, parent, false).apply {
-                accounts[position].let { account ->
+                accounts[position].let { _ ->
                     SpinnerNetworkAddItemBinding.bind(this).rowContainer.apply{
                         add_account_row.text = context.getString(R.string.create_new_account)
                     }
