@@ -355,7 +355,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun setTatsButtonListener() = binding.apply {
-        addCryptoButton.setOnClickListener { view ->
+        addCryptoButton.setOnClickListener { _ ->
             viewModel.apply {
                 if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
             }

@@ -65,7 +65,7 @@ class ValidationRepositoryTest : RxTest() {
     @Test
     fun `is send transaction within RSK having recipient checksum in lowercase success`() {
         val address = "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359"
-        val lowercase = address.toLowerCase()
+        val lowercase = address.lowercase()
         val result = repository.toRecipientChecksum(address, rskMainnetChainId)
         assertEquals(lowercase, result)
 

@@ -105,19 +105,19 @@ class WCClient(
         }
     }
 
-    override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
+    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         var isForceTermination: Boolean = false
-        if (throwable.isForceTerminationError() || response.isForceTerminationError()) {
+        if (t.isForceTerminationError() || response.isForceTerminationError()) {
             resetState()
             isForceTermination = true
         }
-        onFailure(throwable, peerId, isForceTermination)
+        onFailure(t, peerId, isForceTermination)
 
-        if (throwable.isForceTerminationError() || response.isForceTerminationError()) {
+        if (t.isForceTerminationError() || response.isForceTerminationError()) {
             peerId = String.Empty
         }
 
-        listeners.forEach { it.onFailure(webSocket, throwable, response) }
+        listeners.forEach { it.onFailure(webSocket, t, response) }
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -339,6 +339,9 @@ class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 onSignTransaction(request.id, param)
             }
+            else -> {
+                // do nothing.
+            }
         }
     }
 
@@ -369,8 +372,6 @@ class WCClient(
             type = MessageType.PUB,
             payload = payload
         )
-
-        val rpId = remotePeerId ?: session.topic
 
         val json = gson.toJson(message)
         return socket?.send(json) ?: false
