@@ -19,10 +19,10 @@ class OpenDappDialog(private val dapp: Dapp) : DialogFragment() {
                 AlertDialog.Builder(it).apply {
                     setTitle(longName)
                     setMessage(requireContext().getString(R.string.open_dapp_info))
-                    setPositiveButton(R.string.open) { dialog, id ->
+                    setPositiveButton(R.string.open) { _, _ ->
                         listener.onConfirm(Listener.OnConfirmData(dappUrl))
                     }
-                    setNegativeButton(R.string.cancel) { dialog, id ->
+                    setNegativeButton(R.string.cancel) { _, _ ->
                         listener.onCancel()
                     }
 

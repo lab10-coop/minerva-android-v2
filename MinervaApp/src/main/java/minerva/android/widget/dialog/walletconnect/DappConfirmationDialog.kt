@@ -160,7 +160,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                 networkAdapter.selectedItemWidth = BASE_NAME_SIZE + (longestNameLength * SYMBOL_SIZE)
             }
             adapter = networkAdapter
-            prepareSpinner(R.drawable.warning_background, networkItemIndex) { position, view ->
+            prepareSpinner(R.drawable.warning_background, networkItemIndex) { position, _ ->
                 val selectedItem = networkAdapter.getItem(position)
                 updateNotDefinedNetworkWarning(selectedItem, dialogType)
                 if (selectedItem.isAccountAvailable) {

@@ -13,7 +13,7 @@ import java.math.BigInteger
 interface TokenManager {
     fun checkMissingTokensDetails(): Completable
     fun getActiveTokensPerAccount(account: Account): List<ERCToken>
-    fun saveToken(accountAddress: String, chainId: Int, token: ERCToken): Completable
+    fun saveToken(accountAddress: String, chainId: Int, newToken: ERCToken): Completable
     fun saveTokens(
         shouldSafeNewTokens: Boolean,
         newAndLocalTokensPerChainIdMap: Map<Int, List<ERCToken>>

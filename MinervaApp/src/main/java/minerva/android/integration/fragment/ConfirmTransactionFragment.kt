@@ -41,7 +41,7 @@ class ConfirmTransactionFragment : Fragment() {
     }
 
     private fun initBiometricPrompt() {
-        biometricPrompt = BiometricPrompt(this, ContextCompat.getMainExecutor(context),
+        biometricPrompt = BiometricPrompt(this, ContextCompat.getMainExecutor(requireContext()),
             object : BiometricPrompt.AuthenticationCallback() {
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {

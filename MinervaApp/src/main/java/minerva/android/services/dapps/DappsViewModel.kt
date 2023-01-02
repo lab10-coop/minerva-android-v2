@@ -66,9 +66,9 @@ class DappsViewModel(
             filteredDapps = dapps.filter { it.chainIds.contains(chainId) }
 
         _dappsLiveData.value = DappsWithCategories(
-            favorite = filteredDapps.filter { it.isFavorite }.sortedBy { it.shortName.toUpperCase() },
+            favorite = filteredDapps.filter { it.isFavorite }.sortedBy { it.shortName.uppercase() },
             sponsored = filteredDapps.filter { !it.isFavorite && it.isSponsored }.sortedBy { it.sponsoredOrder },
-            remaining = filteredDapps.filter { !it.isFavorite && !it.isSponsored }.sortedBy { it.shortName.toUpperCase() }
+            remaining = filteredDapps.filter { !it.isFavorite && !it.isSponsored }.sortedBy { it.shortName.uppercase() }
         )
     }
 
@@ -123,9 +123,9 @@ class DappsViewModel(
     private fun handleDappResult(list: List<Dapp>) {
         this.dapps = list
         _dappsLiveData.value = DappsWithCategories(
-            favorite = list.filter { it.isFavorite }.sortedBy { it.shortName.toUpperCase() },
+            favorite = list.filter { it.isFavorite }.sortedBy { it.shortName.uppercase() },
             sponsored = list.filter { !it.isFavorite && it.isSponsored }.sortedBy { it.sponsoredOrder },
-            remaining = list.filter { !it.isFavorite && !it.isSponsored }.sortedBy { it.shortName.toUpperCase() }
+            remaining = list.filter { !it.isFavorite && !it.isSponsored }.sortedBy { it.shortName.uppercase() }
         )
     }
 

@@ -60,7 +60,6 @@ class AdvancedFragment : BaseFragment(R.layout.fragment_advanced) {
 
     private fun getRecyclerViewItemDecorator(): VerticalMarginItemDecoration {
         val margin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
-        val bottomMargin = requireContext().resources.getDimension(R.dimen.margin_xbig).toInt()
         return VerticalMarginItemDecoration(margin, Int.NO_MARGIN, Int.NO_MARGIN)
     }
 

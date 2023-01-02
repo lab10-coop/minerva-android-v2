@@ -124,7 +124,7 @@ class TransactionRepositoryImpl(
         marketId: String,
         cryptoBalance: CoinCryptoBalance
     ): Single<CoinBalance> =
-        cryptoApi.getMarkets(marketId, currentFiatCurrency.toLowerCase(Locale.ROOT))
+        cryptoApi.getMarkets(marketId, currentFiatCurrency.lowercase(Locale.ROOT))
             .onErrorReturnItem(Markets())
             .map { market ->
                 ratesMap[cryptoBalance.chainId] = market
@@ -137,13 +137,13 @@ class TransactionRepositoryImpl(
             }
 
     private fun fetchCoinRate(id: String): Single<Markets> =
-        cryptoApi.getMarkets(id, currentFiatCurrency.toLowerCase(Locale.ROOT))
+        cryptoApi.getMarkets(id, currentFiatCurrency.lowercase(Locale.ROOT))
 
     private fun getAddresses(accounts: List<Account>): List<Pair<Int, String>> =
         accounts.map { account -> account.network.chainId to account.address }
 
     override fun getSuperTokenStreamInitBalance(): Flowable<Asset> {
-        accountsForTokenBalanceRefresh.let { accounts ->
+        accountsForTokenBalanceRefresh.let { _ ->
             val accountsWithActiveStreams: List<Account> = getActiveAccountsWithSuperfluidSupport()
             return Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams))
                 .flatMap { asset -> handleSuperTokens(asset) }
@@ -152,7 +152,7 @@ class TransactionRepositoryImpl(
 
     @Throws(ConnectException::class)
     override fun startSuperTokenStreaming(chainId: Int): Flowable<Asset> {
-        accountsForTokenBalanceRefresh.let { accounts ->
+        accountsForTokenBalanceRefresh.let { _ ->
             val accountsWithActiveStreams: List<Account> = getActiveAccountsWithSuperfluidSupport()
                     .filter { account -> account.chainId == chainId }
             return Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams))
@@ -301,7 +301,7 @@ class TransactionRepositoryImpl(
                                 .map { newTokensPerChainIdMap ->
                                     tokenManager.mergeWithLocalTokensList(newTokensPerChainIdMap)
                                 }
-                                .flatMap { (shouldUpdateLogosURI, newAndLocalTokensPerChainIdMap) ->
+                                .flatMap { (_, newAndLocalTokensPerChainIdMap) ->
                                     tokenManager.saveTokens(true, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
@@ -388,11 +388,11 @@ class TransactionRepositoryImpl(
             shouldGetGasPriceFromApi(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
-                        var gasPrice = gasPrice.result
-                        if (gasPrice?.toBigInteger()!! < NetworkManager.getNetwork(chainId).minGasPrice) {
-                            gasPrice = NetworkManager.getNetwork(chainId).minGasPrice.toBigDecimal()
+                        var gasPriceResult = gasPrice.result
+                        if (gasPriceResult?.toBigInteger()!! < NetworkManager.getNetwork(chainId).minGasPrice) {
+                            gasPriceResult = NetworkManager.getNetwork(chainId).minGasPrice.toBigDecimal()
                         }
-                        getTxCosts(txCostPayload, null, gasPrice)
+                        getTxCosts(txCostPayload, null, gasPriceResult)
                     }
                     .onErrorResumeNext {
                         getTxCosts(txCostPayload, null, null)

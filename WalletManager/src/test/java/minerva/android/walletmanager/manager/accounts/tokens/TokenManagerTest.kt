@@ -244,7 +244,7 @@ class TokenManagerTest : RxTest() {
             )
         )
 
-        val result = "accountADDress1".toLowerCase()
+        val result = "accountADDress1".lowercase()
         result shouldBeEqualTo "accountaddress1"
 
         val updatedTokens =
