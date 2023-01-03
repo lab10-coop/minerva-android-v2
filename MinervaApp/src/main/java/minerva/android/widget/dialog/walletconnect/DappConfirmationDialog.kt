@@ -16,6 +16,7 @@ import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
@@ -225,16 +226,25 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             *arrayOf(network.name))
 
 
-    private fun getWarningText(network: BaseNetworkData, context: Context) =
-        if (network.name == String.Empty) context.getString(
-            R.string.unsupported_network_id_message,
-            *arrayOf(network.chainId)
-        ) else context.getString(
-            R.string.unsupported_network_name_message,
-            *arrayOf(network.name))
+    private fun getWarningText(network: BaseNetworkData, context: Context, kinfOfNetwork: KindOfNetwork = KindOfNetwork.EQUAL): String  = when (kinfOfNetwork) {
+        KindOfNetwork.EQUAL -> {
+            if (network.name == String.Empty) context.getString(
+                R.string.unsupported_network_id_message,
+                *arrayOf(network.chainId)
+            ) else context.getString(
+                R.string.unsupported_network_name_message,
+                *arrayOf(network.name))
+        }
+        KindOfNetwork.MAIN -> context
+            .getString(R.string.switch_network,
+                *arrayOf(KindOfNetwork.TEST.name.toLowerCase()))
+        KindOfNetwork.TEST -> context
+            .getString(R.string.switch_network,
+                *arrayOf(KindOfNetwork.MAIN.name.toLowerCase()))
+    }
 
 
-    fun setUnsupportedNetworkMessage(network: BaseNetworkData) = with(binding) {
+    fun setUnsupportedNetworkMessage(network: BaseNetworkData, requestChainId: Int = Int.InvalidId) = with(binding) {
         networkHeader.network.apply {
             networkHeader.network.text = getHeaderText(network, context)
             setCompoundDrawablesRelativeWithIntrinsicBounds(
@@ -247,7 +257,35 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             setTextColor(ContextCompat.getColor(context, R.color.alertRed))
         }
 
-        warning.text = getWarningText(network, context)
+        warning.text = if (requestChainId == Int.InvalidId)
+            getWarningText(network, context)
+        else {
+            var warningText: String = String.Empty
+
+            //using "try/catch" for prevent exception while getting network from api(unsupported chain)
+            try {
+                val requestNetwork = NetworkManager.getNetwork(requestChainId)
+                val responseNetwork = NetworkManager.getNetwork(network.chainId)//network from api (DApp) response
+
+                //if network type the same (main or test) get default warning message; else regarding change network type by type of api response
+                warningText = if (requestNetwork.testNet == responseNetwork.testNet) {
+                    getWarningText(network, context)
+                } else {
+                    if (requestNetwork.testNet) {
+                        getWarningText(network, context, KindOfNetwork.TEST)
+                    } else {
+                        getWarningText(network, context, KindOfNetwork.MAIN)
+                    }
+                }
+            } catch (e: Exception) { }
+
+            //if we get error from api get default warning text
+            if (warningText == String.Empty)
+                getWarningText(network, context)
+            else {
+                warningText
+            }
+        }
         confirmationButtons.confirm.isEnabled = false
         showWaring()
     }
@@ -292,5 +330,12 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         manual.invisible()
         warning.visible()
         warringIcon.visible()
+    }
+
+    /**
+     * Network Type - enum for comparing network type
+     */
+    enum class KindOfNetwork {
+        MAIN, TEST, EQUAL;
     }
 }
