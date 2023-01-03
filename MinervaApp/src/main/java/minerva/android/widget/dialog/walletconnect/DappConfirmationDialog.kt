@@ -267,7 +267,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                 val requestNetwork = NetworkManager.getNetwork(requestChainId)
                 val responseNetwork = NetworkManager.getNetwork(network.chainId)//network from api (DApp) response
 
-                //if network type the same (main or test) get default warning message; else regarding change network type by type of api response
+                //when network type the same (main or test) get default warning message; when isn't the same - regarding change network type by type of api response
                 warningText = if (requestNetwork.testNet == responseNetwork.testNet) {
                     getWarningText(network, context)
                 } else {
