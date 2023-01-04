@@ -343,6 +343,8 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private fun closeToBackground() {
         clearAllDialogs()
+        //go back to browser after connect established(from "Services" page (DApp list))
+        moveTaskToBack(true)
     }
 
     companion object {
