@@ -260,6 +260,7 @@
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
     <string name="connected">Connected</string>
     <string name="disconnect">Disconnect</string>
+    <string name="end_session">End session</string>
     <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
     <string name="Connect">Connect</string>
     <string name="connect_to_website">Connect to website</string>

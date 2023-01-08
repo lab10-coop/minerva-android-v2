@@ -285,7 +285,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `get account test`() {
         whenever(manager.loadAccount(any())).thenReturn(Account(1))
         whenever(repository.getSessionsFlowable()).thenReturn(
-            Flowable.just(listOf(DappSession(address = "address")))
+            Flowable.just(listOf(DappSessionV1(address = "address")))
         )
         viewModel.getAccount(1)
         assertEquals(1, viewModel.account.id)

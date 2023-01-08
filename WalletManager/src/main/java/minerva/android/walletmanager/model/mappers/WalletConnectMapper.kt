@@ -8,13 +8,13 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 
 object WalletConnectSessionMapper : Mapper<WalletConnectSession, WCSession> {
     override fun map(input: WalletConnectSession): WCSession = with(input) {
-        WCSession(topic, version, bridge, key)
+        WCSession(topic, version, key, bridge, relayProtocol, relayData)
     }
 }
 
 object WCSessionToWalletConnectSessionMapper : Mapper<WCSession, WalletConnectSession> {
     override fun map(input: WCSession): WalletConnectSession = with(input) {
-        WalletConnectSession(topic, version, bridge, key)
+        WalletConnectSession(topic, version, key, bridge, relayProtocol, relayData)
     }
 }
 

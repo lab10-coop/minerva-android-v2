@@ -3,7 +3,7 @@ package minerva.android.accounts.walletconnect
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 
@@ -26,10 +26,10 @@ data class OnSessionRequest(
 data class OnDisconnected(val sessionName: String = String.Empty) : WalletConnectState()
 data class ProgressBarState(val show: Boolean) : WalletConnectState()
 object HideDappsState : WalletConnectState()
-data class OnEthSignRequest(val message: String, val session: DappSession) : WalletConnectState()
+data class OnEthSignRequest(val message: String, val session: DappSessionV1) : WalletConnectState()
 data class OnEthSendTransactionRequest(
     val transaction: WalletConnectTransaction,
-    val session: DappSession,
+    val session: DappSessionV1,
     val account: Account?
 ) : WalletConnectState()
 

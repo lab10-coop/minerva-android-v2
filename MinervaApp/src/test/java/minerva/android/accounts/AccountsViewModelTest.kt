@@ -11,12 +11,9 @@ import minerva.android.accounts.state.*
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.mock.accounts
-import minerva.android.mock.accountsWithoutPrimaryAccount
-import minerva.android.mock.networks
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
@@ -27,7 +24,7 @@ import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.WalletConfig
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
@@ -37,7 +34,6 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
-import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
@@ -105,7 +101,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `refresh balances coin balance test`() {
         whenever(walletConnectRepository.getSessionsFlowable())
-            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+            .thenReturn(Flowable.just(listOf(DappSessionV1(address = "address"))))
         whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
@@ -130,7 +126,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `refresh balances return coin balance error test`() {
         val error = Throwable("Error Balance")
         whenever(walletConnectRepository.getSessionsFlowable())
-            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+            .thenReturn(Flowable.just(listOf(DappSessionV1(address = "address"))))
         whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
@@ -148,7 +144,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `refresh balances return error test`() {
         val error = Throwable("Error Balance")
         whenever(walletConnectRepository.getSessionsFlowable())
-            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+            .thenReturn(Flowable.just(listOf(DappSessionV1(address = "address"))))
         whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
@@ -258,7 +254,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getTokensUpdate())
             .thenReturn(Flowable.just(listOf(ERCToken(1, "token", type = TokenType.ERC20))))
         whenever(walletConnectRepository.getSessionsFlowable())
-            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+            .thenReturn(Flowable.just(listOf(DappSessionV1(address = "address"))))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
         whenever( tokenManager.fetchNFTsDetails()).thenReturn(Single.just(true))
@@ -327,7 +323,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get sessions and update accounts success`() {
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(
             Flowable.just(
-                listOf(DappSession(address = "address"))
+                listOf(DappSessionV1(address = "address"))
             )
         )
         whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")

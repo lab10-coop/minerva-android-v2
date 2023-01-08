@@ -15,6 +15,7 @@ import coil.ImageLoader
 import coil.Coil
 import coil.util.CoilUtils
 import coil.decode.SvgDecoder
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import okhttp3.OkHttpClient
 
 
@@ -31,6 +32,7 @@ class MinervaApp : Application() {
         initializeCrashlytics()
         initializeTimber()
         initializeCoil()
+        WalletConnectRepositoryImpl.initializeWalletConnect2(this)
         RxJavaPlugins.setErrorHandler { Timber.e(it) }
         viewModel.checkWalletConfigInitialization()
     }

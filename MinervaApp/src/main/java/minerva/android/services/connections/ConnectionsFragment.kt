@@ -8,9 +8,10 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
 import minerva.android.services.ServicesViewModel
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.walletconnect.DappSessionV2
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -37,8 +38,16 @@ class ConnectionsFragment : MinervaPrimitiveListFragment() {
         { viewModel.removeService(issuer, name) }
     }
 
-    override fun onRemoveDappSession(dapp: DappSession) {
+    override fun onRemoveDappSession(dapp: DappSessionV1) {
         viewModel.removeSession(dapp)
+    }
+
+    override fun onEndDappSession(dapp: DappSessionV2) {
+        viewModel.removeSession(dapp)
+    }
+
+    override fun onRemovePairing(dapp: MinervaPrimitive) {
+        viewModel.removePairing(dapp)
     }
 
     companion object {

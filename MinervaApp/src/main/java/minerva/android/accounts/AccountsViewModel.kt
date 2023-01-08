@@ -38,7 +38,7 @@ import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
@@ -137,10 +137,17 @@ class AccountsViewModel(
         }
     }
 
+    // Only updates DappSessionV1 instances
+    // todo: check V2 sessions get lost here somewhere.
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
             walletConnectRepository.getSessionsFlowable()
-                .map { sessions -> updateSessions(sessions, accounts) }
+                .map { sessions ->
+                    updateSessions(
+                        sessions.filterIsInstance<DappSessionV1>(),
+                        accounts
+                    )
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -151,7 +158,7 @@ class AccountsViewModel(
     }
 
     private fun updateSessions(
-        sessions: List<DappSession>,
+        sessions: List<DappSessionV1>,
         accounts: List<Account>
     ): List<DappSessionData> =
         if (sessions.isNotEmpty()) {
@@ -171,7 +178,7 @@ class AccountsViewModel(
             }
         } else emptyList()
 
-    private fun isCurrentSession(sessions: List<DappSession>, account: Account) =
+    private fun isCurrentSession(sessions: List<DappSessionV1>, account: Account) =
         sessions.find { session ->
             session.address.equals(account.address, true) && session.chainId == account.chainId
         } != null
@@ -778,7 +785,7 @@ class AccountsViewModel(
 
     /**
      * Change Show Warning - change value for "showWarning" property (Account::showWarning)
-     * @param existedAccount - instance of minerva.android.walletmanager.model.minervaprimitives.account.Accont
+     * @param account - instance of minerva.android.walletmanager.model.minervaprimitives.account.Accont
      *     item which value will be changed
      * @param state - new state for Account::showWarning
      */
@@ -859,7 +866,6 @@ class AccountsViewModel(
         account.id == index && account.chainId == chainId && account.network.testNet != areMainNetsEnabled
 
     companion object {
-        private const val DAY: Long = 24L
         private const val NO_DAPP_SESSION = 0
     }
 }

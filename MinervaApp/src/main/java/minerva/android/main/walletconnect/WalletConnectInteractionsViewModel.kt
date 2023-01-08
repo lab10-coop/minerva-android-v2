@@ -34,7 +34,6 @@ import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
-import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -58,7 +57,7 @@ class WalletConnectInteractionsViewModel(
     walletActionsRepository,
     unsupportedNetworkRepository
 ) {
-    internal var currentDappSession: DappSession? = null
+    internal var currentDappSession: DappSessionV1? = null
     private var currentRate: BigDecimal = Double.InvalidBigDecimal
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
@@ -86,10 +85,15 @@ class WalletConnectInteractionsViewModel(
         onCleared()
     }
 
+    // todo: check if V2 are wrongly getting lost here somewhere.
     fun getWalletConnectSessions() {
         launchDisposable {
             walletConnectRepository.getSessions()
-                .map { dappSessions -> reconnect(dappSessions) }
+                .map { dappSessions ->
+                    reconnect(
+                        dappSessions.filterIsInstance<DappSessionV1>()
+                    )
+                }
                 .toFlowable()
                 .switchMap { walletConnectRepository.getSessionsFlowable() }
                 .filter { dappSessions -> dappSessions.isNotEmpty() }
@@ -112,7 +116,7 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    private fun reconnect(dapps: List<DappSession>) {
+    private fun reconnect(dapps: List<DappSessionV1>) {
         dapps.forEach { session ->
             with(session) {
                 walletConnectRepository.connect(
@@ -142,7 +146,7 @@ class WalletConnectInteractionsViewModel(
             else -> Single.just(DefaultRequest)
         }
 
-    private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
+    private fun getTransactionCosts(session: DappSessionV1, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
         transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)
             ?.let { account -> currentAccount = account }

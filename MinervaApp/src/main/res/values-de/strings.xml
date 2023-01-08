@@ -259,6 +259,7 @@
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
     <string name="connected">Verbunden</string>
     <string name="disconnect">Trennen</string>
+    <string name="end_session">End session</string>
     <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
     <string name="Connect">Verbinden</string>
     <string name="connect_to_website">Mit Website verbinden</string>
@@ -385,7 +386,7 @@
     <string name="nft_graphic_error_message">Dieses NFT kann nicht angezeigt werden.</string>
     <string name="cd_dapp_icon">Dapp icon</string>
     <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
-    <string name="sponsored_label">Gesponsort</string>
+    <string name="sponsored_label">Gesponsert</string>
     <string name="open_dapp_label">Öffnen</string>
     <string name="favorite_label">Favorit</string>
     <string name="token_reset_message">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>

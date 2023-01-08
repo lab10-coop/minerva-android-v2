@@ -16,11 +16,18 @@ import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.Empty
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
+import minerva.android.walletmanager.model.walletconnect.DappSessionV2
+import minerva.android.walletmanager.model.walletconnect.Pairing
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
+import minerva.android.walletmanager.utils.AddressConverter.getShortAddress
+import minerva.android.walletmanager.utils.AddressType
 
 class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) :
     RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
@@ -58,7 +65,9 @@ class MinervaPrimitiveViewHolder(
             when (minervaPrimitive) {
                 is Credential -> showCredential(minervaPrimitive, binding)
                 is Service -> showService(minervaPrimitive, binding)
-                is DappSession -> showDappSessions(minervaPrimitive, binding)
+                is DappSessionV1 -> showDappSessionsV1(minervaPrimitive, binding)
+                is DappSessionV2 -> showDappSessionsV2(minervaPrimitive, binding)
+                is Pairing -> showPairing(minervaPrimitive, binding)
             }
             minervaPrimitiveName.text = minervaPrimitive.name
             setupPopupMenu(minervaPrimitive, binding)
@@ -71,7 +80,7 @@ class MinervaPrimitiveViewHolder(
         showLastUsed(minervaPrimitive, binding)
     }
 
-    private fun showDappSessions(minervaPrimitive: DappSession, binding: MinervaPrimitiveListRowBinding) = with(binding) {
+    private fun showDappSessionsV1(minervaPrimitive: DappSessionV1, binding: MinervaPrimitiveListRowBinding) = with(binding) {
         Glide.with(root.context)
             .load(minervaPrimitive.iconUrl)
             .error(R.drawable.ic_services)
@@ -79,6 +88,33 @@ class MinervaPrimitiveViewHolder(
         setSessionItemsVisibility(true)
         sessionInfoLabel.text = "${minervaPrimitive.accountName}: ${minervaPrimitive.address}"
         networkLabel.text = minervaPrimitive.networkName
+    }
+
+    // todo: show different things for version 2
+    private fun showDappSessionsV2(minervaPrimitive: DappSessionV2, binding: MinervaPrimitiveListRowBinding) = with(binding) {
+        Glide.with(root.context)
+            .load(minervaPrimitive.iconUrl)
+            .error(R.drawable.ic_services)
+            .into(minervaPrimitiveLogo)
+        setSessionItemsVisibility(true)
+        // todo: #1 or #2 or etc.
+        sessionInfoLabel.text = WalletConnectRepositoryImpl
+            .namespacesToAddresses(minervaPrimitive.namespaces)
+            .joinToString(" • ") { getShortAddress(AddressType.NORMAL_ADDRESS, it) }
+        networkLabel.text = WalletConnectRepositoryImpl
+            .namespacesToChainNames(minervaPrimitive.namespaces)
+            // todo: move to localization?
+            .joinToString(" • ")
+    }
+
+    private fun showPairing(minervaPrimitive: Pairing, binding: MinervaPrimitiveListRowBinding) = with(binding) {
+        Glide.with(root.context)
+            .load(minervaPrimitive.iconUrl)
+            .error(R.drawable.ic_services)
+            .into(minervaPrimitiveLogo)
+        setSessionItemsVisibility(true)
+        sessionInfoLabel.text = "No active session" // todo: move to localization
+        networkLabel.text = String.Empty
     }
 
     private fun MinervaPrimitiveListRowBinding.setSessionItemsVisibility(isVisible: Boolean) {
@@ -109,6 +145,7 @@ class MinervaPrimitiveViewHolder(
                 setOnMenuItemClickListener {
                     if (it.itemId == R.id.remove || it.itemId == R.id.disconnect) listener.onRemoved(minervaPrimitive)
                     else if (it.itemId == R.id.change_account) listener.onChangeAccount(minervaPrimitive)
+                    else if (it.itemId == R.id.end_session) listener.onEndSession(minervaPrimitive)
                     true
                 }
             }.also {
@@ -123,8 +160,9 @@ class MinervaPrimitiveViewHolder(
 
     private fun PopupMenu.setMenuItems(minervaPrimitive: MinervaPrimitive) {
         with(menu) {
-            findItem(R.id.disconnect).isVisible = minervaPrimitive is DappSession
-            findItem(R.id.change_account).isVisible = minervaPrimitive is DappSession
+            findItem(R.id.disconnect).isVisible = minervaPrimitive is DappSession || minervaPrimitive is Pairing
+            findItem(R.id.change_account).isVisible = minervaPrimitive is DappSessionV1
+            findItem(R.id.end_session).isVisible = minervaPrimitive is DappSessionV2
             findItem(R.id.remove).isVisible = minervaPrimitive is Service || minervaPrimitive is Credential
         }
     }

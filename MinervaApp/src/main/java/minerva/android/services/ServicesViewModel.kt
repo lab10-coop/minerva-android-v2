@@ -18,6 +18,9 @@ import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
+import minerva.android.walletmanager.model.walletconnect.DappSessionV2
+import minerva.android.walletmanager.model.walletconnect.Pairing
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -59,7 +62,7 @@ class ServicesViewModel(
 
     internal fun setDappSessionsFlowable(services: List<MinervaPrimitive>) {
         launchDisposable {
-            walletConnectRepository.getSessionsFlowable()
+            walletConnectRepository.getSessionsAndPairingsFlowable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -70,11 +73,28 @@ class ServicesViewModel(
     }
 
     fun removeSession(dapp: DappSession) {
-        launchDisposable {
-            walletConnectRepository.killSession(dapp.peerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { Timber.e(it) })
+        when (dapp) {
+            is DappSessionV1 -> launchDisposable {
+                walletConnectRepository.killSessionByPeerId(dapp.peerId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(onError = { Timber.e(it) })
+            }
+            // todo: somehow the list doesn't live update yet
+            // todo: observe for error?
+            is DappSessionV2 -> walletConnectRepository.killSessionByTopic(dapp.topic)
+        }
+
+    }
+
+    fun removePairing(dapp: MinervaPrimitive) {
+        when (dapp) {
+            // todo: somehow the list doesn't live update yet
+            // todo: observe for error?
+            is Pairing -> walletConnectRepository.killPairingByTopic(dapp.topic)
+            // todo: somehow the list doesn't live update yet
+            // todo: observe for error?
+            is DappSessionV2 -> walletConnectRepository.killPairingByTopic(dapp.topic)
         }
     }
 

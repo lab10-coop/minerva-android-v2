@@ -53,10 +53,6 @@ class WCClient(
 
     var isConnected: Boolean = false
 
-    fun sessionId(): String? =
-        if (session != null) session!!.topic
-        else null
-
     var handshakeId: Long = Long.InvalidValue
 
     var accounts: List<String>? = null
@@ -106,7 +102,7 @@ class WCClient(
     }
 
     override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
-        var isForceTermination: Boolean = false
+        var isForceTermination = false
         if (throwable.isForceTerminationError() || response.isForceTerminationError()) {
             resetState()
             isForceTermination = true
@@ -141,6 +137,10 @@ class WCClient(
         peerId: String = UUID.randomUUID().toString(),
         remotePeerId: String? = null
     ) {
+        if (session.version != "1" ||session.bridge == null) {
+            throw Throwable("Only WalletConnect Version 1 supported")
+        }
+
         if (this.session != null && this.session?.topic != session.topic) {
             killSession()
         }
@@ -370,22 +370,12 @@ class WCClient(
             payload = payload
         )
 
-        val rpId = remotePeerId ?: session.topic
-
         val json = gson.toJson(message)
         return socket?.send(json) ?: false
     }
 
     fun disconnect(reason: String? = null): Boolean {
         return socket?.close(1000, reason) ?: false
-    }
-
-    fun addSocketListener(listener: WebSocketListener) {
-        listeners.add(listener)
-    }
-
-    fun removeSocketListener() {
-        listeners.remove(this)
     }
 
     private fun resetState() {

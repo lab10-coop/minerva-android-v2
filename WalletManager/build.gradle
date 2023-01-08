@@ -48,6 +48,8 @@ android {
         buildConfigField "String", "ETHERSCAN_KEY", System.env.ETHERSCAN_KEY ?: localProperty("etherscan.key")
         buildConfigField "String", "INFURA_API_KEY", System.env.INFURA_API_KEY ?: localProperty("infura.key")
         buildConfigField "String", "BSCSCAN_KEY", System.env.BSCSCAN_KEY ?: localProperty("bscscan.key")
+        buildConfigField "String", "WALLETCONNET_PROJECT_ID", System.env.WALLETCONNET_PROJECT_ID ?: localProperty("walletconnect.project.id")
+        buildConfigField "String", "WALLETCONNET_RELAY_URL", System.env.WALLETCONNET_RELAY_URL ?: localProperty("walletconnect.relay.url")
     }
 
     buildTypes {
@@ -82,7 +84,7 @@ dependencies {
     implementation project(':ApiProvider')
     implementation project(':BlockchainProvider')
     implementation project(':WalletConnect')
-    implementation(platform("com.walletconnect:android-bom:1.0.1"))
+    implementation(platform("com.walletconnect:android-bom:1.1.0"))
     implementation("com.walletconnect:android-core")
     implementation("com.walletconnect:sign")
 

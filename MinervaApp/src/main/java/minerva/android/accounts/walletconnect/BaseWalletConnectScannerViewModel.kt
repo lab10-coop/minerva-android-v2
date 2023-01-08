@@ -10,7 +10,6 @@ import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.ChainId
@@ -20,7 +19,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
@@ -169,11 +168,11 @@ abstract class BaseWalletConnectScannerViewModel(
         }
     }
 
-    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int, account: Account, isMobileWalletConnect: Boolean) = DappSession(
+    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int, account: Account, isMobileWalletConnect: Boolean) = DappSessionV1(
         account.address,
         currentSession.topic,
         currentSession.version,
-        currentSession.bridge,
+        currentSession.bridge.toString(), // todo: fix this, that's not a real solution
         currentSession.key,
         meta.name,
         getIcon(meta.icons),

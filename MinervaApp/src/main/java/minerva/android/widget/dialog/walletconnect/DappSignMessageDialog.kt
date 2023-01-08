@@ -5,10 +5,9 @@ import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
 import kotlinx.android.synthetic.main.labeled_text_view.view.*
 import minerva.android.R
-import minerva.android.databinding.DappDialogButtonsBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSignMessageDialogBinding
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 
 class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
@@ -31,7 +30,7 @@ class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> U
 
     }
 
-    fun setContent(text: String, session: DappSession) = with(binding) {
+    fun setContent(text: String, session: DappSessionV1) = with(binding) {
         message.setTitleAndBody(context.getString(R.string.message), text)
         accountType.setNetwork(session)
         setupHeader(session.name, session.networkName, session.iconUrl)
