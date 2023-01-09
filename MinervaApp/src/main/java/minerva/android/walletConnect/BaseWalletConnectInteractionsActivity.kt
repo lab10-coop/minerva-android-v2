@@ -21,9 +21,11 @@ import minerva.android.services.ServicesFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.MinervaLoadingDialog
 import minerva.android.widget.dialog.models.ViewDetails
+import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.*
 import org.koin.android.ext.android.inject
 import java.math.BigDecimal
@@ -34,7 +36,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private var dappDialog: DappDialog? = null
     private var loadingDialog: MinervaLoadingDialog? = null
-    private var confirmationDialogDialog: DappConfirmationDialog? = null
+    private var confirmationDialogDialog: DappDialog?  = null // todo: is DappDialog to broad?
     private var errorDialog: AlertDialog? = null
 
     abstract fun isProtectTransactionEnabled(): Boolean
@@ -102,6 +104,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 is OnDisconnected -> handleWalletConnectDisconnectState(state.sessionName)
                 is OnWalletConnectConnectionError -> handleWalletConnectError(state.sessionName)
                 is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)
+                is OnSessionRequestV2 -> showConnectionDialogV2(state.meta, state.networkNames)
                 is UpdateOnSessionRequest -> updateConnectionDialog(state.network, state.dialogType)
                 CloseScannerState -> closeToBackground()
                 CloseDialogState -> closeDialog()
@@ -251,7 +254,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         } else { // connect connection case
             ViewDetails(network.name, getString(R.string.connect_to_website), getString(R.string.connect))
         }
-        confirmationDialogDialog = DappConfirmationDialog(this,
+        confirmationDialogDialog = DappConfirmationDialogV1(this,
             {
                 if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType) {
                     walletConnectViewModel.updateSession(meta.peerId)
@@ -266,7 +269,8 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             },
             { chainId ->
                 walletConnectViewModel.addAccount(chainId, dialogType)
-            }).apply {
+            }
+        ).apply {
             setView(meta, viewDetails)
             handleNetwork(network, dialogType, meta)
             updateAccountSpinner()
@@ -274,7 +278,31 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         }
     }
 
-    private fun DappConfirmationDialog.updateAccountSpinner() {
+    private fun showConnectionDialogV2(meta: WalletConnectPeerMeta, networkNames: List<String>) {
+        confirmationDialogDialog = DappConfirmationDialogV2(this,
+            {
+                // todo: approve session
+                clearAllDialogs()
+            },
+            {
+                // todo: reject session
+                clearAllDialogs()
+            }
+        ).apply {
+            setView(
+                meta,
+                ViewDetailsV2(
+                    networkNames,
+                    getString(R.string.connect_to_website), getString(R.string.connect)
+                )
+            )
+            //handleNetwork(network, dialogType, meta) // todo?
+            //updateAccountSpinner() // todo?
+            show()
+        }
+    }
+
+    private fun DappConfirmationDialogV1.updateAccountSpinner() {
         setupAccountSpinner(walletConnectViewModel.account.id, walletConnectViewModel.availableAccounts) { account ->
             walletConnectViewModel.setNewAccount(account)
             //change state of confirm button for prevent the same db records
@@ -282,7 +310,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         }
     }
 
-    private fun DappConfirmationDialog.handleNetwork(
+    private fun DappConfirmationDialogV1.handleNetwork(
         network: BaseNetworkData,
         dialogType: WalletConnectAlertType,
         meta: WalletConnectPeerMeta = WalletConnectPeerMeta())
@@ -316,8 +344,10 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private fun updateConnectionDialog(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog?.apply {
-            updateAccountSpinner()
-            handleNetwork(network, dialogType)
+            if (this is DappConfirmationDialogV1) {
+                updateAccountSpinner()
+                handleNetwork(network, dialogType)
+            }
         }
     }
 

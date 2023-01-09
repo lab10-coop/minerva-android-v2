@@ -102,7 +102,7 @@ class MinervaPrimitiveViewHolder(
             .namespacesToAddresses(minervaPrimitive.namespaces)
             .joinToString(" • ") { getShortAddress(AddressType.NORMAL_ADDRESS, it) }
         networkLabel.text = WalletConnectRepositoryImpl
-            .namespacesToChainNames(minervaPrimitive.namespaces)
+            .sessionNamespacesToChainNames(minervaPrimitive.namespaces)
             // todo: move to localization?
             .joinToString(" • ")
     }

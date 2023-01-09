@@ -96,8 +96,9 @@ class WalletConnectRepositoryImpl(
 
 
                 // todo: show popup here, only then proceed
-                //status.onNext(OnSessionRequest())
+                status.onNext(OnSessionRequestV2(sessionProposal))
 
+                /*
                 // Namespace identifier, see for reference: https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md#syntax
                 val namespace = "eip155"
                 // List of accounts on chains
@@ -113,9 +114,9 @@ class WalletConnectRepositoryImpl(
 
                 val approveParams: Sign.Params.Approve = Sign.Params.Approve(sessionProposal.proposerPublicKey, namespaces)
                 SignClient.approveSession(approveParams) { error ->
-                    /*callback for error while approving a session*/
                     Timber.e(error.toString())
                 }
+                */
             }
 
             override fun onSessionRequest(sessionRequest: Sign.Model.SessionRequest) {
@@ -125,7 +126,7 @@ class WalletConnectRepositoryImpl(
                 // todo: use some constants here
                 when (sessionRequest.request.method) {
                     "personal_sign" -> {
-                        // todo
+                        // todo: this seems to be something metamask specific
                     }
                     "eth_sign" -> {
                         // todo
@@ -134,7 +135,7 @@ class WalletConnectRepositoryImpl(
                         //status.onNext(OnEthSign(getUserReadableData(message), peerId))
                     }
                     "eth_signTypedData" -> {
-                        // todo
+                        // todo: this would be awesome to support.
                     }
                     "eth_sendTransaction" -> {
                         // todo
@@ -147,10 +148,10 @@ class WalletConnectRepositoryImpl(
                         //)
                     }
                     "eth_signTransaction" -> {
-                        // todo
+                        // todo: but not that common or important.
                     }
                     "eth_sendRawTransaction" -> {
-                        // todo
+                        // todo: but not that common or important.
                     }
                 }
 
@@ -664,10 +665,22 @@ class WalletConnectRepositoryImpl(
 
         // todo: move somewhere else?
         // only works for eip155 namespace
-        fun namespacesToChainNames(namespaces: Map<String, Sign.Model.Namespace.Session>): List<String> {
+        fun sessionNamespacesToChainNames(namespaces: Map<String, Sign.Model.Namespace.Session>): List<String> {
             val accounts = namespaces["eip155"]?.accounts ?: emptyList()
             return accounts
                 .mapNotNull { account -> account.split(":").getOrNull(1)?.toIntOrNull() }
+                .distinct()
+                .mapNotNull { chainId -> getNetworkNameOrNull(chainId) }
+        }
+
+        // todo: move somewhere else?
+        // only works for eip155 namespace
+        // todo: support non eip155 namespaces (just say non evm chain(s))
+        // todo: show names of non supported evm namepsaces
+        fun proposalNamespacesToChainNames(namespaces: Map<String, Sign.Model.Namespace.Proposal>): List<String> {
+            val chains = namespaces["eip155"]?.chains ?: emptyList()
+            return chains
+                .mapNotNull { chain -> chain.split(":").getOrNull(1)?.toIntOrNull() }
                 .distinct()
                 .mapNotNull { chainId -> getNetworkNameOrNull(chainId) }
         }

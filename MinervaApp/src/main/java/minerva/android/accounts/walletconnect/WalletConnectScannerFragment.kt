@@ -29,6 +29,7 @@ open class WalletConnectScannerFragment : BaseWalletConnectScannerFragment() {
                 is OnDisconnected -> handleWalletConnectDisconnectState(state.sessionName)
                 is ProgressBarState -> binding.walletConnectProgress.root.visibleOrInvisible(state.show)
                 is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)
+                is OnSessionRequestV2 -> showConnectionDialogV2(state.meta, state.networkNames)
                 is HideDappsState -> {
                     with(binding) {
                         closeButton.margin(bottom = DEFAULT_MARGIN)

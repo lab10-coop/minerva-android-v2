@@ -11,7 +11,7 @@ import minerva.android.accounts.walletconnect.DappNetworksSpinnerAdapter
 import minerva.android.accounts.walletconnect.NetworkDataSpinnerItem
 import minerva.android.accounts.walletconnect.WalletConnectAlertType
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
-import minerva.android.databinding.DappConfirmationDialogBinding
+import minerva.android.databinding.DappConfirmationDialogV2Binding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.*
@@ -21,11 +21,12 @@ import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.DynamicWidthSpinner
 import minerva.android.widget.dialog.models.ViewDetails
+import minerva.android.widget.dialog.models.ViewDetailsV2
 
-class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit, private val onAddAccountClick: (Int) -> Unit) :
+class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
 
-    private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
+    private val binding: DappConfirmationDialogV2Binding = DappConfirmationDialogV2Binding.inflate(layoutInflater)
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
     //current DApp session wallet connection
     var dAppSessionMeta: WalletConnectPeerMeta? = null
@@ -55,22 +56,23 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     /**
      * Set View - prepare global variables and set some state for popap dialog
      * @param meta - set current wallet connection DApp session (from db)
-     * @param viewDetails - popap dialog view details
+     * @param viewDetails - popup dialog view details
      */
     fun setView(
         meta: WalletConnectPeerMeta,
-        viewDetails: ViewDetails)
+        viewDetails: ViewDetailsV2
+    )
     = with(binding) {
         //set current wallet connection dapp session
         dAppSessionMeta = meta
-        setupHeader(meta.name, viewDetails.networkName, getIcon(meta))
+        setupHeader(meta.name, viewDetails.networkNames.joinToString(" • "), getIcon(meta))
         binding.apply {
             confirmationButtons.confirm.text = viewDetails.confirmButtonName
             connectionName.text = viewDetails.connectionName
         }
     }
 
-    private fun DappConfirmationDialogBinding.getIcon(meta: WalletConnectPeerMeta): Any =
+    private fun DappConfirmationDialogV2Binding.getIcon(meta: WalletConnectPeerMeta): Any =
         if (meta.icons.isEmpty()) {
             confirmationView.setDefaultIcon()
             R.drawable.ic_services
@@ -200,7 +202,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         accountSpinner.visibleOrGone(item.isAccountAvailable)
         addAccount.apply {
             visibleOrGone(!item.isAccountAvailable)
-            setupAddAccountListener(item.chainId)
         }
         setupWarning(
             warningRes,
@@ -208,13 +209,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             WalletConnectAlertType.CHANGE_ACCOUNT != dialogType
         )
         binding.confirmationButtons.confirm.isEnabled = item.isAccountAvailable
-    }
-
-    private fun setupAddAccountListener(chainId: Int) = with(networkHeader.addAccount) {
-        setOnClickListener {
-            onAddAccountClick(chainId)
-            gone()
-        }
     }
 
     private fun getHeaderText(network: BaseNetworkData, context: Context) = if (network.name == String.Empty) context.getString(
@@ -257,7 +251,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         confirmationButtons.confirm.isEnabled = false
         networkHeader.addAccount.visible()
         networkHeader.accountSpinner.gone()
-        setupAddAccountListener(network.chainId)
         showWaring()
     }
 

@@ -22,6 +22,10 @@ data class OnSessionRequest(
     val network: BaseNetworkData,
     val dialogType: WalletConnectAlertType
 ) : WalletConnectState()
+data class OnSessionRequestV2(
+    val meta: WalletConnectPeerMeta,
+    val networkNames: List<String>,
+) : WalletConnectState()
 
 data class OnDisconnected(val sessionName: String = String.Empty) : WalletConnectState()
 data class ProgressBarState(val show: Boolean) : WalletConnectState()

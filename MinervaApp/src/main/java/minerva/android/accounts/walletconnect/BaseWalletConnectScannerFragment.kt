@@ -11,12 +11,15 @@ import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.dialog.models.ViewDetails
-import minerva.android.widget.dialog.walletconnect.DappConfirmationDialog
+import minerva.android.widget.dialog.models.ViewDetailsV2
+import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV1
+import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV2
+import minerva.android.widget.dialog.walletconnect.DappDialog
 
 abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
     abstract val viewModel: BaseWalletConnectScannerViewModel
-    private var confirmationDialogDialog: DappConfirmationDialog? = null
+    private var confirmationDialogDialog: DappDialog?  = null // todo: is DappDialog to broad?
     private var errorDialog: AlertDialog? = null
 
     abstract fun getErrorMessage(error: Throwable): String?
@@ -74,7 +77,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         } else { // connect connection case
             ViewDetails(network.name, getString(R.string.connect_to_website), getString(R.string.connect))
         }
-        confirmationDialogDialog = DappConfirmationDialog(requireContext(),
+        confirmationDialogDialog = DappConfirmationDialogV1(requireContext(),
             {
                 viewModel.approveSession(meta, false)
                 binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
@@ -85,7 +88,9 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             },
             { chainId ->
                 viewModel.addAccount(chainId, dialogType)
-            }).apply {
+            }
+        )
+        .apply {
             setOnDismissListener { shouldScan = true }
             setView(meta, viewDetails)
             handleNetwork(network, dialogType)
@@ -94,13 +99,38 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    private fun DappConfirmationDialog.updateAccountSpinner() {
+    protected fun showConnectionDialogV2(meta: WalletConnectPeerMeta, networkNames: List<String>) {
+        confirmationDialogDialog = DappConfirmationDialogV2(requireContext(),
+            {
+                // todo: approve session
+                binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
+            },
+            {
+                // todo: reject session
+                shouldScan = true
+            }
+        ).apply {
+            setOnDismissListener { shouldScan = true }
+            setView(
+                meta,
+                ViewDetailsV2(
+                    networkNames,
+                    getString(R.string.connect_to_website), getString(R.string.connect)
+                )
+            )
+            //handleNetwork(network, dialogType, meta) // todo?
+            //updateAccountSpinner() // todo?
+            show()
+        }
+    }
+
+    private fun DappConfirmationDialogV1.updateAccountSpinner() {
         setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts) { account ->
             viewModel.setNewAccount(account)
         }
     }
 
-    private fun DappConfirmationDialog.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
+    private fun DappConfirmationDialogV1.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         when (dialogType) {
             WalletConnectAlertType.NO_ALERT -> setNoAlert()
             WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning(viewModel.availableNetworks, dialogType, Int.InvalidId) { chainId ->
@@ -115,8 +145,10 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
     protected fun updateConnectionDialog(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog?.apply {
-            updateAccountSpinner()
-            handleNetwork(network, dialogType)
+            if (this is DappConfirmationDialogV1) {
+                updateAccountSpinner()
+                handleNetwork(network, dialogType)
+            }
         }
     }
 

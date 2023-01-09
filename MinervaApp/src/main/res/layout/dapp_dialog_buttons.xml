@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingTop="@dimen/margin_small"
-    tools:showIn="@layout/dapp_confirmation_dialog">
+    tools:showIn="@layout/dapp_confirmation_dialog_v1">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/cancel"
