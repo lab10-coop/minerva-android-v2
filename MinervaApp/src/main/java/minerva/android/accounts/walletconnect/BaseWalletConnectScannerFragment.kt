@@ -80,7 +80,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         confirmationDialogDialog = DappConfirmationDialogV1(requireContext(),
             {
                 viewModel.approveSession(meta, false)
-                binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
+                binding.closeButton.margin(bottom = INCREASED_MARGIN)
             },
             {
                 viewModel.rejectSession()
@@ -103,7 +103,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         confirmationDialogDialog = DappConfirmationDialogV2(requireContext(),
             {
                 // todo: approve session
-                binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
+                binding.closeButton.margin(bottom = INCREASED_MARGIN)
             },
             {
                 // todo: reject session
@@ -155,5 +155,9 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     protected fun clearDialog() {
         hideProgress()
         confirmationDialogDialog = null
+    }
+
+    companion object {
+        const val INCREASED_MARGIN = 115f
     }
 }

@@ -353,9 +353,8 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
         binding.bottomNavigation.removeBadge(R.id.settings)
 
     override fun showWalletConnectScanner(index: Int) {
-        launchActivity<WalletConnectActivity> {
-            putExtra(ACCOUNT_INDEX, index)
-        }
+        // todo: maybe there should be a values screen scanner result request code?
+        launchActivityForResult<ServicesScannerActivity>(SERVICES_SCANNER_RESULT_REQUEST_CODE)
     }
 
     override fun showNftCollectionScreen(index: Int, tokenAddress: String, collectionName: String, isGroup: Boolean) {

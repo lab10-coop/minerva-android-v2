@@ -220,6 +220,8 @@ class WalletConnectRepositoryImpl(
     ) {
         if (session.version == "2") {
             Timber.i("connect to ${session.toUri()}")
+            // todo: the bottom sheet should come up before pairing.
+
             val pairingParams = Core.Params.Pair(session.toUri())
             CoreClient.Pairing.pair(pairingParams) { error ->
                 Timber.e(error.toString())

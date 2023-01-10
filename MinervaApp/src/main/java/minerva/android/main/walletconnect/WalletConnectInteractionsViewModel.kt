@@ -39,6 +39,7 @@ import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
+// todo: these includes are super confusing, fix it.
 import minerva.android.accounts.walletconnect.OnSessionRequest as OnSessionRequestResult
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest as OnSessionRequestData
 

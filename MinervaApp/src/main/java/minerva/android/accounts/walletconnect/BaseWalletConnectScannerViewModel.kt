@@ -27,6 +27,7 @@ import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnFailure
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequestV2
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -47,6 +48,7 @@ abstract class BaseWalletConnectScannerViewModel(
     abstract fun setLiveDataOnConnectionError(error: Throwable, sessionName: String)
     abstract fun setLiveDataError(error: Throwable)
     abstract fun handleSessionRequest(sessionRequest: OnSessionRequest)
+    abstract fun handleSessionRequestV2(sessionRequest: OnSessionRequestV2)
     abstract fun closeScanner(isMobileWalletConnect: Boolean = false)
     abstract fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType)
 
@@ -95,6 +97,10 @@ abstract class BaseWalletConnectScannerViewModel(
                                 topic = status.topic
                                 handshakeId = status.handshakeId
                                 handleSessionRequest(status)
+                            }
+                            is OnSessionRequestV2 -> {
+                                // todo: do topic and handshakeId need to be set here?
+                                handleSessionRequestV2(status)
                             }
                             is OnDisconnect -> setLiveDataOnDisconnected(status.sessionName)
                             is OnFailure -> {

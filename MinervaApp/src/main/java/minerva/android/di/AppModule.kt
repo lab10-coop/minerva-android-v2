@@ -8,7 +8,6 @@ import minerva.android.accounts.akm.SafeAccountSettingsViewModel
 import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.accounts.nft.viewmodel.NftCollectionViewModel
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
-import minerva.android.accounts.walletconnect.WalletConnectViewModel
 import minerva.android.app.AppViewModel
 import minerva.android.edit.EditOrderViewModel
 import minerva.android.identities.MinervaPrimitivesViewModel
@@ -86,7 +85,6 @@ private val appModules = module {
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
-    viewModel { WalletConnectViewModel(get(), get(), get(), get(), get()) }
     viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get(), get()) }
