@@ -333,7 +333,7 @@
   },
   {
     "name": "zkSync alpha testnet",
-    "isActive": false,
+    "isActive": true,
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://zksync2-testnet.zksync.dev",
@@ -349,7 +349,7 @@
   },
   {
     "name": "Arbitrum Görli",
-    "isActive": false,
+    "isActive": true,
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli-rollup.arbitrum.io/rpc",
@@ -437,7 +437,7 @@
   },
   {
     "name": "LUKSO (L16 Testnet)",
-    "isActive": false,
+    "isActive": true,
     "token": "LYXt",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.l16.lukso.network",
@@ -529,7 +529,7 @@
   },
   {
     "name": "Arbitrum Rinkeby",
-    "isActive": true,
+    "isActive": false,
     "token": "ARETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.arbitrum.io/rpc",
@@ -549,7 +549,7 @@
   },
   {
     "name": "LUKSO (L14 Testnet)",
-    "isActive": true,
+    "isActive": false,
     "token": "tLYX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.l14.lukso.network",
