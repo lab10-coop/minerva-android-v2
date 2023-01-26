@@ -10,7 +10,7 @@ import minerva.android.accounts.walletconnect.DappAccountsSpinnerAdapter
 import minerva.android.accounts.walletconnect.DappNetworksSpinnerAdapter
 import minerva.android.accounts.walletconnect.NetworkDataSpinnerItem
 import minerva.android.accounts.walletconnect.WalletConnectAlertType
-import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
+import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogV1Binding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*

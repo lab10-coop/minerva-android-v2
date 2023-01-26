@@ -687,7 +687,6 @@ class WalletConnectRepositoryImpl(
                 .mapNotNull { chainId -> getNetworkNameOrNull(chainId) }
         }
 
-        // todo: move this somewhere else, this can't stay a static (companion object) method.
         fun initializeWalletConnect2(application: Application) {
             val projectId = BuildConfig.WALLETCONNET_PROJECT_ID
             val relayUrl = BuildConfig.WALLETCONNET_RELAY_URL

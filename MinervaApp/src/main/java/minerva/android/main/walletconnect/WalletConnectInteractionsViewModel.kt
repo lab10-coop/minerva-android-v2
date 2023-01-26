@@ -7,7 +7,6 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidBigDecimal
@@ -33,15 +32,17 @@ import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest as OnSessionRequestData
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequestV2 as OnSessionRequestDataV2
+// todo: these includes are super confusing, fix it.
+import minerva.android.accounts.walletconnect.OnSessionRequest as OnSessionRequestResult
+import minerva.android.accounts.walletconnect.OnSessionRequestV2 as OnSessionRequestResultV2
 import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-// todo: these includes are super confusing, fix it.
-import minerva.android.accounts.walletconnect.OnSessionRequest as OnSessionRequestResult
-import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest as OnSessionRequestData
 
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
@@ -432,6 +433,7 @@ class WalletConnectInteractionsViewModel(
         _errorLiveData.value = Event(error)
     }
 
+    // todo: why is this duplicate with ServicesScannerViewModel??
     override fun handleSessionRequest(sessionRequest: OnSessionRequestData) {
         //if ethereum was chosen set unknown id for showing all networks
         val id: Int? = if (ChainId.ETH_MAIN == sessionRequest.chainId) null else sessionRequest.chainId
@@ -455,6 +457,24 @@ class WalletConnectInteractionsViewModel(
             }
             else -> _walletConnectStatus.value = getWalletConnectStateForRequestedNetwork(sessionRequest, id)
         }
+    }
+
+    // todo: why is this duplicate with ServicesScannerViewModel??
+    // todo: implement
+    override fun handleSessionRequestV2(sessionRequest: OnSessionRequestDataV2) {
+        _walletConnectStatus.value = OnSessionRequestResultV2(
+            WalletConnectPeerMeta(
+                // todo
+            ),
+            // todo: list
+            emptyList()
+            /*
+            WalletConnectRepositoryImpl.proposalNamespacesToChainNames(
+                sessionRequest.sessionProposal.requiredNamespaces
+            )
+            */
+        )
+
     }
 
     private fun getWalletConnectStateForRequestedNetwork(
@@ -487,7 +507,7 @@ class WalletConnectInteractionsViewModel(
     }
 
     fun handleDeepLink(deepLink: String) {
-        if (AddressParser.parse(deepLink) != AddressParser.WALLET_CONNECT || !AddressParser.containsKeyAndBridge(deepLink)) {
+        if (!WalletConnectUriUtils.isValidWalletConnectUri(deepLink)) {
             _walletConnectStatus.value = WrongWalletConnectCodeState
         } else {
             _walletConnectStatus.value = CorrectWalletConnectCodeState

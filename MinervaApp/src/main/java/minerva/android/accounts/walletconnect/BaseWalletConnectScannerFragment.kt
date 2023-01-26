@@ -159,5 +159,6 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
     companion object {
         const val INCREASED_MARGIN = 115f
+        const val FIRST_ICON = 0
     }
 }

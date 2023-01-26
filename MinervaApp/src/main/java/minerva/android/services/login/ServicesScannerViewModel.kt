@@ -6,7 +6,6 @@ import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerViewModel
 import minerva.android.accounts.walletconnect.WalletConnectAlertType
 import minerva.android.kotlinUtils.Empty
@@ -27,8 +26,11 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectUriUtils
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequestV2
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -80,21 +82,22 @@ class ServicesScannerViewModel(
     }
 
     fun validateResult(result: String) {
-        if (AddressParser.parse(result) != AddressParser.WALLET_CONNECT) {
-            launchDisposable {
-                serviceManager.decodeJwtToken(result)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onSuccess = { handleLoginQrCodeResponse(it) },
-                        onError = { error ->
-                            Timber.e(error)
-                            setLiveDataError(error)
-                        }
-                    )
-            }
-        } else {
+        if (WalletConnectUriUtils.isValidWalletConnectUri(result)) {
             handleWalletConnectQrCodeResponse(result)
+            return
+        }
+        // todo: validate jwt before decoding it?
+        launchDisposable {
+            serviceManager.decodeJwtToken(result)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { handleLoginQrCodeResponse(it) },
+                    onError = { error ->
+                        Timber.e(error)
+                        setLiveDataError(error)
+                    }
+                )
         }
     }
 
@@ -143,6 +146,7 @@ class ServicesScannerViewModel(
         walletConnectRepository.connect(currentSession)
     }
 
+    // todo: why is this duplicate with WalletConnectInteracionsViewModel??
     override fun handleSessionRequest(sessionRequest: OnSessionRequest) {
         //if ethereum was chosen set unknown id for showing all networks
         val id: Int? = if (ChainId.ETH_MAIN == sessionRequest.chainId) null else sessionRequest.chainId
@@ -166,6 +170,24 @@ class ServicesScannerViewModel(
             }
             else ->  _viewStateLiveData.value = getWalletConnectStateForRequestedNetwork(sessionRequest, id)
         }
+    }
+
+    // todo: why is this duplicate with WalletConnectInteracionsViewModel??
+    // todo: implement
+    override fun handleSessionRequestV2(sessionRequest: OnSessionRequestV2) {
+        _viewStateLiveData.value = WalletConnectSessionRequestResultV2(
+            WalletConnectPeerMeta(
+                // todo
+            ),
+            // todo: list
+            emptyList()
+            /*
+            WalletConnectRepositoryImpl.proposalNamespacesToChainNames(
+                sessionRequest.sessionProposal.requiredNamespaces
+            )
+            */
+        )
+
     }
 
     private fun getWalletConnectStateForRequestedNetwork(sessionRequest: OnSessionRequest, chainId: Int): ServicesScannerViewState {

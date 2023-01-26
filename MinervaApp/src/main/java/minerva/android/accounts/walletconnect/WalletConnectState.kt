@@ -7,6 +7,8 @@ import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 
+// todo: why is this duplicate with ServicesScannerViewState?
+
 sealed class WalletConnectState
 object CloseScannerState : WalletConnectState()
 object CloseDialogState : WalletConnectState()
