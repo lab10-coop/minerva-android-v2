@@ -1,8 +1,7 @@
 package minerva.android.walletmanager.model.walletconnect
 
-// todo: write tests for this!
 object WalletConnectUriUtils {
-    private val walletConnectPattern = Regex("^wc:([a-zA-Z0-9]+)(@[1-9][0-9]*)?(\\?.*)?$")
+    private val walletConnectPattern = Regex("^wc:([a-zA-Z0-9-]+)(@[1-9][0-9]*)?(\\?.*)?$")
 
     fun walletConnectVersionFromUri(uri: String): Int? {
         return walletConnectPattern.find(uri)?.groups?.get(2)?.value?.substring(1)?.toInt()
