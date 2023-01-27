@@ -86,7 +86,7 @@ private val appModules = module {
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
     viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { ManageTokensViewModel(get(), get(), get(), get()) }
+    viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }

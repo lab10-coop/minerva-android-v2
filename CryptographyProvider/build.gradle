@@ -8,12 +8,12 @@ android {
     buildToolsVersion _buildToolsVersion
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_11
     }
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion _minSdkVersion
         targetSdk _targetSdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

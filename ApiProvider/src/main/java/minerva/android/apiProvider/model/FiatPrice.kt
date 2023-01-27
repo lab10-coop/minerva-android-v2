@@ -106,7 +106,7 @@ data class FiatPrice(
     private fun getFiatPrices(): Map<String, Double> =
         mutableMapOf<String, Double>().apply {
             this@FiatPrice::class.memberProperties.forEach {
-                put(it.name.toUpperCase(Locale.ROOT), it.getter.call(this@FiatPrice) as Double)
+                put(it.name.uppercase(Locale.ROOT), it.getter.call(this@FiatPrice) as Double)
             }
         }
 }

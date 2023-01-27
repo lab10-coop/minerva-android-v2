@@ -422,6 +422,7 @@
     <string name="connect">Verbinden</string>
     <string name="unknown_type">Unknown Type</string>
     <string name="paste_button_text">Paste from clipboard</string>
+    <string name="switch_network">You need to switch to %s networks in the Settings first</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
@@ -475,6 +476,28 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.8.1</item>
+        <item>* Added Gnosis Chiado testnet support</item>
+        <item>* Added Optimism Bedrock &amp; Görli testnet support</item>
+        <item>* Set Optimism Kovan testnet to unmaintained</item>
+        <item>* WalletConnect: Open connections with pasted links</item>
+        <item>* Paste addresses on the scanner from Clipboard</item>
+        <item>* NFT Favorites collection</item>
+        <item>* Manual refresh screen for NFTs</item>
+        <item>* Improved token and NFT sorting</item>
+        <item>* Improved Manage Assets Screen</item>
+        <item>* Account status in \'Add account\' (free - used - hidden)</item>
+        <item>* Superfluid Streams on Ethereum Mainnet</item>
+        <item>* UI adjustments &amp; bug fixes</item>
+        <item>1.8.0</item>
+        <item>* WalletConnect: Change account on existing connections</item>
+        <item>* Onboarding screen: Added Celo as main option</item>
+        <item>* Superfluid Super Token visibility improvement</item>
+        <item>* Support for Secret Recovery Phrase with Password </item>
+        <item>* cREAL on Celo direct purchase via ramp.network</item>
+        <item>* ETH and DAI on Optimism direct purchase via ramp.network</item>
+        <item>* Set Kovan testnet as unmaintained network</item>
+        <item>* UI adjustments &amp; various improvements</item>
         <item>1.7.9</item>
         <item>* Added Celo network support</item>
         <item>* Added Celo testnets support</item>

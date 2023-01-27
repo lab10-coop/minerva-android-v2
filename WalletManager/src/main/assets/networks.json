@@ -13,7 +13,11 @@
     "color": "#393939",
     "testNet": false,
     "chainId": 1,
-    "explore": "https://etherscan.io/"
+    "explore": "https://etherscan.io/",
+    "superfluid": {
+      "host": "0x4E583d9390082B65Bef884b629DFA426114CED6d",
+      "cfav1": "0x2844c1BBdA121E9E43105630b9C8310e5c72744b"
+    }
   },
   {
     "name": "Gnosis Chain",
@@ -149,7 +153,11 @@
     "color": "#35d07f",
     "testNet": false,
     "chainId": 42220,
-    "explore": "https://celoscan.io/"
+    "explore": "https://celoscan.io/",
+    "superfluid": {
+      "host": "0xA4Ff07cF81C02CFD356184879D953970cA957585",
+      "cfav1": "0x9d369e78e1a682cE0F8d9aD849BeA4FE1c3bD3Ad"
+    }
   },
   {
     "name": "ARTIS Σ1",

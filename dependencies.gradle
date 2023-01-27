@@ -2,6 +2,7 @@ ext {
     _compileSdk = 31
     _buildToolsVersion = "30.0.3"
     _targetSdk = 31
+    _minSdkVersion = 24
     kotlinVersion = '1.6.20'
 
     constraintVersion = '2.0.0-beta4'
@@ -45,7 +46,7 @@ ext {
     crashlyticsVersion = '2.10.1'
     scannerVersion = '2.1.0'
     coroutinesVersion = '1.3.7'
-    viewModelScopeVersion = '2.3.0-alpha01'
+    viewModelScopeVersion = '2.4.0'
     qrGeneratorVersion = '2.6.0'
 
     glideVersion = '4.11.0'

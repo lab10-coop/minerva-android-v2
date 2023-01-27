@@ -13,7 +13,7 @@ import java.math.BigInteger
 interface TokenManager {
     fun checkMissingTokensDetails(): Completable
     fun getActiveTokensPerAccount(account: Account): List<ERCToken>
-    fun saveToken(accountAddress: String, chainId: Int, token: ERCToken): Completable
+    fun saveToken(accountAddress: String, chainId: Int, newToken: ERCToken): Completable
     fun saveTokens(
         shouldSafeNewTokens: Boolean,
         newAndLocalTokensPerChainIdMap: Map<Int, List<ERCToken>>
@@ -32,7 +32,7 @@ interface TokenManager {
     fun downloadTokensList(account: Account): Single<List<ERCToken>>
     fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable
     fun updateTokensRate(account: Account)
-    fun getSingleTokenRate(chainId: Int, address: String): Double
+    fun getSingleTokenRate(tokenHash: String): Double
     fun getTokensUpdate(): Flowable<List<ERCToken>>
     fun getSuperTokenBalance(account: Account): Flowable<Asset>
     fun mergeNFTDetailsWithRemoteConfig(

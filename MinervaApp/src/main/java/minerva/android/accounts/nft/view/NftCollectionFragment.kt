@@ -5,6 +5,7 @@ import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import io.reactivex.subjects.PublishSubject
+import kotlinx.android.synthetic.main.fragment_nft_collection.*
 import minerva.android.R
 import minerva.android.accounts.nft.model.NftItem
 import minerva.android.accounts.nft.viewmodel.NftCollectionViewModel
@@ -39,6 +40,11 @@ class NftCollectionFragment : BaseFragment(R.layout.fragment_nft_collection) {
         setupRecyclerView()
         setupObserver()
         requireActivity().invalidateOptionsMenu()
+
+        binding.nftSwipeRefresh.setOnRefreshListener {
+            (activity as NftCollectionActivity).initList()//refresh state of nft tokens
+            this.nft_swipe_refresh.isRefreshing = false//hide native (SwipeRefreshLayout) progress spinner
+        }
     }
 
     private fun setupRecyclerView() {

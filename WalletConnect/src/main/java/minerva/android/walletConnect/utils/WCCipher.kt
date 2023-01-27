@@ -42,7 +42,7 @@ object WCCipher {
 
         val computedHmac = computeHmac(data = data, iv = iv, key = key)
 
-        if (computedHmac != payload.hmac.toLowerCase(Locale.ROOT)) {
+        if (computedHmac != payload.hmac.lowercase(Locale.ROOT)) {
             throw InvalidHmacException()
         }
 

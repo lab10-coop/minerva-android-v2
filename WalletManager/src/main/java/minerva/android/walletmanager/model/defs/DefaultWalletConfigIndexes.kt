@@ -3,12 +3,16 @@ package minerva.android.walletmanager.model.defs
 import android.annotation.SuppressLint
 import androidx.annotation.IntDef
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIFTH_DEFAULT_MAIN_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIFTH_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_MAIN_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FOURTH_DEFAULT_MAIN_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FOURTH_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_DEFAULT_MAIN_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_DEFAULT_TEST_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.THIRD_DEFAULT_MAIN_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.THIRD_DEFAULT_TEST_NETWORK_INDEX
 
 @SuppressLint("UniqueConstants")
@@ -20,8 +24,12 @@ import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Compa
     SECOND_DEFAULT_TEST_NETWORK_INDEX,
     THIRD_DEFAULT_TEST_NETWORK_INDEX,
     FOURTH_DEFAULT_TEST_NETWORK_INDEX,
+    FIFTH_DEFAULT_TEST_NETWORK_INDEX,
     FIRST_DEFAULT_MAIN_NETWORK_INDEX,
-    SECOND_DEFAULT_MAIN_NETWORK_INDEX
+    SECOND_DEFAULT_MAIN_NETWORK_INDEX,
+    THIRD_DEFAULT_MAIN_NETWORK_INDEX,
+    FOURTH_DEFAULT_MAIN_NETWORK_INDEX,
+    FIFTH_DEFAULT_MAIN_NETWORK_INDEX
 )
 annotation class DefaultWalletConfigIndexes {
     companion object {

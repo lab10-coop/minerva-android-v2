@@ -2,6 +2,7 @@ package minerva.android.token
 
 import com.nhaarman.mockitokotlin2.*
 import minerva.android.BaseViewModelTest
+import minerva.android.kotlinUtils.ONE
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -21,9 +22,8 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val localStorage: LocalStorage = mock()
     private val tokenManager: TokenManager = mock()
-    private val transactionRepository: TransactionRepository = mock()
     private val viewModel =
-        ManageTokensViewModel(accountManager, localStorage, tokenManager, transactionRepository)
+        ManageTokensViewModel(accountManager, localStorage, tokenManager)
 
     private val networks = listOf(
         Network(chainId = 1, httpRpc = "address", testNet = true),
@@ -49,20 +49,23 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         )
     )
 
+    private val ercTokenList: List<ERCToken> = account.accountTokens.map { it.token }
+
     @Test
     fun `Check loading correct tokens list for account`() {
         NetworkManager.initialize(networks)
         whenever(accountManager.loadAccount(any())).thenReturn(account)
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
+        whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(ercTokenList)
         viewModel.initViewModel(0)
 
         val tokens = viewModel.loadTokens()
-        tokens.size shouldBeEqualTo 5
+        tokens.size shouldBeEqualTo 6
         tokens[0].symbol shouldBeEqualTo "cookie"
         tokens[1].symbol shouldBeEqualTo "token1"
         tokens[2].symbol shouldBeEqualTo "token2"
-        tokens[3].symbol shouldBeEqualTo "token5"
-        tokens[4].symbol shouldBeEqualTo "token3"
+        tokens[3].symbol shouldBeEqualTo "token4"
+        tokens[4].symbol shouldBeEqualTo "token5"
     }
 
     @Test
