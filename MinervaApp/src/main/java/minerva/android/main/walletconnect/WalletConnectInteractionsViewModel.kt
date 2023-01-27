@@ -38,6 +38,7 @@ import minerva.android.walletmanager.repository.walletconnect.OnSessionRequestV2
 import minerva.android.accounts.walletconnect.OnSessionRequest as OnSessionRequestResult
 import minerva.android.accounts.walletconnect.OnSessionRequestV2 as OnSessionRequestResultV2
 import minerva.android.walletmanager.utils.BalanceUtils
+import minerva.android.walletmanager.utils.TokenUtils
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -216,7 +217,7 @@ class WalletConnectInteractionsViewModel(
     private fun getTokenHash(chainId: Int, status: OnEthSendTransaction): String =
         currentAccount.accountTokens
             .find { it.token.symbol == status.transaction.tokenTransaction.tokenSymbol }?.token?.address
-            .let { tokenAddress -> generateTokenHash(chainId, tokenAddress ?: String.Empty) }
+            .let { tokenAddress -> TokenUtils.generateTokenHash(chainId, tokenAddress ?: String.Empty) }
 
     private fun isTokenTransaction(transferType: TransferType) =
         (transferType == TransferType.TOKEN_SWAP || transferType == TransferType.TOKEN_TRANSFER)
