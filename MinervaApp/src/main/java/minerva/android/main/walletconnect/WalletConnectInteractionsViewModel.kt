@@ -123,7 +123,7 @@ class WalletConnectInteractionsViewModel(
         dapps.forEach { session ->
             with(session) {
                 walletConnectRepository.connect(
-                    WalletConnectSession(topic, version, bridge, key),
+                    WalletConnectSession(topic, version, key, bridge),
                     peerId,
                     remotePeerId,
                     dapps

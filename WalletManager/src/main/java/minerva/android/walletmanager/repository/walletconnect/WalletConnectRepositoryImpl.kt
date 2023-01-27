@@ -345,8 +345,8 @@ class WalletConnectRepositoryImpl(
                             WalletConnectSession(
                                 topic,
                                 version,
-                                bridge,
-                                key
+                                key,
+                                bridge
                             )
                         ),
                         peerMeta = WCPeerMeta(),

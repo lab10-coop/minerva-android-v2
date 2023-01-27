@@ -137,7 +137,7 @@ class WCClient(
         peerId: String = UUID.randomUUID().toString(),
         remotePeerId: String? = null
     ) {
-        if (session.version != "1" ||session.bridge == null) {
+        if (session.version != "1" || session.bridge == null) {
             throw Throwable("Only WalletConnect Version 1 supported")
         }
 

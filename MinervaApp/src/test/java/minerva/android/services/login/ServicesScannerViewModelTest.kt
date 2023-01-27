@@ -279,7 +279,7 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
     fun `approve session test with close app state`() {
         NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
         viewModel.topic = Topic()
-        viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
+        viewModel.currentSession = WalletConnectSession("topic", "version", "key", "bridge")
         viewModel.account = Account(1, chainId = 2)
         viewModel.viewStateLiveData.observeForever(stateObserver)
         whenever(walletConnectRepository.approveSession(any(), any(), any(), any())).thenReturn(Completable.complete())
@@ -304,8 +304,8 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
             WalletConnectSession(
                 topic = "topic",
                 version = "v",
-                bridge = "b",
-                key = "k"
+                key = "k",
+                bridge = "b"
             )
         )
         viewModel.viewStateLiveData.observeForever(stateObserver)

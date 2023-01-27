@@ -900,8 +900,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             WalletConnectSession(
                 topic = "topic",
                 version = "v",
-                bridge = "b",
-                key = "k"
+                key = "k",
+                bridge = "b"
             )
         )
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -916,7 +916,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     fun `approve session test and close app state `() {
         NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
         viewModel.topic = Topic()
-        viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
+        viewModel.currentSession = WalletConnectSession("topic", "version", "key", "bridge")
         viewModel.account = Account(1, chainId = 2)
         viewModel.walletConnectStatus.observeForever(requestObserver)
         whenever(
@@ -938,7 +938,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     fun `approve session test and close dialog state `() {
         NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
         viewModel.topic = Topic()
-        viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
+        viewModel.currentSession = WalletConnectSession("topic", "version", "key", "bridge")
         viewModel.account = Account(1, chainId = 2)
         viewModel.walletConnectStatus.observeForever(requestObserver)
         whenever(

@@ -237,10 +237,10 @@ class DappConfirmationDialogV1(context: Context, approve: () -> Unit, deny: () -
         }
         KindOfNetwork.MAIN -> context
             .getString(R.string.switch_network,
-                *arrayOf(KindOfNetwork.TEST.name.toLowerCase()))
+                *arrayOf(KindOfNetwork.TEST.name.lowercase()))
         KindOfNetwork.TEST -> context
             .getString(R.string.switch_network,
-                *arrayOf(KindOfNetwork.MAIN.name.toLowerCase()))
+                *arrayOf(KindOfNetwork.MAIN.name.lowercase()))
     }
 
 
