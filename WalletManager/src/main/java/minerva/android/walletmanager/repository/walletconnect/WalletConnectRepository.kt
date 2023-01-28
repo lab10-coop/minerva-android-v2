@@ -17,6 +17,7 @@ interface WalletConnectRepository {
     )
 
     fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSessionV1): Completable
+    fun approveSessionV2(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSessionV2): Completable
 
     /**
      * Update Session - update current wallet connection

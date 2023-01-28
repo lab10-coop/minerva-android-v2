@@ -36,7 +36,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private var dappDialog: DappDialog? = null
     private var loadingDialog: MinervaLoadingDialog? = null
-    private var confirmationDialogDialog: DappDialog?  = null // todo: is DappDialog to broad?
+    private var confirmationDialogDialog: DappDialog?  = null // todo: is DappDialog too broad?
     private var errorDialog: AlertDialog? = null
 
     abstract fun isProtectTransactionEnabled(): Boolean
@@ -282,6 +282,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         confirmationDialogDialog = DappConfirmationDialogV2(this,
             {
                 // todo: approve session
+                walletConnectViewModel.approveSessionV2(meta, true)
                 clearAllDialogs()
             },
             {

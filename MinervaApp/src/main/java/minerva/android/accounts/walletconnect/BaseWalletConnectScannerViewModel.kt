@@ -129,25 +129,48 @@ abstract class BaseWalletConnectScannerViewModel(
     }
 
     fun approveSession(meta: WalletConnectPeerMeta, isMobileWalletConnect: Boolean) {
-        if (account.id != Int.InvalidId) {
-            launchDisposable {
-                walletConnectRepository.approveSession(
-                    listOf(account.address),
-                    account.chainId,
-                    topic.peerId,
-                    getDapp(meta, account.chainId, account, isMobileWalletConnect)
+        if (account.id == Int.InvalidId) {
+            return
+        }
+        launchDisposable {
+            walletConnectRepository.approveSession(
+                listOf(account.address),
+                account.chainId,
+                topic.peerId,
+                getDapp(meta, account.chainId, account, isMobileWalletConnect)
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = {
+                        //set default value for showing empty list of network in future
+                        requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                        closeScanner(isMobileWalletConnect)
+                    },
+                    onError = { setLiveDataError(it) }
                 )
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onComplete = {
-                            //set default value for showing empty list of network in future
-                            requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
-                            closeScanner(isMobileWalletConnect)
-                        },
-                        onError = { setLiveDataError(it) }
-                    )
-            }
+        }
+    }
+
+    // todo: implement
+    fun approveSessionV2(meta: WalletConnectPeerMeta, isMobileWalletConnect: Boolean) {
+        launchDisposable {
+            walletConnectRepository.approveSessionV2(
+                listOf(account.address),
+                account.chainId,
+                topic.peerId,
+                getDapp(meta, account.chainId, account, isMobileWalletConnect)
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = {
+                        //set default value for showing empty list of network in future
+                        requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                        closeScanner(isMobileWalletConnect)
+                    },
+                    onError = { setLiveDataError(it) }
+                )
         }
     }
 

@@ -219,13 +219,7 @@ class WalletConnectRepositoryImpl(
         dapps: List<DappSessionV1>
     ) {
         if (session.version == "2") {
-            Timber.i("connect to ${session.toUri()}")
-            // todo: the bottom sheet should come up before pairing.
-
-            val pairingParams = Core.Params.Pair(session.toUri())
-            CoreClient.Pairing.pair(pairingParams) { error ->
-                Timber.e(error.toString())
-            }
+            Timber.i("Connect WalletConnect 2.0 session: ${session.toUri()}")
             return
         }
 
@@ -522,6 +516,34 @@ class WalletConnectRepositoryImpl(
         } else {
             Completable.error(Throwable("Session not approved"))
         }
+
+    // todo: implement
+    override fun approveSessionV2(
+        addresses: List<String>,
+        chainId: Int,
+        peerId: String,
+        dapp: DappSessionV2
+    ): Completable {
+        // todo: pair
+
+        val pairingParams = Core.Params.Pair(session.toUri())
+        CoreClient.Pairing.pair(pairingParams) { error ->
+            Timber.e(error.toString())
+        }
+
+        // todo: start session
+
+
+        /*
+        if (clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true) {
+            logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} $peerId")
+            saveDappSession(dapp)
+        } else {
+            Completable.error(Throwable("Session not approved"))
+        }
+        */
+    }
+
 
     override fun updateSession(
         connectionPeerId: String,
