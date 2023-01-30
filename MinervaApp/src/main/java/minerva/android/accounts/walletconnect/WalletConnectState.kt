@@ -2,10 +2,7 @@ package minerva.android.accounts.walletconnect
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.DappSessionV1
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
+import minerva.android.walletmanager.model.walletconnect.*
 
 // todo: why is this duplicate with ServicesScannerViewState?
 
@@ -26,7 +23,8 @@ data class OnSessionRequest(
 ) : WalletConnectState()
 data class OnSessionRequestV2(
     val meta: WalletConnectPeerMeta,
-    val networkNames: List<String>,
+    val numberOfNonEip155Chains: Int,
+    val eip155ProposalNamespace: WalletConnectProposalNamespace
 ) : WalletConnectState()
 
 data class OnDisconnected(val sessionName: String = String.Empty) : WalletConnectState()

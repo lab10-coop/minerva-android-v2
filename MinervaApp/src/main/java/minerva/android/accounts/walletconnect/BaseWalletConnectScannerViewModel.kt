@@ -18,11 +18,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.DappSessionV1
-import minerva.android.walletmanager.model.walletconnect.Topic
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnFailure
@@ -152,15 +148,9 @@ abstract class BaseWalletConnectScannerViewModel(
         }
     }
 
-    // todo: implement
-    fun approveSessionV2(meta: WalletConnectPeerMeta, isMobileWalletConnect: Boolean) {
+    fun approveSessionV2(proposerPublicKey: String, namespace: WalletConnectSessionNamespace, isMobileWalletConnect: Boolean) {
         launchDisposable {
-            walletConnectRepository.approveSessionV2(
-                listOf(account.address),
-                account.chainId,
-                topic.peerId,
-                getDapp(meta, account.chainId, account, isMobileWalletConnect)
-            )
+            walletConnectRepository.approveSessionV2(proposerPublicKey, namespace)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -221,6 +211,10 @@ abstract class BaseWalletConnectScannerViewModel(
 
     open fun rejectSession(isMobileWalletConnect: Boolean = false) {
         walletConnectRepository.rejectSession(topic.peerId)
+    }
+
+    open fun rejectSessionV2(proposerPublicKey: String, reason: String, isMobileWalletConnect: Boolean = false) {
+        walletConnectRepository.rejectSessionV2(proposerPublicKey, reason)
     }
 
     fun addAccount(chainId: Int, dialogType: WalletConnectAlertType) {

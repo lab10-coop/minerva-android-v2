@@ -20,7 +20,6 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.DynamicWidthSpinner
-import minerva.android.widget.dialog.models.ViewDetails
 import minerva.android.widget.dialog.models.ViewDetailsV2
 
 class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -> Unit) :
@@ -54,7 +53,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     }
 
     /**
-     * Set View - prepare global variables and set some state for popap dialog
+     * Set View - prepare global variables and set some state for popup dialog
      * @param meta - set current wallet connection DApp session (from db)
      * @param viewDetails - popup dialog view details
      */

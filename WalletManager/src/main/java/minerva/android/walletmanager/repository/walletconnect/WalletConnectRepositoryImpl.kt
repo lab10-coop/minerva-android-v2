@@ -77,46 +77,28 @@ class WalletConnectRepositoryImpl(
                 // Triggered when wallet receives the session proposal sent by a Dapp
                 Timber.i("onSessionProposal: $sessionProposal")
 
-                // check if the wallet is able to do what is proposed
-                val requiredNamespacesEip155 = sessionProposal.requiredNamespaces["eip155"]
-                if (requiredNamespacesEip155 == null) {
-                    Timber.e("Not requesting eip155 namespace.")
-                    // todo: show info to the user then reject proposal
-                    return
-                }
-                // check if non eip155 is requested and then reject
-                if (sessionProposal.requiredNamespaces.keys.size > 1) {
-                    Timber.e("Contains namespaces that are not eip155.")
-                    // todo: show info to the user then reject proposal
-                    return
-                }
-                // todo: check if methods are required that we don't support
-                // todo: check if events are required that we don't support
-                // todo: check which chains are requested and check if we have active accounts or show the current UI
+                val numberOfNonEip155Chains = namespacesCountNonEip155Chains(sessionProposal.requiredNamespaces)
+                // todo: maybe some kind of cast would work better here.
+                val eip155TempNamespace = sessionProposal.requiredNamespaces[EIP155]
+                val eip155ProposalNamespace = WalletConnectProposalNamespace(
+                    chains = eip155TempNamespace?.chains ?: emptyList(),
+                    methods = eip155TempNamespace?.methods ?: emptyList(),
+                    events = eip155TempNamespace?.events ?: emptyList(),
+                    extensions = eip155TempNamespace?.extensions ?: null
+                )
 
-
-                // todo: show popup here, only then proceed
-                status.onNext(OnSessionRequestV2(sessionProposal))
-
-                /*
-                // Namespace identifier, see for reference: https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md#syntax
-                val namespace = "eip155"
-                // List of accounts on chains
-                val accounts: List<String> = listOf<String>(
-                    "eip155:100:0xc269D9794473Fee9912B13be65764826341bFd3e"
-                ) // todo: get from accounts
-                // List of methods that wallet approves
-                val methods: List<String> = requiredNamespacesEip155.methods // todo: add addition capabilities?
-                // List of events that wallet approves
-                val events: List<String> = requiredNamespacesEip155.events // todo: add addition capabilities?
-                val namespaces: Map<String, Sign.Model.Namespace.Session> =
-                    mapOf(Pair(namespace, Sign.Model.Namespace.Session(accounts, methods, events, extensions = null)))
-
-                val approveParams: Sign.Params.Approve = Sign.Params.Approve(sessionProposal.proposerPublicKey, namespaces)
-                SignClient.approveSession(approveParams) { error ->
-                    Timber.e(error.toString())
-                }
-                */
+                // show popup here, only then proceed
+                status.onNext(OnSessionRequestV2(
+                    WalletConnectPeerMeta(
+                        name = sessionProposal.name,
+                        url = sessionProposal.url,
+                        description = sessionProposal.description,
+                        icons = sessionProposal.icons.map { uri -> uri.toString() },
+                        proposerPublicKey = sessionProposal.proposerPublicKey
+                    ),
+                    numberOfNonEip155Chains,
+                    eip155ProposalNamespace
+                ))
             }
 
             override fun onSessionRequest(sessionRequest: Sign.Model.SessionRequest) {
@@ -219,7 +201,11 @@ class WalletConnectRepositoryImpl(
         dapps: List<DappSessionV1>
     ) {
         if (session.version == "2") {
-            Timber.i("Connect WalletConnect 2.0 session: ${session.toUri()}")
+            Timber.i("Connect WalletConnect 2.0 pairing: ${session.toUri()}")
+            val pairingParams = Core.Params.Pair(session.toUri())
+            CoreClient.Pairing.pair(pairingParams) { error ->
+                Timber.e(error.toString())
+            }
             return
         }
 
@@ -519,20 +505,23 @@ class WalletConnectRepositoryImpl(
 
     // todo: implement
     override fun approveSessionV2(
-        addresses: List<String>,
-        chainId: Int,
-        peerId: String,
-        dapp: DappSessionV2
+        proposerPublicKey: String,
+        namespace: WalletConnectSessionNamespace
+        // todo: pass relayProtocol here?
     ): Completable {
-        // todo: pair
-
-        val pairingParams = Core.Params.Pair(session.toUri())
-        CoreClient.Pairing.pair(pairingParams) { error ->
+        val namespaces: Map<String, Sign.Model.Namespace.Session> =
+            mapOf(
+                Pair(
+                    EIP155,
+                    Sign.Model.Namespace.Session(
+                        namespace.accounts, namespace.methods, namespace.events, namespace.extensions)
+                )
+            )
+        val relayProtocol = null
+        val approveParams: Sign.Params.Approve = Sign.Params.Approve(proposerPublicKey, namespaces, relayProtocol)
+        SignClient.approveSession(approveParams) { error ->
             Timber.e(error.toString())
         }
-
-        // todo: start session
-
 
         /*
         if (clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true) {
@@ -542,8 +531,17 @@ class WalletConnectRepositoryImpl(
             Completable.error(Throwable("Session not approved"))
         }
         */
+
+        // todo: remove this when done with implementation
+        return Completable.error(Throwable("WC 2.0 not implemented yet"))
     }
 
+    override fun rejectSessionV2(proposerPublicKey: String, reason: String) {
+        SignClient.rejectSession(Sign.Params.Reject(proposerPublicKey, reason)) {
+            error ->
+            Timber.e(error.toString())
+        }
+    }
 
     override fun updateSession(
         connectionPeerId: String,
@@ -677,10 +675,17 @@ class WalletConnectRepositoryImpl(
     }
 
     companion object {
+        fun namespacesCountNonEip155Chains(namespaces: Map<String, Sign.Model.Namespace.Proposal>): Int {
+            return namespaces.entries
+                .filter { entry -> entry.key != EIP155 }
+                .flatMap { entry -> entry.value.chains }
+                .size
+        }
+
         // todo: move somewhere else?
         // only works for eip155 namespace
         fun namespacesToAddresses(namespaces: Map<String, Sign.Model.Namespace.Session>): List<String> {
-            val accounts = namespaces["eip155"]?.accounts ?: emptyList()
+            val accounts = namespaces[EIP155]?.accounts ?: emptyList()
             return accounts
                 .mapNotNull { account -> account.split(":").getOrNull(2) }
                 // todo: check for valid address?
@@ -688,9 +693,9 @@ class WalletConnectRepositoryImpl(
         }
 
         // todo: move somewhere else?
-        // only works for eip155 namespace
+        // only works for eip155 namespace and known chains
         fun sessionNamespacesToChainNames(namespaces: Map<String, Sign.Model.Namespace.Session>): List<String> {
-            val accounts = namespaces["eip155"]?.accounts ?: emptyList()
+            val accounts = namespaces[EIP155]?.accounts ?: emptyList()
             return accounts
                 .mapNotNull { account -> account.split(":").getOrNull(1)?.toIntOrNull() }
                 .distinct()
@@ -699,14 +704,12 @@ class WalletConnectRepositoryImpl(
 
         // todo: move somewhere else?
         // only works for eip155 namespace
-        // todo: support non eip155 namespaces (just say non evm chain(s))
-        // todo: show names of non supported evm namepsaces
-        fun proposalNamespacesToChainNames(namespaces: Map<String, Sign.Model.Namespace.Proposal>): List<String> {
-            val chains = namespaces["eip155"]?.chains ?: emptyList()
-            return chains
+        // todo: show names of non supported evm namespaces, see: fetchUnsupportedNetworkName
+        fun proposalNamespacesToChainNames(namespace: WalletConnectProposalNamespace): List<String> {
+            return namespace.chains
                 .mapNotNull { chain -> chain.split(":").getOrNull(1)?.toIntOrNull() }
                 .distinct()
-                .mapNotNull { chainId -> getNetworkNameOrNull(chainId) }
+                .map { chainId -> getNetworkNameOrNull(chainId) ?: "unknown evm chain" }
         }
 
         fun initializeWalletConnect2(application: Application) {
@@ -743,5 +746,6 @@ class WalletConnectRepositoryImpl(
         const val MAX_RECONNECTION_ATTEMPTS: Int = 3
         const val INIT_ATTEMPT: Int = 0
         const val ONE_ATTEMPT: Int = 1
+        const val EIP155: String = "eip155"
     }
 }

@@ -176,18 +176,10 @@ class ServicesScannerViewModel(
     // todo: implement
     override fun handleSessionRequestV2(sessionRequest: OnSessionRequestV2) {
         _viewStateLiveData.value = WalletConnectSessionRequestResultV2(
-            WalletConnectPeerMeta(
-                // todo
-            ),
-            // todo: list
-            emptyList()
-            /*
-            WalletConnectRepositoryImpl.proposalNamespacesToChainNames(
-                sessionRequest.sessionProposal.requiredNamespaces
-            )
-            */
+            sessionRequest.meta,
+            sessionRequest.numberOfNonEip155Chains,
+            sessionRequest.eip155ProposalNamespace
         )
-
     }
 
     private fun getWalletConnectStateForRequestedNetwork(sessionRequest: OnSessionRequest, chainId: Int): ServicesScannerViewState {

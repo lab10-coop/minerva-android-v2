@@ -72,7 +72,7 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
                 peerId = minervaPrimitive.peerId,
                 address = minervaPrimitive.address,
                 chainId = minervaPrimitive.chainId),
-            BaseNetworkData(chainId = Int.InvalidValue, name = String.Empty), //put empties values for get popap with all available networks
+            BaseNetworkData(chainId = Int.InvalidValue, name = String.Empty), //put empties values for get popup with all available networks
             WalletConnectAlertType.CHANGE_ACCOUNT) //put value for calling wallet connection change action
         //calling LiveModel changing through pulling new state (of WalletConnectInteractionsViewModel::_walletConnectStatus)
         mainActivityFromContext.onChangeAccount(state)

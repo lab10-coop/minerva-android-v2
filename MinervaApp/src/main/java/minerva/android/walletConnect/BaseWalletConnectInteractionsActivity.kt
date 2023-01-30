@@ -21,6 +21,8 @@ import minerva.android.services.ServicesFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSessionNamespace
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.MinervaLoadingDialog
@@ -104,7 +106,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 is OnDisconnected -> handleWalletConnectDisconnectState(state.sessionName)
                 is OnWalletConnectConnectionError -> handleWalletConnectError(state.sessionName)
                 is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)
-                is OnSessionRequestV2 -> showConnectionDialogV2(state.meta, state.networkNames)
+                is OnSessionRequestV2 -> showConnectionDialogV2(state.meta, state.numberOfNonEip155Chains, state.eip155ProposalNamespace)
                 is UpdateOnSessionRequest -> updateConnectionDialog(state.network, state.dialogType)
                 CloseScannerState -> closeToBackground()
                 CloseDialogState -> closeDialog()
@@ -278,31 +280,72 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         }
     }
 
-    private fun showConnectionDialogV2(meta: WalletConnectPeerMeta, networkNames: List<String>) {
+    // todo: implement
+    private fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int, eip155ProposalNamespace: WalletConnectProposalNamespace) {
         confirmationDialogDialog = DappConfirmationDialogV2(this,
             {
-                // todo: approve session
-                walletConnectViewModel.approveSessionV2(meta, true)
+                // approve session
+                val sessionNamespace = WalletConnectSessionNamespace(
+                    accounts = emptyList(), // todo
+                    methods = eip155ProposalNamespace.methods,
+                    events = eip155ProposalNamespace.events,
+                    extensions = null // todo
+                )
+                walletConnectViewModel.approveSessionV2(meta.proposerPublicKey, sessionNamespace,true)
                 clearAllDialogs()
             },
             {
-                // todo: reject session
+                // reject session
+                // todo: move this to a function
+                var networksSupported = true
+                if (numberOfNonEip155Chains > 0) {
+                    networksSupported = false
+                }
+                if (/* todo: unsupported evm chains */ false) {
+                    networksSupported = false
+                }
+
+                // todo: move this to a function
+                var methodOrEventSupported = true
+                if (/* todo: check methods */ false) {
+                    methodOrEventSupported = false
+                }
+
+                // todo: check extensions and move that to a function
+
+                var reason = "User rejection" // todo: localize?
+                if (!networksSupported) {
+                    reason = "Network(s) not supported" // todo: localize?
+                } else if (!methodOrEventSupported) {
+                    reason = "Method(s) or Event(s) not supported" // todo: localize?
+                }
+                walletConnectViewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
                 clearAllDialogs()
             }
         ).apply {
+            // todo: and enable/disable connect button?
+            var chainNames = WalletConnectRepositoryImpl.proposalNamespacesToChainNames(eip155ProposalNamespace)
+            when {
+                numberOfNonEip155Chains == 1 -> chainNames = chainNames + "Non EVM Chain" // todo: localize
+                numberOfNonEip155Chains > 1 -> chainNames = chainNames + "Non EVM Chains" // todo: localize
+            }
             setView(
                 meta,
                 ViewDetailsV2(
-                    networkNames,
-                    getString(R.string.connect_to_website), getString(R.string.connect)
+                    chainNames,
+                    getString(R.string.connect_to_website),
+                    getString(R.string.connect)
                 )
             )
-            //handleNetwork(network, dialogType, meta) // todo?
-            //updateAccountSpinner() // todo?
+            //handleNetwork(network, dialogType, meta)
+
+            // todo: set addresses in spinner instead of accounts
+            //updateAccountSpinner()
             show()
         }
     }
 
+    // todo: for walletconnect 2.0 set a list of addresses instead of accounts
     private fun DappConfirmationDialogV1.updateAccountSpinner() {
         setupAccountSpinner(walletConnectViewModel.account.id, walletConnectViewModel.availableAccounts) { account ->
             walletConnectViewModel.setNewAccount(account)
@@ -311,6 +354,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         }
     }
 
+    // todo: set warnings etc. for walletconnect 2.0 as well.
     private fun DappConfirmationDialogV1.handleNetwork(
         network: BaseNetworkData,
         dialogType: WalletConnectAlertType,

@@ -54,7 +54,7 @@ class DappConfirmationDialogV1(context: Context, approve: () -> Unit, deny: () -
     }
 
     /**
-     * Set View - prepare global variables and set some state for popap dialog
+     * Set View - prepare global variables and set some state for popup dialog
      * @param meta - set current wallet connection DApp session (from db)
      * @param viewDetails - popup dialog view details
      */

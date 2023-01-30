@@ -464,18 +464,10 @@ class WalletConnectInteractionsViewModel(
     // todo: implement
     override fun handleSessionRequestV2(sessionRequest: OnSessionRequestDataV2) {
         _walletConnectStatus.value = OnSessionRequestResultV2(
-            WalletConnectPeerMeta(
-                // todo
-            ),
-            // todo: list
-            emptyList()
-            /*
-            WalletConnectRepositoryImpl.proposalNamespacesToChainNames(
-                sessionRequest.sessionProposal.requiredNamespaces
-            )
-            */
+            sessionRequest.meta,
+            sessionRequest.numberOfNonEip155Chains,
+            sessionRequest.eip155ProposalNamespace
         )
-
     }
 
     private fun getWalletConnectStateForRequestedNetwork(
@@ -519,6 +511,11 @@ class WalletConnectInteractionsViewModel(
 
     override fun rejectSession(isMobileWalletConnect: Boolean) {
         walletConnectRepository.rejectSession(topic.peerId)
+        closeScanner(isMobileWalletConnect)
+    }
+
+    override fun rejectSessionV2(proposerPublicKey: String, reason: String, isMobileWalletConnect: Boolean) {
+        walletConnectRepository.rejectSessionV2(proposerPublicKey, reason)
         closeScanner(isMobileWalletConnect)
     }
 }

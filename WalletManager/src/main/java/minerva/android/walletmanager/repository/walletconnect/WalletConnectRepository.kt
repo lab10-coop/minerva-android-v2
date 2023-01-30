@@ -17,7 +17,7 @@ interface WalletConnectRepository {
     )
 
     fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSessionV1): Completable
-    fun approveSessionV2(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSessionV2): Completable
+    fun approveSessionV2(proposerPublicKey: String, namespace: WalletConnectSessionNamespace): Completable
 
     /**
      * Update Session - update current wallet connection
@@ -30,6 +30,7 @@ interface WalletConnectRepository {
      */
     fun updateSession(connectionPeerId: String, accountAddress: String, accountChainId: Int, accountName: String, networkName: String): Completable
     fun rejectSession(peerId: String)
+    fun rejectSessionV2(proposerPublicKey: String, reason: String)
     fun killSessionByPeerId(peerId: String): Completable
     fun killSessionByTopic(topic: String)
     fun killPairingByTopic(topic: String)
