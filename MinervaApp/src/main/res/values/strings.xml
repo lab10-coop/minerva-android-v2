@@ -73,8 +73,9 @@
     <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
     <string name="remove_service_dialog_message">Do you really want to remove this service?</string>
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
-    <string name="hide_account_dialog_message">After confirming this message, this account is hidden but can still be used to receive transfers.\n\nTo make the account visible again, you have to tap on ‘+’ in the Values screen, select it from your addresses list and add the account.</string>
-    <string name="hide_account_dialog_title">Hide account</string>
+    <string name="hide_account_dialog_message_part_1">After confirming this message, this account will be hidden and because the network is UNMAINTAINED, the account CANNOT be shown again.</string>
+    <string name="hide_account_dialog_message_part_2">To access this account again, you have to import the private key into a wallet software which still supports this network.</string>
+    <string name="hide_account_dialog_title">Permanently hide \n\t\t\t\t\taccount</string>
     <string name="remove_owner">Remove owner</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
