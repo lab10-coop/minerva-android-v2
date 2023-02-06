@@ -34,7 +34,7 @@ import java.math.BigDecimal
 
 abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
-    private val walletConnectViewModel: WalletConnectInteractionsViewModel by inject()
+    private val viewModel: WalletConnectInteractionsViewModel by inject()
 
     private var dappDialog: DappDialog? = null
     private var loadingDialog: MinervaLoadingDialog? = null
@@ -48,19 +48,19 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
      * @param state - new (viewModel::_walletConnectStatus) state
      */
     fun onChangeAccount(state: WalletConnectState) {
-        walletConnectViewModel.onChangeAccount(state)
+        viewModel.onChangeAccount(state)
     }
 
     private fun rejectRequest() {
         dappDialog?.let {
             it.dismiss()
-            walletConnectViewModel.rejectRequest(true)
+            viewModel.rejectRequest(true)
         }
     }
 
     override fun onPause() {
         super.onPause()
-        walletConnectViewModel.dispose()
+        viewModel.dispose()
         rejectRequest()
     }
 
@@ -76,7 +76,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        with(walletConnectViewModel) {
+        with(viewModel) {
             getWalletConnectSessions()
             subscribeToWCConnectionStatusFlowable()
         }
@@ -94,7 +94,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     private fun prepareWalletConnectInteractionObservers() {
-        walletConnectViewModel.walletConnectStatus.observe(this@BaseWalletConnectInteractionsActivity, Observer { state ->
+        viewModel.walletConnectStatus.observe(this@BaseWalletConnectInteractionsActivity, Observer { state ->
             dismissDialogs()
             when (state) {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(state)
@@ -116,7 +116,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 else -> {}
             }
         })
-        walletConnectViewModel.errorLiveData.observe(this, EventObserver { handleWalletConnectGeneralError(it.message) })
+        viewModel.errorLiveData.observe(this, EventObserver { handleWalletConnectGeneralError(it.message) })
     }
 
     private fun handleWalletConnectTransactionError(state: OnWalletConnectTransactionError) {
@@ -129,7 +129,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private fun handleWrongTransactionValueState(state: WrongTransactionValueState) {
         val firebaseID: String = FirebaseInstanceId.getInstance().id
-        walletConnectViewModel.logToFirebase("Transaction with invalid value: ${state.transaction}, firebaseId: $firebaseID")
+        viewModel.logToFirebase("Transaction with invalid value: ${state.transaction}, firebaseId: $firebaseID")
         AlertDialogHandler.showDialog(
             this,
             getString(R.string.error_header),
@@ -167,7 +167,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     private fun getSendTransactionDialog(txRequest: OnEthSendTransactionRequest) =
-        with(walletConnectViewModel) {
+        with(viewModel) {
             DappSendTransactionDialog(
                 this@BaseWalletConnectInteractionsActivity,
                 {
@@ -194,16 +194,16 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     private fun DappSendTransactionDialog.showGasPriceDialog(it: OnEthSendTransactionRequest) {
         GasPriceDialog(context) { gasPrice ->
             setCustomGasPrice(
-                walletConnectViewModel.recalculateTxCost(BigDecimal(gasPrice), it.transaction),
+                viewModel.recalculateTxCost(BigDecimal(gasPrice), it.transaction),
                 it.account
-            ) { balance, cost -> walletConnectViewModel.isBalanceTooLow(balance, cost) }
+            ) { balance, cost -> viewModel.isBalanceTooLow(balance, cost) }
         }.show()
     }
 
     private fun getDappSignDialog(it: OnEthSignRequest) =
         DappSignMessageDialog(this@BaseWalletConnectInteractionsActivity,
-            { walletConnectViewModel.acceptRequest(it.session.isMobileWalletConnect) },
-            { walletConnectViewModel.rejectRequest(it.session.isMobileWalletConnect) }
+            { viewModel.acceptRequest(it.session.isMobileWalletConnect) },
+            { viewModel.rejectRequest(it.session.isMobileWalletConnect) }
         ).apply {
             setContent(it.message, it.session)
             show()
@@ -259,18 +259,18 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         confirmationDialogDialog = DappConfirmationDialogV1(this,
             {
                 if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType) {
-                    walletConnectViewModel.updateSession(meta.peerId)
+                    viewModel.updateSession(meta.peerId)
                 } else {
-                    walletConnectViewModel.approveSession(meta, true)
+                    viewModel.approveSession(meta, true)
                 }
                 clearAllDialogs()
             },
             {
-                walletConnectViewModel.rejectSession()
+                viewModel.rejectSession()
                 clearAllDialogs()
             },
             { chainId ->
-                walletConnectViewModel.addAccount(chainId, dialogType)
+                viewModel.addAccount(chainId, dialogType)
             }
         ).apply {
             setView(meta, viewDetails)
@@ -302,14 +302,21 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
         confirmationDialogDialog = DappConfirmationDialogV2(this,
             {
+                // todo: set availableAddresses in confirmationDialog and make the user select one.
+                val selectedAddress = viewModel.availableAddresses[0]
+                // todo: turn this into a function
+                // todo: check if address is checksummed
+                val accounts = viewModel.availableNetworks
+                    .map { network -> "eip155:" + network.chainId + ":" + selectedAddress }
+
                 // approve session
                 val sessionNamespace = WalletConnectSessionNamespace(
-                    accounts = emptyList(), // todo
+                    accounts,
                     methods = eip155ProposalNamespace.methods,
                     events = eip155ProposalNamespace.events,
                     extensions = null // todo
                 )
-                walletConnectViewModel.approveSessionV2(meta.proposerPublicKey, sessionNamespace,true)
+                viewModel.approveSessionV2(meta.proposerPublicKey, sessionNamespace, true)
                 clearAllDialogs()
             },
             {
@@ -320,7 +327,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 } else if (!methodOrEventSupported) {
                     reason = "Method(s) or Event(s) not supported" // todo: localize?
                 }
-                walletConnectViewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
+                viewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
                 clearAllDialogs()
             }
         ).apply {
@@ -354,18 +361,10 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     // todo: for walletconnect 2.0 set a list of addresses instead of accounts
     private fun DappConfirmationDialogV1.updateAccountSpinner() {
-        setupAccountSpinner(walletConnectViewModel.account.id, walletConnectViewModel.availableAccounts) { account ->
-            walletConnectViewModel.setNewAccount(account)
+        setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts) { account ->
+            viewModel.setNewAccount(account)
             //change state of confirm button for prevent the same db records
             changeClickableConfirmButtonState(account.address, account.chainId)
-        }
-    }
-
-    private fun DappConfirmationDialogV2.setWarnings(alertType: WalletConnectV2AlertType) {
-        when (alertType) {
-            WalletConnectV2AlertType.NO_ALERT -> setNoAlert()
-            WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkWarning()
-            WalletConnectV2AlertType.OTHER_UNSUPPORTED -> setOtherUnsupportedWarning()
         }
     }
 
@@ -378,21 +377,21 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         when (dialogType) {
             WalletConnectAlertType.NO_ALERT -> setNoAlert()
             WalletConnectAlertType.UNDEFINED_NETWORK_WARNING, WalletConnectAlertType.CHANGE_ACCOUNT -> {
-                setNotDefinedNetworkWarning(walletConnectViewModel.availableNetworks, dialogType, meta.chainId) { chainId ->
-                    walletConnectViewModel.setAccountForSelectedNetwork(chainId)
+                setNotDefinedNetworkWarning(viewModel.availableNetworks, dialogType, meta.chainId) { chainId ->
+                    viewModel.setAccountForSelectedNetwork(chainId)
                     updateAccountSpinner()
                 }
                 if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType) {
                     //set default network for equal state in "networkAdapter" and "accountAdapter"
                     if (Int.InvalidId == meta.chainId) {
-                        walletConnectViewModel.setAccountForSelectedNetwork( walletConnectViewModel.availableNetworks.first().chainId )
+                        viewModel.setAccountForSelectedNetwork(viewModel.availableNetworks.first().chainId )
                     } else {
                         //set current DApp session network like current account(s) network (for show it like chosen in spinner)
-                        walletConnectViewModel.setAccountForSelectedNetwork(meta.chainId)
+                        viewModel.setAccountForSelectedNetwork(meta.chainId)
                         //set current DApp session address(account) like current account (for show it like chosen in spinner)
-                        walletConnectViewModel.availableAccounts
+                        viewModel.availableAccounts
                             .find { meta.address == it.address }
-                            ?.let { walletConnectViewModel.setNewAccount(it) }
+                            ?.let { viewModel.setNewAccount(it) }
                     }
                 }
             }
@@ -412,7 +411,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     private fun handleWCConnectionDeepLink(deepLink: String) {
-        walletConnectViewModel.handleDeepLink(deepLink)
+        viewModel.handleDeepLink(deepLink)
     }
 
     private fun clearAllDialogs() {

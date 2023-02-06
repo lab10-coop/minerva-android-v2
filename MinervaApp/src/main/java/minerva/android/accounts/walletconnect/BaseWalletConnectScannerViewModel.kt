@@ -66,6 +66,11 @@ abstract class BaseWalletConnectScannerViewModel(
 
     val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(selectedChainId)
 
+    val availableAddresses: List<String> get() = accountManager.getAllAccounts()
+        .filter { account -> account.shouldShow }
+        .map { account -> account.address }
+        .distinct()
+
     private fun prepareAvailableNetworks(): List<NetworkDataSpinnerItem> =
         mutableListOf<NetworkDataSpinnerItem>().apply {
             val availableAccountList = accountManager.getFirstActiveAccountForAllNetworks()

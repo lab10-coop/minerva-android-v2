@@ -11,6 +11,7 @@ import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSessionNamespace
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.widget.dialog.models.ViewDetails
 import minerva.android.widget.dialog.models.ViewDetailsV2
@@ -105,31 +106,79 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     // todo: why is this the same as BaseWalletConnectInteractionsActivity?
     protected fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int,
                                          eip155ProposalNamespace: WalletConnectProposalNamespace) {
+
+
+        // todo: move this to a function
+        var networksSupported = true
+        if (numberOfNonEip155Chains > 0) {
+            networksSupported = false
+        }
+        if (/* todo: unsupported evm chains */ false) {
+            networksSupported = false
+        }
+
+        // todo: move this to a function
+        var methodOrEventSupported = true
+        if (/* todo: check methods */ false) {
+            methodOrEventSupported = false
+        }
+        // todo: check extensions and move that to a function
+
         confirmationDialogDialog = DappConfirmationDialogV2(requireContext(),
             {
-                // todo: approve session
+                // todo: set availableAddresses in confirmationDialog and make the user select one.
+                val selectedAddress = viewModel.availableAddresses[0]
+                // todo: turn this into a function
+                // todo: check if address is checksummed
+                val accounts = viewModel.availableNetworks
+                    .map { network -> "eip155:" + network.chainId + ":" + selectedAddress }
+
+                // approve session
+                val sessionNamespace = WalletConnectSessionNamespace(
+                    accounts,
+                    methods = eip155ProposalNamespace.methods,
+                    events = eip155ProposalNamespace.events,
+                    extensions = null // todo
+                )
+                viewModel.approveSessionV2(meta.proposerPublicKey, sessionNamespace, true)
                 binding.closeButton.margin(bottom = INCREASED_MARGIN)
             },
             {
-                // todo: reject session
+                // reject session
+                var reason = "User rejection" // todo: localize?
+                if (!networksSupported) {
+                    reason = "Network(s) not supported" // todo: localize?
+                } else if (!methodOrEventSupported) {
+                    reason = "Method(s) or Event(s) not supported" // todo: localize?
+                }
+                viewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
                 shouldScan = true
             }
         ).apply {
+            // todo: and enable/disable connect button?
             var networkNames = WalletConnectRepositoryImpl.proposalNamespacesToChainNames(eip155ProposalNamespace)
             when {
                 numberOfNonEip155Chains == 1 -> networkNames = networkNames + "Non EVM Chain" // todo: localize
                 numberOfNonEip155Chains > 1 -> networkNames = networkNames + "Non EVM Chains" // todo: localize
             }
-            setOnDismissListener { shouldScan = true }
             setView(
                 meta,
                 ViewDetailsV2(
                     networkNames,
-                    getString(R.string.connect_to_website), getString(R.string.connect)
+                    getString(R.string.connect_to_website),
+                    getString(R.string.connect)
                 )
             )
-            //handleNetwork(network, dialogType, meta) // todo?
-            //updateAccountSpinner() // todo?
+            var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
+            if (!networksSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
+            } else if (!methodOrEventSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
+            }
+            setWarnings(walletConnectV2AlertType)
+
+            // todo: set addresses in spinner instead of accounts
+            //updateAccountSpinner()
             show()
         }
     }
