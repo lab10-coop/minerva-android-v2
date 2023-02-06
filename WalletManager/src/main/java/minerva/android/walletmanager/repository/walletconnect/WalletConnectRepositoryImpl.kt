@@ -65,27 +65,28 @@ class WalletConnectRepositoryImpl(
     private var reconnectionAttempts: MutableMap<String, Int> = mutableMapOf()
     private var isInitialized = initialize()
 
+    private fun sessionProposalToWalletConnectProposalNamespace(sessionProposal: Sign.Model.SessionProposal): WalletConnectProposalNamespace {
+        val eip155TempNamespace = sessionProposal.requiredNamespaces[EIP155]!!
+        return WalletConnectProposalNamespace(
+            chains = eip155TempNamespace.chains,
+            methods = eip155TempNamespace.methods,
+            events = eip155TempNamespace.events,
+            extensions = eip155TempNamespace.extensions
+        )
+    }
+
     private fun initialize(): Boolean {
         if (isInitialized) {
             return true
         }
 
-        // do this only once as to not duplicate event watching..
-        // todo: handle events etc.
         val walletDelegate = object : SignClient.WalletDelegate {
             override fun onSessionProposal(sessionProposal: Sign.Model.SessionProposal) {
                 // Triggered when wallet receives the session proposal sent by a Dapp
                 Timber.i("onSessionProposal: $sessionProposal")
 
                 val numberOfNonEip155Chains = namespacesCountNonEip155Chains(sessionProposal.requiredNamespaces)
-                // todo: maybe some kind of cast would work better here.
-                val eip155TempNamespace = sessionProposal.requiredNamespaces[EIP155]
-                val eip155ProposalNamespace = WalletConnectProposalNamespace(
-                    chains = eip155TempNamespace?.chains ?: emptyList(),
-                    methods = eip155TempNamespace?.methods ?: emptyList(),
-                    events = eip155TempNamespace?.events ?: emptyList(),
-                    extensions = eip155TempNamespace?.extensions ?: null
-                )
+                val eip155ProposalNamespace = sessionProposalToWalletConnectProposalNamespace(sessionProposal)
 
                 // show popup here, only then proceed
                 status.onNext(OnSessionRequestV2(
@@ -93,7 +94,7 @@ class WalletConnectRepositoryImpl(
                         name = sessionProposal.name,
                         url = sessionProposal.url,
                         description = sessionProposal.description,
-                        icons = sessionProposal.icons.map { uri -> uri.toString() },
+                        icons = sessionProposal.icons.map { it.toString() },
                         proposerPublicKey = sessionProposal.proposerPublicKey
                     ),
                     numberOfNonEip155Chains,
