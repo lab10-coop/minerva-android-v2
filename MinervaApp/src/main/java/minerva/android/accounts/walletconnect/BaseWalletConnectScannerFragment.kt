@@ -10,6 +10,8 @@ import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.widget.dialog.models.ViewDetails
 import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV1
@@ -99,7 +101,10 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    protected fun showConnectionDialogV2(meta: WalletConnectPeerMeta, networkNames: List<String>) {
+    // todo: implement
+    // todo: why is this the same as BaseWalletConnectInteractionsActivity?
+    protected fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int,
+                                         eip155ProposalNamespace: WalletConnectProposalNamespace) {
         confirmationDialogDialog = DappConfirmationDialogV2(requireContext(),
             {
                 // todo: approve session
@@ -110,6 +115,11 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                 shouldScan = true
             }
         ).apply {
+            var networkNames = WalletConnectRepositoryImpl.proposalNamespacesToChainNames(eip155ProposalNamespace)
+            when {
+                numberOfNonEip155Chains == 1 -> networkNames = networkNames + "Non EVM Chain" // todo: localize
+                numberOfNonEip155Chains > 1 -> networkNames = networkNames + "Non EVM Chains" // todo: localize
+            }
             setOnDismissListener { shouldScan = true }
             setView(
                 meta,

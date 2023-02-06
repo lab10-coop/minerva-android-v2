@@ -281,7 +281,25 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     // todo: implement
+    // todo: why is this the same as BaseWalletConnectScannerFragment?
     private fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int, eip155ProposalNamespace: WalletConnectProposalNamespace) {
+
+        // todo: move this to a function
+        var networksSupported = true
+        if (numberOfNonEip155Chains > 0) {
+            networksSupported = false
+        }
+        if (/* todo: unsupported evm chains */ false) {
+            networksSupported = false
+        }
+
+        // todo: move this to a function
+        var methodOrEventSupported = true
+        if (/* todo: check methods */ false) {
+            methodOrEventSupported = false
+        }
+        // todo: check extensions and move that to a function
+
         confirmationDialogDialog = DappConfirmationDialogV2(this,
             {
                 // approve session
@@ -296,23 +314,6 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             },
             {
                 // reject session
-                // todo: move this to a function
-                var networksSupported = true
-                if (numberOfNonEip155Chains > 0) {
-                    networksSupported = false
-                }
-                if (/* todo: unsupported evm chains */ false) {
-                    networksSupported = false
-                }
-
-                // todo: move this to a function
-                var methodOrEventSupported = true
-                if (/* todo: check methods */ false) {
-                    methodOrEventSupported = false
-                }
-
-                // todo: check extensions and move that to a function
-
                 var reason = "User rejection" // todo: localize?
                 if (!networksSupported) {
                     reason = "Network(s) not supported" // todo: localize?
@@ -324,20 +325,26 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             }
         ).apply {
             // todo: and enable/disable connect button?
-            var chainNames = WalletConnectRepositoryImpl.proposalNamespacesToChainNames(eip155ProposalNamespace)
+            var networkNames = WalletConnectRepositoryImpl.proposalNamespacesToChainNames(eip155ProposalNamespace)
             when {
-                numberOfNonEip155Chains == 1 -> chainNames = chainNames + "Non EVM Chain" // todo: localize
-                numberOfNonEip155Chains > 1 -> chainNames = chainNames + "Non EVM Chains" // todo: localize
+                numberOfNonEip155Chains == 1 -> networkNames = networkNames + "Non EVM Chain" // todo: localize
+                numberOfNonEip155Chains > 1 -> networkNames = networkNames + "Non EVM Chains" // todo: localize
             }
             setView(
                 meta,
                 ViewDetailsV2(
-                    chainNames,
+                    networkNames,
                     getString(R.string.connect_to_website),
                     getString(R.string.connect)
                 )
             )
-            //handleNetwork(network, dialogType, meta)
+            var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
+            if (!networksSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
+            } else if (!methodOrEventSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
+            }
+            setWarnings(walletConnectV2AlertType)
 
             // todo: set addresses in spinner instead of accounts
             //updateAccountSpinner()
@@ -351,6 +358,14 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             walletConnectViewModel.setNewAccount(account)
             //change state of confirm button for prevent the same db records
             changeClickableConfirmButtonState(account.address, account.chainId)
+        }
+    }
+
+    private fun DappConfirmationDialogV2.setWarnings(alertType: WalletConnectV2AlertType) {
+        when (alertType) {
+            WalletConnectV2AlertType.NO_ALERT -> setNoAlert()
+            WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkWarning()
+            WalletConnectV2AlertType.OTHER_UNSUPPORTED -> setOtherUnsupportedWarning()
         }
     }
 
