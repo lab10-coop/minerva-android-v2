@@ -503,7 +503,6 @@ class WalletConnectRepositoryImpl(
             Completable.error(Throwable("Session not approved"))
         }
 
-    // todo: implement
     override fun approveSessionV2(
         proposerPublicKey: String,
         namespace: WalletConnectSessionNamespace
@@ -519,21 +518,13 @@ class WalletConnectRepositoryImpl(
             )
         val relayProtocol = null
         val approveParams: Sign.Params.Approve = Sign.Params.Approve(proposerPublicKey, namespaces, relayProtocol)
-        SignClient.approveSession(approveParams) { error ->
-            Timber.e(error.toString())
-        }
 
-        /*
-        if (clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true) {
-            logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} $peerId")
-            saveDappSession(dapp)
-        } else {
-            Completable.error(Throwable("Session not approved"))
+        return Completable.create { emitter ->
+            SignClient.approveSession(approveParams) { error ->
+                Timber.e(error.toString())
+                emitter.onError(Throwable(error.toString()))
+            }
         }
-        */
-
-        // todo: remove this when done with implementation
-        return Completable.error(Throwable("WC 2.0 not implemented yet"))
     }
 
     override fun rejectSessionV2(proposerPublicKey: String, reason: String) {
