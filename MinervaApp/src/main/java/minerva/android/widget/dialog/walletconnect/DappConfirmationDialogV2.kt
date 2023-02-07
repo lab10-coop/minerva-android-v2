@@ -1,6 +1,7 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
+import kotlinx.android.synthetic.main.dapp_network_header.*
 import minerva.android.R
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.accounts.walletconnect.WalletConnectV2AlertType
@@ -45,23 +46,28 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     }
 
     // todo: check if this is correct
-    fun setNoAlert() = with(binding) {
+    private fun setNoAlert() = with(binding) {
         warringIcon.gone()
         warning.gone()
         manual.visible()
         confirmationButtons.confirm.isEnabled = true
         networkHeader.apply {
+            networkWarning.visible()
             networkWarning.text = "Fully supported (x networks)" // todo: localize
             addAccount.gone()
-            accountSpinner.visible()
+            accountSpinner.gone()
             networkSpinner.gone()
         }
     }
 
     // todo: implement
-    fun setUnsupportedNetworkWarning() = with(binding) {
+    private fun setUnsupportedNetworkWarning() = with(binding) {
         networkHeader.apply {
+            networkWarning.visible()
             networkWarning.text = "The request is not supported."
+            addAccount.gone()
+            accountSpinner.gone()
+            networkSpinner.gone()
         }
         confirmationButtons.confirm.isEnabled = false
         // todo: localize
@@ -69,9 +75,13 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     }
 
     // todo: implement
-    fun setOtherUnsupportedWarning() = with(binding) {
+    private fun setOtherUnsupportedWarning() = with(binding) {
         networkHeader.apply {
+            networkWarning.visible()
             networkWarning.text = "Fully supported (x networks)" // todo: localize
+            addAccount.gone()
+            accountSpinner.gone()
+            networkSpinner.gone()
         }
         confirmationButtons.confirm.isEnabled = false
         // todo: localize

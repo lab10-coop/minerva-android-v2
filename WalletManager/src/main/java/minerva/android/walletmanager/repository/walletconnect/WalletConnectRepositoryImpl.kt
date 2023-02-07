@@ -525,6 +525,7 @@ class WalletConnectRepositoryImpl(
                 Timber.e(error.toString())
                 emitter.onError(Throwable(error.toString()))
             }
+            emitter.onComplete()
         }
     }
 
