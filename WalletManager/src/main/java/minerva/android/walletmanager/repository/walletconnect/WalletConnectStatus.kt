@@ -1,10 +1,7 @@
 package minerva.android.walletmanager.repository.walletconnect
 
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.model.walletconnect.Topic
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
-import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
+import minerva.android.walletmanager.model.walletconnect.*
 
 sealed class WalletConnectStatus
 data class OnSessionRequest(val meta: WalletConnectPeerMeta, val chainId: Int?, val topic: Topic, val handshakeId: Long) :
@@ -13,5 +10,6 @@ data class OnSessionRequestV2(val meta: WalletConnectPeerMeta, val numberOfNonEi
 
 data class OnDisconnect(val sessionName: String = String.Empty) : WalletConnectStatus()
 data class OnEthSign(val message: String, val peerId: String) : WalletConnectStatus()
+data class OnEthSignV2(val message: String, val session: DappSessionV2) : WalletConnectStatus()
 data class OnEthSendTransaction(val transaction: WalletConnectTransaction, val peerId: String) : WalletConnectStatus()
 data class OnFailure(val error: Throwable, val sessionName: String = String.Empty) : WalletConnectStatus()

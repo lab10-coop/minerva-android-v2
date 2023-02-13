@@ -7,6 +7,7 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.AccountTypeItemBinding
 import minerva.android.walletmanager.model.walletconnect.DappSessionV1
+import minerva.android.walletmanager.model.walletconnect.DappSessionV2
 import minerva.android.widget.repository.getNetworkIcon
 
 class AccountTypeItem @JvmOverloads constructor(
@@ -18,11 +19,11 @@ class AccountTypeItem @JvmOverloads constructor(
     private val binding: AccountTypeItemBinding =
         AccountTypeItemBinding.bind(inflate(context, R.layout.account_type_item, this))
 
-    fun setNetwork(session: DappSessionV1) = with(binding) {
-        accountName.text = session.accountName
-        address.text = session.address
+    fun setNetwork(_accountName: String, _address: String, chainId: Int) = with(binding) {
+        accountName.text = _accountName
+        address.text = _address
         Glide.with(root.context)
-            .load(getNetworkIcon(context, session.chainId))
+            .load(getNetworkIcon(context, chainId))
             .into(logo)
     }
 }

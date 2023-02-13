@@ -140,6 +140,7 @@ class WalletConnectInteractionsViewModel(
                         currentDappSession = session
                         OnEthSignRequest(status.message, session)
                     }
+            is OnEthSignV2 -> OnEthSignRequestV2(status.message, status.session)
             is OnDisconnect -> Single.just(OnDisconnected(sessionName = status.sessionName))
             is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
@@ -395,7 +396,24 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
+    fun acceptRequestV2(isMobileWalletConnect: Boolean) {
+        currentDappSession?.let { session ->
+            transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
+                walletConnectRepository.approveRequest(session.peerId, it.privateKey)
+                successWalletConnectInteraction(isMobileWalletConnect)
+            }
+        }
+    }
+
     fun rejectRequest(isMobileWalletConnect: Boolean) {
+        weiCoinTransactionValue = NO_COIN_TX_VALUE
+        currentDappSession?.let { session ->
+            walletConnectRepository.rejectRequest(session.peerId)
+            successWalletConnectInteraction(isMobileWalletConnect)
+        }
+    }
+
+    fun rejectRequestV2(isMobileWalletConnect: Boolean) {
         weiCoinTransactionValue = NO_COIN_TX_VALUE
         currentDappSession?.let { session ->
             walletConnectRepository.rejectRequest(session.peerId)

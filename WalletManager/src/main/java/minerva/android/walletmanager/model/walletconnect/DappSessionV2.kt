@@ -16,5 +16,5 @@ data class DappSessionV2(
     override val chainId: Int = Int.InvalidValue,
     override val isMobileWalletConnect: Boolean = false,
     val metaData: Core.Model.AppMetaData? = null,
-    val namespaces: Map<String, Sign.Model.Namespace.Session>
+    val namespaces: Map<String, Sign.Model.Namespace.Session>? = null
 ) : DappSession(address = address, name = name, iconUrl = iconUrl, version = version, topic = topic, isMobileWalletConnect = isMobileWalletConnect)

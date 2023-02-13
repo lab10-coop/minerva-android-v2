@@ -8,6 +8,7 @@ import minerva.android.R
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSignMessageDialogBinding
 import minerva.android.walletmanager.model.walletconnect.DappSessionV1
+import minerva.android.walletmanager.model.walletconnect.DappSessionV2
 
 class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
@@ -32,8 +33,18 @@ class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> U
 
     fun setContent(text: String, session: DappSessionV1) = with(binding) {
         message.setTitleAndBody(context.getString(R.string.message), text)
-        accountType.setNetwork(session)
+        accountType.setNetwork(session.accountName, session.address, session.chainId)
         setupHeader(session.name, session.networkName, session.iconUrl)
+    }
+
+    // todo: implement and move somewhere reasonable
+    fun getNetworkNameFromChainId(chainId: Int): String = ""
+
+    fun setContentV2(text: String, session: DappSessionV2) = with(binding) {
+        message.setTitleAndBody(context.getString(R.string.message), text)
+        accountType.setNetwork(session.accountName, session.address, session.chainId)
+        val networkName = getNetworkNameFromChainId(session.chainId)
+        setupHeader(session.name, networkName, session.iconUrl)
     }
 
     companion object {

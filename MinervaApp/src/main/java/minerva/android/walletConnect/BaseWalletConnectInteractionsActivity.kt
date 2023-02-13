@@ -98,6 +98,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             dismissDialogs()
             when (state) {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(state)
+                is OnEthSignRequestV2 -> dappDialog = getDappSignDialogV2(state)
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(state)
                 is ProgressBarState -> handleLoadingDialog(state)
                 is OnGeneralError -> handleWalletConnectGeneralError(state.error.message)
@@ -209,10 +210,18 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             show()
         }
 
+    private fun getDappSignDialogV2(it: OnEthSignRequestV2) =
+        DappSignMessageDialog(this@BaseWalletConnectInteractionsActivity,
+            { viewModel.acceptRequestV2(it.session.isMobileWalletConnect) },
+            { viewModel.rejectRequestV2(it.session.isMobileWalletConnect) }
+        ).apply {
+            setContentV2(it.message, it.session)
+            show()
+        }
+
     protected fun showFlashbar(title: String, message: String) {
         MinervaFlashbar.show(this@BaseWalletConnectInteractionsActivity, title, message)
     }
-
 
     private fun handleWalletConnectError(sessionName: String) {
         confirmationDialogDialog?.dismiss()

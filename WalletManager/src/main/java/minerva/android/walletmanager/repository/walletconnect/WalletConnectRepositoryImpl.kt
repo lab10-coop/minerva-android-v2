@@ -104,31 +104,73 @@ class WalletConnectRepositoryImpl(
 
             override fun onSessionRequest(sessionRequest: Sign.Model.SessionRequest) {
                 // Triggered when a Dapp sends SessionRequest to sign a transaction or a message
-                Timber.i("onSessionRequest")
+                Timber.i("onSessionRequest: $sessionRequest")
+
+                // todo: test this
+                // todo: move somewhere more sensible
+                fun caipChainIdToInt(chainId: String?): Int {
+                    return chainId?.split(":")?.get(1)?.toInt() ?: Int.InvalidValue
+                }
 
                 // todo: use some constants here
+                // todo: maybe all sign messages could be combined in one case?
                 when (sessionRequest.request.method) {
                     "personal_sign" -> {
-                        // todo: this seems to be something metamask specific
+                        // this seems to be something metamask specific
+                        // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#personal_sign
+                        val address = sessionRequest.request.params[1] as String
+                        val message = sessionRequest.request.params[0] as String
+                        // todo: isMobileWalletConnect?
+                        val session = DappSessionV2(
+                            topic = sessionRequest.topic,
+                            // todo: create a funtion for
+                            chainId = caipChainIdToInt(sessionRequest?.chainId),
+                            isMobileWalletConnect = false,
+                            address = address
+                            // todo: accountName
+                        )
+                        status.onNext(OnEthSignV2(message.hexToUtf8, session))
                     }
                     "eth_sign" -> {
-                        // todo
-                        //currentRequestId = id
-                        //currentEthMessage = message
-                        //status.onNext(OnEthSign(getUserReadableData(message), peerId))
+                        // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_sign
+                        val address = sessionRequest.request.params[0] as String
+                        val message = sessionRequest.request.params[1] as String
+                        // todo: isMobileWalletConnect?
+                        val session = DappSessionV2(
+                            topic = sessionRequest.topic,
+                            // todo: create a funtion for
+                            chainId = caipChainIdToInt(sessionRequest?.chainId),
+                            isMobileWalletConnect = false,
+                            address = address
+                            // todo: accountName
+                        )
+                        status.onNext(OnEthSignV2(message.hexToUtf8, session))
                     }
                     "eth_signTypedData" -> {
-                        // todo: this would be awesome to support.
+                        // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_signtypeddata
+                        val address = sessionRequest.request.params[0] as String
+                        val message = sessionRequest.request.params[1] as String
+                        // todo: isMobileWalletConnect?
+                        val session = DappSessionV2(
+                            topic = sessionRequest.topic,
+                            // todo: create a funtion for
+                            chainId = caipChainIdToInt(sessionRequest?.chainId),
+                            isMobileWalletConnect = false,
+                            address = address
+                            // todo: accountName
+                        )
+                        status.onNext(OnEthSignV2(message.hexToUtf8, session))
                     }
                     "eth_sendTransaction" -> {
                         // todo
-                        //currentRequestId = id
-                        //status.onNext(
-                        //    OnEthSendTransaction(
-                        //        WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
-                        //        peerId
-                        //    )
-                        //)
+                        /*Timber.i("transaction: $transaction")
+                        currentRequestId = id
+                        status.onNext(
+                            OnEthSendTransaction(
+                                WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
+                                peerId
+                            )
+                        )*/
                     }
                     "eth_signTransaction" -> {
                         // todo: but not that common or important.
@@ -481,6 +523,9 @@ class WalletConnectRepositoryImpl(
     // todo: add WC 2.0 sessions here with ByTopic instead?
     override fun getDappSessionById(peerId: String): Single<DappSessionV1> =
         dappDao.getDappSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
+
+    /*private fun getDappSessionByTopic(topic: String): DappSessionV2 =
+        SignClient.getSettledSessionByTopic(topic)*/
 
     private fun getUserReadableData(message: WCEthereumSignMessage) =
         when (message.type) {
