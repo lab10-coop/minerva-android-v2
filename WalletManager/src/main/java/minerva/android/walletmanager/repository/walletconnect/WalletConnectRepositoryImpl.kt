@@ -2,6 +2,7 @@ package minerva.android.walletmanager.repository.walletconnect
 
 import android.app.Application
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import com.walletconnect.android.Core
 import com.walletconnect.android.CoreClient
 import com.walletconnect.android.relay.ConnectionType
@@ -24,6 +25,8 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
+import minerva.android.kotlinUtils.crypto.toByteArray
+import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -138,7 +141,7 @@ class WalletConnectRepositoryImpl(
                             // todo: accountName
                             accountName = "todo"
                         )
-                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8, session))
+                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, session))
                     }
                     "eth_sign" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_sign
@@ -155,11 +158,27 @@ class WalletConnectRepositoryImpl(
                             // todo: accountName
                             accountName = "todo"
                         )
-                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8, session))
+                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, session))
                     }
                     "eth_signTypedData" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_signtypeddata
-                        val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
+                        val paramsJsonArray = JsonParser.parseString(sessionRequest.request.params).asJsonArray
+                        val params: List<String> = paramsJsonArray
+                            .map { value ->
+                                if (value.toString().startsWith("\"0x")) {
+                                    return@map value.asString
+                                }
+                                val stringBuilder = StringBuilder()
+                                // todo: with or without 0x?
+                                stringBuilder.append("0x")
+                                for (char in value.toString()) {
+                                    val hexChar = Integer.toHexString(char.code)
+                                    stringBuilder.append(hexChar)
+                                }
+                                stringBuilder.toString().hexToUtf8
+                            }
+                        Timber.i("eth_signTypedData: $paramsJsonArray")
+                        Timber.i("eth_signTypedData: $params")
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         currentEthMessage = WCEthereumSignMessage(type = TYPED_MESSAGE, raw = params)
                         // todo: isMobileWalletConnect?
@@ -172,7 +191,7 @@ class WalletConnectRepositoryImpl(
                             // todo: accountName
                             accountName = "todo"
                         )
-                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8, session))
+                        status.onNext(OnEthSignV2(currentEthMessage.data.getFormattedMessage, session))
                     }
                     "eth_sendTransaction" -> {
                         // todo
@@ -649,13 +668,14 @@ class WalletConnectRepositoryImpl(
         clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
     }
 
-    // todo: implement
     override fun approveRequestV2(topic: String, privateKey: String) {
         logger.logToFirebase("${LoggerMessages.APPROVE_REQUEST} $topic")
+        Timber.i("${LoggerMessages.APPROVE_REQUEST} $topic")
         val jsonRpcResponse = Sign.Model.JsonRpcResponse.JsonRpcResult(
             id = currentRequestId,
             result = signData(privateKey)
         )
+        Timber.i("${LoggerMessages.APPROVE_REQUEST} $topic $jsonRpcResponse")
         val result = Sign.Params.Response(sessionTopic = topic, jsonRpcResponse = jsonRpcResponse)
         SignClient.respond(result) { error ->
             Timber.e(error.toString())
@@ -678,7 +698,6 @@ class WalletConnectRepositoryImpl(
         clientMap[peerId]?.rejectRequest(currentRequestId)
     }
 
-    // todo: implement
     override fun rejectRequestV2(topic: String) {
         logger.logToFirebase("${LoggerMessages.REJECT_REQUEST} $topic")
         val jsonRpcResponseError = Sign.Model.JsonRpcResponse.JsonRpcError(
