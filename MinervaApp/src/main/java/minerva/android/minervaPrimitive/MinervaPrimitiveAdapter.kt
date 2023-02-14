@@ -98,11 +98,12 @@ class MinervaPrimitiveViewHolder(
             .into(minervaPrimitiveLogo)
         setSessionItemsVisibility(true)
         // todo: #1 or #2 or etc.
+        val namespaces = minervaPrimitive.namespaces ?: emptyMap()
         sessionInfoLabel.text = WalletConnectRepositoryImpl
-            .namespacesToAddresses(minervaPrimitive.namespaces)
+            .namespacesToAddresses(namespaces)
             .joinToString(" • ") { getShortAddress(AddressType.NORMAL_ADDRESS, it) }
         networkLabel.text = WalletConnectRepositoryImpl
-            .sessionNamespacesToChainNames(minervaPrimitive.namespaces)
+            .sessionNamespacesToChainNames(namespaces)
             // todo: move to localization?
             .joinToString(" • ")
     }

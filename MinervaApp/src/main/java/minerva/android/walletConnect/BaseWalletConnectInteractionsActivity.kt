@@ -210,12 +210,12 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             show()
         }
 
-    private fun getDappSignDialogV2(it: OnEthSignRequestV2) =
+    private fun getDappSignDialogV2(req: OnEthSignRequestV2) =
         DappSignMessageDialog(this@BaseWalletConnectInteractionsActivity,
-            { viewModel.acceptRequestV2(it.session.isMobileWalletConnect) },
-            { viewModel.rejectRequestV2(it.session.isMobileWalletConnect) }
+            { viewModel.acceptRequestV2(req.session) },
+            { viewModel.rejectRequestV2(req.session) }
         ).apply {
-            setContentV2(it.message, it.session)
+            setContentV2(req.message, req.session)
             show()
         }
 

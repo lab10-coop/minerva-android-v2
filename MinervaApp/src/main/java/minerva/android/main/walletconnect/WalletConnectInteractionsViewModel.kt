@@ -140,7 +140,7 @@ class WalletConnectInteractionsViewModel(
                         currentDappSession = session
                         OnEthSignRequest(status.message, session)
                     }
-            is OnEthSignV2 -> OnEthSignRequestV2(status.message, status.session)
+            is OnEthSignV2 -> Single.just(OnEthSignRequestV2(status.message, status.session))
             is OnDisconnect -> Single.just(OnDisconnected(sessionName = status.sessionName))
             is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
@@ -396,12 +396,10 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    fun acceptRequestV2(isMobileWalletConnect: Boolean) {
-        currentDappSession?.let { session ->
-            transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
-                walletConnectRepository.approveRequest(session.peerId, it.privateKey)
-                successWalletConnectInteraction(isMobileWalletConnect)
-            }
+    fun acceptRequestV2(session: DappSessionV2) {
+        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
+            walletConnectRepository.approveRequestV2(session.topic, it.privateKey)
+            successWalletConnectInteraction(session.isMobileWalletConnect)
         }
     }
 
@@ -413,12 +411,10 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    fun rejectRequestV2(isMobileWalletConnect: Boolean) {
+    fun rejectRequestV2(session: DappSessionV2) {
         weiCoinTransactionValue = NO_COIN_TX_VALUE
-        currentDappSession?.let { session ->
-            walletConnectRepository.rejectRequest(session.peerId)
-            successWalletConnectInteraction(isMobileWalletConnect)
-        }
+        walletConnectRepository.rejectRequestV2(session.topic)
+        successWalletConnectInteraction(session.isMobileWalletConnect)
     }
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =

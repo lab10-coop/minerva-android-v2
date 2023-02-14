@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.repository.walletconnect
 
 import android.app.Application
+import com.google.gson.GsonBuilder
 import com.walletconnect.android.Core
 import com.walletconnect.android.CoreClient
 import com.walletconnect.android.relay.ConnectionType
@@ -29,6 +30,8 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.MESSAGE
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.TYPED_MESSAGE
+import minerva.android.walletConnect.model.jsonRpc.JsonRpcError
+import minerva.android.walletConnect.model.jsonRpc.JsonRpcErrorResponse
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
@@ -52,7 +55,8 @@ class WalletConnectRepositoryImpl(
     minervaDatabase: MinervaDatabase,
     private val logger: Logger,
     private var wcClient: WCClient = WCClient(),
-    private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
+    private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap(),
+    private val builder: GsonBuilder = GsonBuilder()
 ) : WalletConnectRepository {
     private var status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override var connectionStatusFlowable: Flowable<WalletConnectStatus> =
@@ -64,6 +68,9 @@ class WalletConnectRepositoryImpl(
     private val dappDao = minervaDatabase.dappSessionDao()
     private var reconnectionAttempts: MutableMap<String, Int> = mutableMapOf()
     private var isInitialized = initialize()
+    private val gson = builder
+        .serializeNulls()
+        .create()
 
     private fun sessionProposalToWalletConnectProposalNamespace(sessionProposal: Sign.Model.SessionProposal): WalletConnectProposalNamespace {
         val eip155TempNamespace = sessionProposal.requiredNamespaces[EIP155]!!
@@ -118,48 +125,54 @@ class WalletConnectRepositoryImpl(
                     "personal_sign" -> {
                         // this seems to be something metamask specific
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#personal_sign
-                        val address = sessionRequest.request.params[1] as String
-                        val message = sessionRequest.request.params[0] as String
+                        val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        currentEthMessage = WCEthereumSignMessage(type = PERSONAL_MESSAGE, raw = params)
                         // todo: isMobileWalletConnect?
                         val session = DappSessionV2(
                             topic = sessionRequest.topic,
-                            // todo: create a funtion for
+                            // todo: create a function for
                             chainId = caipChainIdToInt(sessionRequest?.chainId),
                             isMobileWalletConnect = false,
-                            address = address
+                            address = currentEthMessage.address,
                             // todo: accountName
+                            accountName = "todo"
                         )
-                        status.onNext(OnEthSignV2(message.hexToUtf8, session))
+                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8, session))
                     }
                     "eth_sign" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_sign
-                        val address = sessionRequest.request.params[0] as String
-                        val message = sessionRequest.request.params[1] as String
+                        val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        currentEthMessage = WCEthereumSignMessage(type = MESSAGE, raw = params)
                         // todo: isMobileWalletConnect?
                         val session = DappSessionV2(
                             topic = sessionRequest.topic,
-                            // todo: create a funtion for
+                            // todo: create a function for
                             chainId = caipChainIdToInt(sessionRequest?.chainId),
                             isMobileWalletConnect = false,
-                            address = address
+                            address = currentEthMessage.address,
                             // todo: accountName
+                            accountName = "todo"
                         )
-                        status.onNext(OnEthSignV2(message.hexToUtf8, session))
+                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8, session))
                     }
                     "eth_signTypedData" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_signtypeddata
-                        val address = sessionRequest.request.params[0] as String
-                        val message = sessionRequest.request.params[1] as String
+                        val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        currentEthMessage = WCEthereumSignMessage(type = TYPED_MESSAGE, raw = params)
                         // todo: isMobileWalletConnect?
                         val session = DappSessionV2(
                             topic = sessionRequest.topic,
-                            // todo: create a funtion for
+                            // todo: create a function for
                             chainId = caipChainIdToInt(sessionRequest?.chainId),
                             isMobileWalletConnect = false,
-                            address = address
+                            address = currentEthMessage.address,
                             // todo: accountName
+                            accountName = "todo"
                         )
-                        status.onNext(OnEthSignV2(message.hexToUtf8, session))
+                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8, session))
                     }
                     "eth_sendTransaction" -> {
                         // todo
@@ -636,6 +649,19 @@ class WalletConnectRepositoryImpl(
         clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
     }
 
+    // todo: implement
+    override fun approveRequestV2(topic: String, privateKey: String) {
+        logger.logToFirebase("${LoggerMessages.APPROVE_REQUEST} $topic")
+        val jsonRpcResponse = Sign.Model.JsonRpcResponse.JsonRpcResult(
+            id = currentRequestId,
+            result = signData(privateKey)
+        )
+        val result = Sign.Params.Response(sessionTopic = topic, jsonRpcResponse = jsonRpcResponse)
+        SignClient.respond(result) { error ->
+            Timber.e(error.toString())
+        }
+    }
+
     override fun approveTransactionRequest(peerId: String, message: String) {
         logger.logToFirebase("${LoggerMessages.APPROVE_TX_REQUEST} $peerId")
         clientMap[peerId]?.approveRequest(currentRequestId, message)
@@ -650,6 +676,20 @@ class WalletConnectRepositoryImpl(
     override fun rejectRequest(peerId: String) {
         logger.logToFirebase("${LoggerMessages.REJECT_REQUEST} $peerId")
         clientMap[peerId]?.rejectRequest(currentRequestId)
+    }
+
+    // todo: implement
+    override fun rejectRequestV2(topic: String) {
+        logger.logToFirebase("${LoggerMessages.REJECT_REQUEST} $topic")
+        val jsonRpcResponseError = Sign.Model.JsonRpcResponse.JsonRpcError(
+            id = currentRequestId,
+            code = -32000,
+            message = "Rejected by the user"
+        )
+        val result = Sign.Params.Response(sessionTopic = topic, jsonRpcResponse = jsonRpcResponseError)
+        SignClient.respond(result) { error ->
+            Timber.e(error.toString())
+        }
     }
 
     override fun killAllAccountSessions(address: String, chainId: Int): Completable =
