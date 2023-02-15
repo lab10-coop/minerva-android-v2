@@ -131,37 +131,30 @@ class WalletConnectRepositoryImpl(
                         val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         currentEthMessage = WCEthereumSignMessage(type = PERSONAL_MESSAGE, raw = params)
+                        val chainId = caipChainIdToInt(sessionRequest?.chainId)
                         // todo: isMobileWalletConnect?
-                        val session = DappSessionV2(
-                            topic = sessionRequest.topic,
-                            // todo: create a function for
-                            chainId = caipChainIdToInt(sessionRequest?.chainId),
-                            isMobileWalletConnect = false,
-                            address = currentEthMessage.address,
-                            // todo: accountName
-                            accountName = "todo"
-                        )
-                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, session))
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
+                        session?.let {
+                            status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, it))
+                        }
                     }
                     "eth_sign" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_sign
                         val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         currentEthMessage = WCEthereumSignMessage(type = MESSAGE, raw = params)
+                        val chainId = caipChainIdToInt(sessionRequest?.chainId)
                         // todo: isMobileWalletConnect?
-                        val session = DappSessionV2(
-                            topic = sessionRequest.topic,
-                            // todo: create a function for
-                            chainId = caipChainIdToInt(sessionRequest?.chainId),
-                            isMobileWalletConnect = false,
-                            address = currentEthMessage.address,
-                            // todo: accountName
-                            accountName = "todo"
-                        )
-                        status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, session))
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
+                        session?.let {
+                            status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, it))
+                        }
                     }
                     "eth_signTypedData" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_signtypeddata
+                        // todo: refactor? this section is weird because it tries to use WC 1.0 structures
                         val paramsJsonArray = JsonParser.parseString(sessionRequest.request.params).asJsonArray
                         val params: List<String> = paramsJsonArray
                             .map { value ->
@@ -177,21 +170,15 @@ class WalletConnectRepositoryImpl(
                                 }
                                 stringBuilder.toString().hexToUtf8
                             }
-                        Timber.i("eth_signTypedData: $paramsJsonArray")
-                        Timber.i("eth_signTypedData: $params")
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         currentEthMessage = WCEthereumSignMessage(type = TYPED_MESSAGE, raw = params)
+                        val chainId = caipChainIdToInt(sessionRequest?.chainId)
                         // todo: isMobileWalletConnect?
-                        val session = DappSessionV2(
-                            topic = sessionRequest.topic,
-                            // todo: create a function for
-                            chainId = caipChainIdToInt(sessionRequest?.chainId),
-                            isMobileWalletConnect = false,
-                            address = currentEthMessage.address,
-                            // todo: accountName
-                            accountName = "todo"
-                        )
-                        status.onNext(OnEthSignV2(currentEthMessage.data.getFormattedMessage, session))
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
+                        session?.let {
+                            status.onNext(OnEthSignV2(currentEthMessage.data.getFormattedMessage, it))
+                        }
                     }
                     "eth_sendTransaction" -> {
                         // todo
@@ -211,13 +198,6 @@ class WalletConnectRepositoryImpl(
                         // todo: but not that common or important.
                     }
                 }
-
-                // todo: response
-                //val sessionTopic: String = /*Topic of Session*/
-                //val jsonRpcResponse: Sign.Model.JsonRpcResponse.JsonRpcResult = /*Settled Session Request ID along with request data*/
-                //val result = Sign.Params.Response(sessionTopic = sessionTopic, jsonRpcResponse = jsonRpcResponse)
-
-                //SignClient.respond(result) { error -> /*callback for error while responding session request*/ }
             }
 
             override fun onSessionDelete(deletedSession: Sign.Model.DeletedSession) {
@@ -504,6 +484,7 @@ class WalletConnectRepositoryImpl(
                 session.metaData?.icons?.getOrNull(0) ?: String.Empty,
                 String.Empty,
                 String.Empty,
+                String.Empty,
                 Int.InvalidValue,
                 false, // todo: how do we know this here.
                 session.metaData,
@@ -552,12 +533,29 @@ class WalletConnectRepositoryImpl(
                     .mergeWithoutDuplicates(getV2Sessions())
             }
 
-    // todo: add WC 2.0 sessions here with ByTopic instead?
     override fun getDappSessionById(peerId: String): Single<DappSessionV1> =
         dappDao.getDappSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
 
-    /*private fun getDappSessionByTopic(topic: String): DappSessionV2 =
-        SignClient.getSettledSessionByTopic(topic)*/
+    fun getDappSessionByTopic(topic: String, address: String = String.Empty, chainId: Int = Int.InvalidValue): DappSessionV2? {
+        val session = SignClient.getSettledSessionByTopic(topic) ?: return null
+        val networkName = getNetworkNameOrNull(chainId) ?: String.Empty
+        // todo: create some mapper instead
+        return DappSessionV2(
+            address,
+            session.topic,
+            "2",
+            session.metaData?.name ?: String.Empty,
+            // todo: check which icon is good
+            session.metaData?.icons?.getOrNull(0) ?: String.Empty,
+            String.Empty,
+            networkName,
+            String.Empty,
+            chainId,
+            false, // todo: how do we know this here.
+            session.metaData,
+            session.namespaces
+        )
+    }
 
     private fun getUserReadableData(message: WCEthereumSignMessage) =
         when (message.type) {

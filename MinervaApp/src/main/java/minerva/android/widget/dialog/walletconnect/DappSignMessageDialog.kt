@@ -37,14 +37,11 @@ class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> U
         setupHeader(session.name, session.networkName, session.iconUrl)
     }
 
-    // todo: implement and move somewhere reasonable
-    fun getNetworkNameFromChainId(chainId: Int): String = ""
-
     fun setContentV2(text: String, session: DappSessionV2) = with(binding) {
         message.setTitleAndBody(context.getString(R.string.message), text)
         accountType.setNetwork(session.accountName, session.address, session.chainId)
-        val networkName = getNetworkNameFromChainId(session.chainId)
-        setupHeader(session.name, networkName, session.iconUrl)
+        setupHeader(session.name, session.networkName,session.iconUrl)
+        // todo: accountName, networkName
     }
 
     companion object {

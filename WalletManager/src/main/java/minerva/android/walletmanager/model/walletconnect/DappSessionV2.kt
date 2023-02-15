@@ -12,6 +12,7 @@ data class DappSessionV2(
     override var name: String = String.Empty,
     override val iconUrl: String = String.Empty,
     override val peerId: String = String.Empty,
+    override val networkName: String = String.Empty,
     override val accountName: String = String.Empty,
     override val chainId: Int = Int.InvalidValue,
     override val isMobileWalletConnect: Boolean = false,

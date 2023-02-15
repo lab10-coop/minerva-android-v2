@@ -13,7 +13,7 @@ data class DappSessionV1(
     override val iconUrl: String = String.Empty,
     override val peerId: String = String.Empty,
     val remotePeerId: String? = String.Empty,
-    val networkName: String = String.Empty,
+    override val networkName: String = String.Empty,
     override val accountName: String = String.Empty,
     override val chainId: Int = Int.InvalidValue,
     val handshakeId: Long = Long.InvalidValue,
