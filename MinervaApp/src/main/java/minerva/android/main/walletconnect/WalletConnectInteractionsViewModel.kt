@@ -60,7 +60,7 @@ class WalletConnectInteractionsViewModel(
     walletActionsRepository,
     unsupportedNetworkRepository
 ) {
-    internal var currentDappSession: DappSessionV1? = null
+    internal var currentDappSession: DappSession? = null
     private var currentRate: BigDecimal = Double.InvalidBigDecimal
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
@@ -142,15 +142,18 @@ class WalletConnectInteractionsViewModel(
                     }
             is OnEthSignV2 -> Single.just(OnEthSignRequestV2(status.message, status.session))
             is OnDisconnect -> Single.just(OnDisconnected(sessionName = status.sessionName))
-            is OnEthSendTransaction -> {
+            is OnEthSendTransactionV1 -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
+            }
+            is OnEthSendTransactionV2 -> {
+                getTransactionCosts(status.session, status)
             }
             is OnFailure -> Single.just(if (status.sessionName.isNotEmpty()) OnGeneralError(status.error) else DefaultRequest)
             else -> Single.just(DefaultRequest)
         }
 
-    private fun getTransactionCosts(session: DappSessionV1, status: OnEthSendTransaction): Single<WalletConnectState> {
+    private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
         transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)
             ?.let { account -> currentAccount = account }
@@ -339,7 +342,12 @@ class WalletConnectInteractionsViewModel(
                     logToFirebase("Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt")
                     weiCoinTransactionValue = NO_COIN_TX_VALUE
                     currentDappSession?.let { session ->
-                        walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
+                        when {
+                            session is DappSessionV1 ->
+                                walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
+                            session is DappSessionV2 ->
+                                walletConnectRepository.approveTransactionRequestV2(session.topic, txReceipt)
+                        }
                     }
                     txReceipt
                 }
@@ -410,7 +418,12 @@ class WalletConnectInteractionsViewModel(
     fun rejectRequest(isMobileWalletConnect: Boolean) {
         weiCoinTransactionValue = NO_COIN_TX_VALUE
         currentDappSession?.let { session ->
-            walletConnectRepository.rejectRequest(session.peerId)
+            when {
+                session is DappSessionV1 ->
+                    walletConnectRepository.rejectRequest(session.peerId)
+                session is DappSessionV2 ->
+                    walletConnectRepository.rejectRequestV2(session.topic)
+            }
             successWalletConnectInteraction(isMobileWalletConnect)
         }
     }

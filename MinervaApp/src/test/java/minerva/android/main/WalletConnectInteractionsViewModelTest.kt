@@ -165,7 +165,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(tx, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(tx, "peerId"))
         )
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSessionV1())))
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
@@ -231,7 +231,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             )
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSessionV1())))
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
@@ -288,7 +288,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(
@@ -343,7 +343,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(
@@ -398,7 +398,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(
@@ -447,7 +447,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(
@@ -491,7 +491,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(
@@ -540,7 +540,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(
@@ -712,7 +712,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+            Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(

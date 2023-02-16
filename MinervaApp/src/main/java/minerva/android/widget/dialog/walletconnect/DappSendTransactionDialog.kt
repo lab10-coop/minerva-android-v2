@@ -15,7 +15,7 @@ import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.walletconnect.DappSessionV1
+import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 import minerva.android.walletmanager.utils.BalanceUtils
 import java.math.BigDecimal
@@ -41,7 +41,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
 
     fun setContent(
         transaction: WalletConnectTransaction,
-        session: DappSessionV1,
+        session: DappSession,
         account: Account?,
         showGasPriceDialog: () -> Unit,
         recalculateTxCost: (BigDecimal) -> WalletConnectTransaction,

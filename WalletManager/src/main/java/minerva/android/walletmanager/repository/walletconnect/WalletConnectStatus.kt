@@ -11,5 +11,7 @@ data class OnSessionRequestV2(val meta: WalletConnectPeerMeta, val numberOfNonEi
 data class OnDisconnect(val sessionName: String = String.Empty) : WalletConnectStatus()
 data class OnEthSign(val message: String, val peerId: String) : WalletConnectStatus()
 data class OnEthSignV2(val message: String, val session: DappSessionV2) : WalletConnectStatus()
-data class OnEthSendTransaction(val transaction: WalletConnectTransaction, val peerId: String) : WalletConnectStatus()
+sealed class OnEthSendTransaction(open val transaction: WalletConnectTransaction) : WalletConnectStatus()
+data class OnEthSendTransactionV1(override val transaction: WalletConnectTransaction, val peerId: String) : OnEthSendTransaction(transaction)
+data class OnEthSendTransactionV2(override val transaction: WalletConnectTransaction, val session: DappSessionV2) : OnEthSendTransaction(transaction)
 data class OnFailure(val error: Throwable, val sessionName: String = String.Empty) : WalletConnectStatus()

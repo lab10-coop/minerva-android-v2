@@ -25,16 +25,14 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
-import minerva.android.kotlinUtils.crypto.toByteArray
-import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.MESSAGE
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.TYPED_MESSAGE
-import minerva.android.walletConnect.model.jsonRpc.JsonRpcError
-import minerva.android.walletConnect.model.jsonRpc.JsonRpcErrorResponse
+import minerva.android.walletConnect.model.ethereum.WCEthereumTransaction
+import minerva.android.walletConnect.model.exceptions.InvalidJsonRpcParamsException
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
@@ -59,7 +57,7 @@ class WalletConnectRepositoryImpl(
     private val logger: Logger,
     private var wcClient: WCClient = WCClient(),
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap(),
-    private val builder: GsonBuilder = GsonBuilder()
+    builder: GsonBuilder = GsonBuilder()
 ) : WalletConnectRepository {
     private var status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override var connectionStatusFlowable: Flowable<WalletConnectStatus> =
@@ -121,17 +119,18 @@ class WalletConnectRepositoryImpl(
                 fun caipChainIdToInt(chainId: String?): Int {
                     return chainId?.split(":")?.get(1)?.toInt() ?: Int.InvalidValue
                 }
+                val chainId = caipChainIdToInt(sessionRequest.chainId)
 
                 // todo: use some constants here
                 // todo: maybe all sign messages could be combined in one case?
                 when (sessionRequest.request.method) {
                     "personal_sign" -> {
                         // this seems to be something metamask specific
+                        // todo: throw InvalidJsonRpcParamsException?
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#personal_sign
                         val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         currentEthMessage = WCEthereumSignMessage(type = PERSONAL_MESSAGE, raw = params)
-                        val chainId = caipChainIdToInt(sessionRequest?.chainId)
                         // todo: isMobileWalletConnect?
                         // todo: accountName needs to come from somewhere else..
                         val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
@@ -141,10 +140,10 @@ class WalletConnectRepositoryImpl(
                     }
                     "eth_sign" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_sign
+                        // todo: throw InvalidJsonRpcParamsException?
                         val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         currentEthMessage = WCEthereumSignMessage(type = MESSAGE, raw = params)
-                        val chainId = caipChainIdToInt(sessionRequest?.chainId)
                         // todo: isMobileWalletConnect?
                         // todo: accountName needs to come from somewhere else..
                         val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
@@ -155,8 +154,8 @@ class WalletConnectRepositoryImpl(
                     "eth_signTypedData" -> {
                         // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_signtypeddata
                         // todo: refactor? this section is weird because it tries to use WC 1.0 structures
-                        val paramsJsonArray = JsonParser.parseString(sessionRequest.request.params).asJsonArray
-                        val params: List<String> = paramsJsonArray
+                        // todo: throw InvalidJsonRpcParamsException?
+                        val params: List<String> = JsonParser.parseString(sessionRequest.request.params).asJsonArray
                             .map { value ->
                                 if (value.toString().startsWith("\"0x")) {
                                     return@map value.asString
@@ -172,7 +171,6 @@ class WalletConnectRepositoryImpl(
                             }
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         currentEthMessage = WCEthereumSignMessage(type = TYPED_MESSAGE, raw = params)
-                        val chainId = caipChainIdToInt(sessionRequest?.chainId)
                         // todo: isMobileWalletConnect?
                         // todo: accountName needs to come from somewhere else..
                         val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
@@ -181,21 +179,28 @@ class WalletConnectRepositoryImpl(
                         }
                     }
                     "eth_sendTransaction" -> {
-                        // todo
-                        /*Timber.i("transaction: $transaction")
-                        currentRequestId = id
-                        status.onNext(
-                            OnEthSendTransaction(
-                                WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
-                                peerId
+                        val transaction =
+                            gson.fromJson<List<WCEthereumTransaction>>(sessionRequest.request.params, WCEthereumTransaction::class.java)
+                                .firstOrNull() ?: throw InvalidJsonRpcParamsException(sessionRequest.request.id)
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        Timber.i("${LoggerMessages.ON_ETH_SEND_TX} topic: ${sessionRequest.topic}; transaction: $transaction")
+                        // todo: isMobileWalletConnect?
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, transaction.from, chainId)
+                        session?.let {
+                            status.onNext(
+                                OnEthSendTransactionV2(
+                                    WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
+                                    session
+                                )
                             )
-                        )*/
+                        }
                     }
                     "eth_signTransaction" -> {
-                        // todo: but not that common or important.
+                        // todo: but not that common or important. wasn't implemented for wc 1.0
                     }
                     "eth_sendRawTransaction" -> {
-                        // todo: but not that common or important.
+                        // todo: but not that common or important. wasn't implemented for wc 1.0
                     }
                 }
             }
@@ -206,8 +211,7 @@ class WalletConnectRepositoryImpl(
                 when (deletedSession) {
                     is Sign.Model.DeletedSession.Success -> {
                         Timber.i("onSessionDelete Success")
-                        val deletedSessionSuccess = deletedSession as Sign.Model.DeletedSession.Success
-                        val session = SignClient.getSettledSessionByTopic(deletedSessionSuccess.topic)
+                        val session = SignClient.getSettledSessionByTopic(deletedSession.topic)
                         val name = session?.metaData?.name
                         // todo: fetching the name of the session doesn't seem to work.
                         // todo: also we could give a reason for the session end here.
@@ -330,7 +334,7 @@ class WalletConnectRepositoryImpl(
                 logger.logToFirebase("${LoggerMessages.ON_ETH_SEND_TX} peerId: $peerId; transaction: $transaction")
                 currentRequestId = id
                 status.onNext(
-                    OnEthSendTransaction(
+                    OnEthSendTransactionV1(
                         WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
                         peerId
                     )
@@ -667,8 +671,8 @@ class WalletConnectRepositoryImpl(
     }
 
     override fun approveRequestV2(topic: String, privateKey: String) {
-        logger.logToFirebase("${LoggerMessages.APPROVE_REQUEST} $topic")
-        Timber.i("${LoggerMessages.APPROVE_REQUEST} $topic")
+        logger.logToFirebase("${LoggerMessages.APPROVE_REQUEST} topic: $topic")
+        Timber.i("${LoggerMessages.APPROVE_REQUEST} topic: $topic")
         val jsonRpcResponse = Sign.Model.JsonRpcResponse.JsonRpcResult(
             id = currentRequestId,
             result = signData(privateKey)
@@ -681,8 +685,21 @@ class WalletConnectRepositoryImpl(
     }
 
     override fun approveTransactionRequest(peerId: String, message: String) {
-        logger.logToFirebase("${LoggerMessages.APPROVE_TX_REQUEST} $peerId")
+        logger.logToFirebase("${LoggerMessages.APPROVE_TX_REQUEST} peerId: $peerId")
         clientMap[peerId]?.approveRequest(currentRequestId, message)
+    }
+
+    override fun approveTransactionRequestV2(topic: String, message: String) {
+        logger.logToFirebase("${LoggerMessages.APPROVE_TX_REQUEST} topic: $topic")
+        val jsonRpcResponse = Sign.Model.JsonRpcResponse.JsonRpcResult(
+            id = currentRequestId,
+            result = message
+        )
+        Timber.i("${LoggerMessages.APPROVE_REQUEST} $topic $jsonRpcResponse")
+        val result = Sign.Params.Response(sessionTopic = topic, jsonRpcResponse = jsonRpcResponse)
+        SignClient.respond(result) {error ->
+            Timber.e(error.toString())
+        }
     }
 
     private fun signData(privateKey: String) = if (currentEthMessage.type == TYPED_MESSAGE) {
