@@ -102,27 +102,40 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    // todo: implement
-    // todo: why is this the same as BaseWalletConnectInteractionsActivity?
-    protected fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int,
-                                         eip155ProposalNamespace: WalletConnectProposalNamespace) {
-
-
-        // todo: move this to a function
-        var networksSupported = true
+    // todo: move somewhere else?
+    private fun areAllNetworksSupported(numberOfNonEip155Chains: Int, eip155ProposalNamespace: WalletConnectProposalNamespace): Boolean {
         if (numberOfNonEip155Chains > 0) {
-            networksSupported = false
+            return false
         }
         if (/* todo: unsupported evm chains */ false) {
-            networksSupported = false
+            return false
         }
+        return true
+    }
 
-        // todo: move this to a function
-        var methodOrEventSupported = true
+    // todo: move somewhere else?
+    private fun areAllMethodsAndEventsSupported(eip155ProposalNamespace: WalletConnectProposalNamespace): Boolean {
         if (/* todo: check methods */ false) {
-            methodOrEventSupported = false
+            return false
         }
-        // todo: check extensions and move that to a function
+        if (/* todo: check events */ false) {
+            return false
+        }
+        return true
+    }
+
+    // todo: move somewhere else?
+    private fun areAllExtensionsSupported(eip155ProposalNamespace: WalletConnectProposalNamespace): Boolean {
+        // todo: check extensions
+        return true
+    }
+
+    // todo: implement
+    // todo: why is this the same as BaseWalletConnectInteractionsActivity?
+    protected fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int, eip155ProposalNamespace: WalletConnectProposalNamespace) {
+        val networksSupported = areAllNetworksSupported(numberOfNonEip155Chains, eip155ProposalNamespace)
+        val methodOrEventSupported = areAllMethodsAndEventsSupported(eip155ProposalNamespace)
+        val extensionsSupported = areAllExtensionsSupported(eip155ProposalNamespace)
 
         confirmationDialogDialog = DappConfirmationDialogV2(requireContext(),
             {
@@ -145,11 +158,14 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             },
             {
                 // reject session
-                var reason = "User rejection" // todo: localize?
+                // todo: localize reason?
+                var reason = "User rejection"
                 if (!networksSupported) {
-                    reason = "Network(s) not supported" // todo: localize?
+                    reason = "Network(s) not supported"
                 } else if (!methodOrEventSupported) {
-                    reason = "Method(s) or Event(s) not supported" // todo: localize?
+                    reason = "Method(s) or Event(s) not supported"
+                } else if (!extensionsSupported) {
+                    reason = "Extension(s) not supported"
                 }
                 viewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
                 shouldScan = true
@@ -199,6 +215,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
             WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
             WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network, viewModel.account.chainId)
+            WalletConnectAlertType.CHANGE_ACCOUNT -> { /* do nothing */ }
         }
     }
 

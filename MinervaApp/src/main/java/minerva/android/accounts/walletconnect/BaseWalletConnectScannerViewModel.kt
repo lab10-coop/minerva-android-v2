@@ -66,7 +66,7 @@ abstract class BaseWalletConnectScannerViewModel(
 
     val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(selectedChainId)
 
-    val availableAddresses: List<String> get() = accountManager.getAllAccounts()
+    val availableAddresses: List<String> get() = accountManager.getAllAccountsForSelectedNetworksType()
         .filter { account -> account.shouldShow }
         .map { account -> account.address }
         .distinct()
@@ -100,7 +100,7 @@ abstract class BaseWalletConnectScannerViewModel(
                                 handleSessionRequest(status)
                             }
                             is OnSessionRequestV2 -> {
-                                // todo: do topic and handshakeId need to be set here?
+                                // topic and handshakeId only need to be set for WC 1.0
                                 handleSessionRequestV2(status)
                             }
                             is OnDisconnect -> setLiveDataOnDisconnected(status.sessionName)
@@ -192,11 +192,12 @@ abstract class BaseWalletConnectScannerViewModel(
         }
     }
 
+    // todo: only use this for WC 1.0, this need to be verified
     private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int, account: Account, isMobileWalletConnect: Boolean) = DappSessionV1(
         account.address,
         currentSession.topic,
         currentSession.version,
-        currentSession.bridge.toString(), // todo: fix this, that's not a real solution
+        currentSession.bridge ?: "",
         currentSession.key,
         meta.name,
         getIcon(meta.icons),

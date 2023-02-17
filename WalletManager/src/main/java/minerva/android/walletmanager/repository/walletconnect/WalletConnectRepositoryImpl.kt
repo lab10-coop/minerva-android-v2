@@ -3,6 +3,7 @@ package minerva.android.walletmanager.repository.walletconnect
 import android.app.Application
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
+import com.google.gson.reflect.TypeToken
 import com.walletconnect.android.Core
 import com.walletconnect.android.CoreClient
 import com.walletconnect.android.relay.ConnectionType
@@ -179,8 +180,10 @@ class WalletConnectRepositoryImpl(
                         }
                     }
                     "eth_sendTransaction" -> {
+                        // It seems like eth_sendTransaction allows for multiple Transactions
+                        val listType = object : TypeToken<List<WCEthereumTransaction>>() {}.type
                         val transaction =
-                            gson.fromJson<List<WCEthereumTransaction>>(sessionRequest.request.params, WCEthereumTransaction::class.java)
+                            gson.fromJson<List<WCEthereumTransaction>>(sessionRequest.request.params, listType)
                                 .firstOrNull() ?: throw InvalidJsonRpcParamsException(sessionRequest.request.id)
                         currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
                         Timber.i("${LoggerMessages.ON_ETH_SEND_TX} topic: ${sessionRequest.topic}; transaction: $transaction")
