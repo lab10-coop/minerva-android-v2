@@ -15,10 +15,10 @@
         android:gravity="start"
         android:textColor="@color/advancedTitleColor"
         android:textSize="@dimen/text_normal"
-        app:layout_constraintBottom_toBottomOf="@+id/arrow"
-        app:layout_constraintEnd_toStartOf="@+id/action_text"
+        app:layout_constraintBottom_toBottomOf="@+id/advanced_action_container"
+        app:layout_constraintEnd_toStartOf="@+id/advanced_action_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/arrow"
+        app:layout_constraintTop_toTopOf="@+id/advanced_action_container"
         tools:text="Clear Token Cache" />
 
     <TextView
@@ -37,27 +37,12 @@
         app:layout_constraintTop_toBottomOf="@id/title"
         tools:text="This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts." />
 
-    <TextView
-        android:id="@+id/action_text"
+    <LinearLayout
+        android:id="@+id/advanced_action_container"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_normal"
-        android:fontFamily="@font/rubik_regular"
-        android:textColor="@color/advancedActionColor"
-        android:textSize="@dimen/text_normal"
-        app:layout_constraintBottom_toBottomOf="@+id/arrow"
-        app:layout_constraintEnd_toStartOf="@+id/arrow"
-        app:layout_constraintTop_toTopOf="@+id/arrow"
-        tools:text="Clear" />
-
-    <ImageView
-        android:id="@+id/arrow"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:src="@drawable/ic_arrow_right"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
+        tools:ignore="Orientation"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
