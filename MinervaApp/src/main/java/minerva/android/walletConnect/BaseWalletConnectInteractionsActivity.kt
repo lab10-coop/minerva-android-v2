@@ -2,6 +2,7 @@ package minerva.android.walletConnect
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -107,6 +108,11 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             }
         })
         walletConnectViewModel.errorLiveData.observe(this, EventObserver { handleWalletConnectGeneralError(it.message) })
+        walletConnectViewModel.closeState.observe(this, Observer { state ->
+            if (state) {
+                moveTaskToBack(true)//close application to background
+            }
+        })
     }
 
     private fun handleWalletConnectTransactionError(state: OnWalletConnectTransactionError) {

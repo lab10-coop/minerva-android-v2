@@ -47,6 +47,9 @@ class WCClient(
 
     private var peerMeta: WCPeerMeta? = null
 
+    var isMobileWalletConnect: Boolean = false
+        private set
+
     var peerId: String = String.Empty
         private set
 
@@ -150,6 +153,7 @@ class WCClient(
         this.peerMeta = peerMeta
         this.peerId = peerId
         this.remotePeerId = remotePeerId
+        this.isMobileWalletConnect = session.isMobileWalletConnect
 
         val request = Request.Builder()
             .url(session.bridge)
@@ -297,7 +301,7 @@ class WCClient(
                     this.chainId?.let { currentChainId ->//chain id of already connected network (which would be changed)
                         if (Int.InvalidIndex != currentChainId) {
                             //set current chain id to data for get it while popap displaying; peerId (db record ~id~) for update db
-                            val meta: WCPeerMeta = peerMeta.copy(chainId = currentChainId, peerId = this.peerId)
+                            val meta: WCPeerMeta = peerMeta.copy(chainId = currentChainId, peerId = this.peerId, isMobileWalletConnect = this.isMobileWalletConnect)
                             onSessionRequest(this.remotePeerId, meta, chainId, this.peerId, this.handshakeId, CHANGE_TYPE)
                         }
                     }

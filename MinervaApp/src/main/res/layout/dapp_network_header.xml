@@ -78,10 +78,11 @@
 
         <ImageView
             android:id="@+id/arrow_separator"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/arrow_separator_ic" />
+            android:layout_width="@dimen/margin_normal"
+            android:layout_height="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:src="@drawable/arrow_separator_ic"
+            android:visibility="gone"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/add_account"

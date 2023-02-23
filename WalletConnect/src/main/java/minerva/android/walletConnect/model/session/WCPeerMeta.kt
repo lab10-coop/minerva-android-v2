@@ -9,7 +9,8 @@ data class WCPeerMeta(
     val description: String? = null,
     val icons: List<String> = listOf(),
     val chainId: Int = Int.InvalidIndex,
-    val peerId: String = String.Empty
+    val peerId: String = String.Empty,
+    val isMobileWalletConnect: Boolean = false
 )
 
 const val PEER_NAME = "Minerva Wallet"

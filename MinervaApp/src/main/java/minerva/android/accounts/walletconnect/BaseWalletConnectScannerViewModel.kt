@@ -1,5 +1,7 @@
 package minerva.android.accounts.walletconnect
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -33,9 +35,7 @@ abstract class BaseWalletConnectScannerViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val unsupportedNetworkRepository: UnsupportedNetworkRepository
 ) : BaseViewModel() {
-
     abstract var account: Account
-
     abstract fun hideProgress()
     abstract fun setLiveDataOnDisconnected(sessionName: String)
     abstract fun setLiveDataOnConnectionError(error: Throwable, sessionName: String)
@@ -43,6 +43,16 @@ abstract class BaseWalletConnectScannerViewModel(
     abstract fun handleSessionRequest(sessionRequest: OnSessionRequest)
     abstract fun closeScanner(isMobileWalletConnect: Boolean = false)
     abstract fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType)
+    //property which specified that application must be closed (to background)
+    private val _closeState: MutableLiveData<Boolean> = MutableLiveData(false)
+    val closeState: LiveData<Boolean> get() = _closeState
+
+    /**
+     * To Close State - set _closeState to "true" (move application to background if this isn't "scanner"(desktop) case)
+     */
+    private fun toCloseState() {
+        _closeState.value = true
+    }
 
     protected open val selectedChainId
         get() = when {
@@ -95,6 +105,10 @@ abstract class BaseWalletConnectScannerViewModel(
                                     //Int.ONE - CHANE NETWORK(through api) case
                                     if (Int.ONE == status.type && !accountManager.isChangeNetworkEnabled) {
                                         handleSessionRequest(status)
+                                    } else {
+                                        if (status.meta.isMobileWalletConnect) {
+                                            toCloseState()//close application(to background)
+                                        }
                                     }
                                 }
                             }
@@ -249,5 +263,4 @@ abstract class BaseWalletConnectScannerViewModel(
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
-
 }
