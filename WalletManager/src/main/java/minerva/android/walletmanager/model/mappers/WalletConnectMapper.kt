@@ -8,7 +8,7 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 
 object WalletConnectSessionMapper : Mapper<WalletConnectSession, WCSession> {
     override fun map(input: WalletConnectSession): WCSession = with(input) {
-        WCSession(topic, version, bridge, key)
+        WCSession(topic, version, bridge, key, isMobileWalletConnect)
     }
 }
 
@@ -20,6 +20,6 @@ object WCSessionToWalletConnectSessionMapper : Mapper<WCSession, WalletConnectSe
 
 object WCPeerToWalletConnectPeerMetaMapper : Mapper<WCPeerMeta, WalletConnectPeerMeta> {
     override fun map(input: WCPeerMeta): WalletConnectPeerMeta = with(input) {
-        WalletConnectPeerMeta(name, url, description, icons)
+        WalletConnectPeerMeta(name, url, description, icons, chainId = input.chainId, peerId = input.peerId, isMobileWalletConnect = input.isMobileWalletConnect)
     }
 }

@@ -39,4 +39,5 @@ interface LocalStorage {
     var areMainNetworksEnabled: Boolean
     var isProtectKeysEnabled: Boolean
     var isProtectTransactionsEnabled: Boolean
+    var isChangeNetworkEnabled: Boolean
 }

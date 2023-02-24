@@ -1,16 +1,13 @@
 package minerva.android.accounts.walletconnect
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.FirstIndex
-import minerva.android.kotlinUtils.InvalidId
-import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.ChainId
@@ -25,10 +22,8 @@ import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnFailure
+import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -40,9 +35,7 @@ abstract class BaseWalletConnectScannerViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val unsupportedNetworkRepository: UnsupportedNetworkRepository
 ) : BaseViewModel() {
-
     abstract var account: Account
-
     abstract fun hideProgress()
     abstract fun setLiveDataOnDisconnected(sessionName: String)
     abstract fun setLiveDataOnConnectionError(error: Throwable, sessionName: String)
@@ -50,6 +43,16 @@ abstract class BaseWalletConnectScannerViewModel(
     abstract fun handleSessionRequest(sessionRequest: OnSessionRequest)
     abstract fun closeScanner(isMobileWalletConnect: Boolean = false)
     abstract fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType)
+    //property which specified that application must be closed (to background)
+    private val _closeState: MutableLiveData<Boolean> = MutableLiveData(false)
+    val closeState: LiveData<Boolean> get() = _closeState
+
+    /**
+     * To Close State - set _closeState to "true" (move application to background if this isn't "scanner"(desktop) case)
+     */
+    private fun toCloseState() {
+        _closeState.value = true
+    }
 
     protected open val selectedChainId
         get() = when {
@@ -95,7 +98,19 @@ abstract class BaseWalletConnectScannerViewModel(
                             is OnSessionRequest -> {
                                 topic = status.topic
                                 handshakeId = status.handshakeId
-                                handleSessionRequest(status)
+
+                                if (null == status.type) {
+                                    handleSessionRequest(status)
+                                } else {
+                                    //Int.ONE - CHANE NETWORK(through api) case
+                                    if (Int.ONE == status.type && !accountManager.isChangeNetworkEnabled) {
+                                        handleSessionRequest(status)
+                                    } else {
+                                        if (status.meta.isMobileWalletConnect) {
+                                            toCloseState()//close application(to background)
+                                        }
+                                    }
+                                }
                             }
                             is OnDisconnect -> setLiveDataOnDisconnected(status.sessionName)
                             is OnFailure -> {
@@ -149,20 +164,25 @@ abstract class BaseWalletConnectScannerViewModel(
     /**
      * Update Session - update account for current wallet api connection
      * @param connectionPeerId - id of socket client connection
+     * @param chainId - id of chain which we need to change
      */
-    fun updateSession(connectionPeerId: String) {
+    fun updateSession(connectionPeerId: String, chainId: Int? = null) {
         if (account.id != Int.InvalidId) {
             launchDisposable {
                 walletConnectRepository.updateSession(
-                    connectionPeerId,
-                    account.address,
-                    account.chainId,
-                    account.name,
-                    account.network.name
+                    connectionPeerId = connectionPeerId,
+                    accountAddress = account.address,
+                    accountChainId = if (null == chainId) account.chainId else chainId,
+                    accountName = account.name,
+                    networkName = account.network.name
                 )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
+                        onComplete = {
+                            //set default value for showing empty list of network in future
+                            requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                        },
                         onError = { setLiveDataError(it) }
                     )
             }
@@ -243,5 +263,4 @@ abstract class BaseWalletConnectScannerViewModel(
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
-
 }

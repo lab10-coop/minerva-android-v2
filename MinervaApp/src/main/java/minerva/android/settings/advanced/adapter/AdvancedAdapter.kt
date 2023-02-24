@@ -8,6 +8,7 @@ import minerva.android.R
 import minerva.android.databinding.AdvancedSectionLayoutBinding
 import minerva.android.settings.advanced.model.AdvancedSection
 import minerva.android.settings.advanced.model.AdvancedSectionRowType
+import minerva.android.widget.AdvancedActionItem
 
 class AdvancedAdapter(
     private val onSettingPressed: (type: AdvancedSectionRowType) -> Unit
@@ -45,7 +46,11 @@ class AdvancedViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
                 setOnClickListener { onSettingPressed(section.rowType) }
                 title.setText(section.title)
                 description.setText(section.description)
-                actionText.setText(section.actionText)
+                //set details for "advanced_action_container"
+                advancedActionContainer.removeAllViews()
+                advancedActionContainer.addView(AdvancedActionItem(context).apply {
+                    setRow(section, onSettingPressed)
+                })
             }
         }
     }

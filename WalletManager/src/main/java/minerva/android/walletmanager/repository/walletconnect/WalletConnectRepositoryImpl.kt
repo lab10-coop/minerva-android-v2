@@ -33,7 +33,6 @@ import minerva.android.walletmanager.model.mappers.WCSessionToWalletConnectSessi
 import minerva.android.walletmanager.model.mappers.WalletConnectSessionMapper
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
@@ -77,18 +76,18 @@ class WalletConnectRepositoryImpl(
                 }
             }
 
-            onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId ->
+            onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId, type ->
                 logger.logToFirebase("${LoggerMessages.ON_SESSION_REQUEST}$peerId")
                 status.onNext(
                     OnSessionRequest(
                         WCPeerToWalletConnectPeerMetaMapper.map(meta),
                         chainId,
                         Topic(peerId, remotePeerId),
-                        handshakeId
+                        handshakeId,
+                        type = type
                     )
                 )
             }
-
             onFailure = { error, peerId, isForceTermination ->
                 if (isForceTermination) {
                     logger.logToFirebase("${LoggerMessages.CONNECTION_TERMINATION} $error, peerId: $peerId")

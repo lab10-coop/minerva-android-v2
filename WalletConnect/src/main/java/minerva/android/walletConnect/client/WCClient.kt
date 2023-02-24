@@ -6,6 +6,7 @@ import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.toByteArray
 import minerva.android.walletConnect.model.enums.MessageType
@@ -46,6 +47,9 @@ class WCClient(
 
     private var peerMeta: WCPeerMeta? = null
 
+    var isMobileWalletConnect: Boolean = false
+        private set
+
     var peerId: String = String.Empty
         private set
 
@@ -65,8 +69,8 @@ class WCClient(
 
     var onFailure: (error: Throwable, peerId: String, isForceTermination: Boolean) -> Unit = { _, _, _ -> }
     var onDisconnect: (code: Int, peerId: String?, isExternal: Boolean) -> Unit = { _, _, _ -> }
-    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String, handshakeId: Long) -> Unit =
-        { _, _, _, _, _ -> }
+    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String, handshakeId: Long, type: Int?) -> Unit =
+        { _, _, _, _, _, _ -> }
     var onEthSign: (id: Long, message: WCEthereumSignMessage, peerId: String) -> Unit = { _, _, _ -> }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
     var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction, peerId: String) -> Unit = { _, _, _ -> }
@@ -149,6 +153,7 @@ class WCClient(
         this.peerMeta = peerMeta
         this.peerId = peerId
         this.remotePeerId = remotePeerId
+        this.isMobileWalletConnect = session.isMobileWalletConnect
 
         val request = Request.Builder()
             .url(session.bridge)
@@ -280,13 +285,26 @@ class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId, handshakeId)
+                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId, handshakeId, null)
             }
             WCMethod.SESSION_UPDATE -> {
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 if (!param.approved) {
                     killSession(EXTERNAL_DISCONNECT)
+                }
+            }
+            WCMethod.SWITCH_ETHEREUM_CHAIN -> {
+                val param = gson.fromJson<List<WCSwitchEthereumChain>>(request.params)
+                val chainId: Int? = Integer.decode(param.firstOrNull()?.chainId)//decode from hex string("0xXXX") to Int
+                this.peerMeta?.let { peerMeta ->
+                    this.chainId?.let { currentChainId ->//chain id of already connected network (which would be changed)
+                        if (Int.InvalidIndex != currentChainId) {
+                            //set current chain id to data for get it while popap displaying; peerId (db record ~id~) for update db
+                            val meta: WCPeerMeta = peerMeta.copy(chainId = currentChainId, peerId = this.peerId, isMobileWalletConnect = this.isMobileWalletConnect)
+                            onSessionRequest(this.remotePeerId, meta, chainId, this.peerId, this.handshakeId, CHANGE_TYPE)
+                        }
+                    }
                 }
             }
             WCMethod.ETH_SIGN -> {
@@ -399,5 +417,6 @@ class WCClient(
 
     companion object {
         private const val EXTERNAL_DISCONNECT = "external_disconnect"
+        const val CHANGE_TYPE = 1
     }
 }

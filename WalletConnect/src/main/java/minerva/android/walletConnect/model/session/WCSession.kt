@@ -6,7 +6,8 @@ data class WCSession(
     val topic: String,
     val version: String,
     val bridge: String,
-    val key: String
+    val key: String,
+    val isMobileWalletConnect: Boolean = false
 ) {
     companion object {
         fun from(from: String): WCSession {

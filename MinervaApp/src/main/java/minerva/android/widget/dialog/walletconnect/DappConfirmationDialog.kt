@@ -1,21 +1,26 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.AdapterView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import minerva.android.R
-import minerva.android.accounts.walletconnect.DappAccountsSpinnerAdapter
-import minerva.android.accounts.walletconnect.DappNetworksSpinnerAdapter
-import minerva.android.accounts.walletconnect.NetworkDataSpinnerItem
-import minerva.android.accounts.walletconnect.WalletConnectAlertType
+import minerva.android.accounts.walletconnect.*
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.main.MainActivity
+import minerva.android.main.handler.replaceFragment
+import minerva.android.settings.advanced.AdvancedFragment
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
@@ -80,21 +85,48 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             meta.icons[FIRST_ICON]
         }
 
-    private fun setNetworkHeader() {
-        with(networkHeader.network) {
-            background = ContextCompat.getDrawable(context, R.drawable.network_not_defined_background)
-            setTextColor(ContextCompat.getColor(context, R.color.white))
+    /**
+     * Set Network Header - set layout details
+     * @param - instance of minerva.android.accounts.walletconnect.WalletConnectAlertType
+     */
+    private fun setNetworkHeader(dialogType: WalletConnectAlertType) {
+        networkHeader.apply {
+            network.apply {
+                if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+                    background = ContextCompat.getDrawable(context, R.drawable.rounded_background_gray_frame)
+                    setTextColor(ContextCompat.getColor(context, R.color.dappStatusColorGray))
+                } else {
+                    background = ContextCompat.getDrawable(context, R.drawable.network_not_defined_background)
+                    setTextColor(ContextCompat.getColor(context, R.color.white))
+                }
+            }
+            addAccount.apply {
+                if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+                    background = ContextCompat.getDrawable(context, R.drawable.rounded_background_gray_frame)
+                    setTextColor(ContextCompat.getColor(context, R.color.dappStatusColorGray))
+                }
+            }
+            arrowSeparator.apply {
+                visibility = if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            }
         }
     }
 
-    fun setupAccountSpinner(selectedAccountId: Int, availableAccounts: List<Account>, onAccountSelected: (Account) -> Unit) =
-        with(binding) {
-            val accountAdapter = DappAccountsSpinnerAdapter(
-                context,
-                R.layout.spinner_network_wallet_connect,
-                availableAccounts
-            ).apply { setDropDownViewResource(R.layout.spinner_network_wallet_connect) }
-            networkHeader.accountSpinner.apply {
+    fun setupAccountSpinner(selectedAccountId: Int, availableAccounts: List<Account>, dialogType: WalletConnectAlertType, onAccountSelected: (Account) -> Unit) {
+        networkHeader.accountSpinner.apply {
+            if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+                gone()
+            } else {
+                val accountAdapter = DappAccountsSpinnerAdapter(
+                    context,
+                    R.layout.spinner_network_wallet_connect,
+                    availableAccounts
+                ).apply { setDropDownViewResource(R.layout.spinner_network_wallet_connect) }
+
                 visibleOrGone(isAccountSpinnerVisible(availableAccounts.size))
                 addOnGlobalLayoutListener {
                     accountAdapter.selectedItemWidth = networkHeader.accountSpinner.width
@@ -114,6 +146,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                 }
             }
         }
+    }
 
     private fun isAccountSpinnerVisible(listSize: Int): Boolean = listSize > Int.EmptyResource && networkHeader.addAccount.isGone
 
@@ -121,11 +154,11 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         availableNetworks: List<NetworkDataSpinnerItem>,
         dialogType: WalletConnectAlertType,
         currentDAppSessionChainId: Int = Int.InvalidId, //current chainId connection (or -1 if connection wasn't installed)
+        network: BaseNetworkData,
         onNetworkSelected: (Int) -> Unit)
     = with(binding) {
-        setNetworkHeader()
+        setNetworkHeader(dialogType)
         showWaring()
-        networkHeader.network.gone()
         val networkAdapter = DappNetworksSpinnerAdapter(
             context,
             R.layout.spinner_network_wallet_connect,
@@ -134,7 +167,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             setDropDownViewResource(R.layout.spinner_network_wallet_connect)
         }
         //get current DApp session (item) index from availableNetworks (for set this network(account) like selected in spinner)
-        val networkItemIndex: Int =  if (Int.InvalidId == currentDAppSessionChainId) {
+        val networkItemIndex: Int = if (Int.InvalidId == currentDAppSessionChainId || Int.ONE == availableNetworks.size) {
             Int.FirstIndex
         } else {
             var indexByChainId: Int = Int.FirstIndex //DApp session default value
@@ -146,26 +179,31 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             }
             indexByChainId
         }
-        updateNotDefinedNetworkWarning(networkAdapter.getItem(networkItemIndex), dialogType)
-        networkHeader.networkSpinner.apply {
-            visible()
-            addOnGlobalLayoutListener() {
-                //the longest name length of network list
-                var longestNameLength = 0
-                val BASE_NAME_SIZE = 200
-                val SYMBOL_SIZE = 14
-                availableNetworks.forEach { network ->
-                    if (network.networkName.length > longestNameLength) longestNameLength = network.networkName.length
+        updateNotDefinedNetworkWarning(networkAdapter.getItem(networkItemIndex), dialogType, network.name)
+        if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+            networkHeader.network.text = availableNetworks.first().networkName
+        } else {
+            networkHeader.network.gone()
+            networkHeader.networkSpinner.apply {
+                visible()
+                addOnGlobalLayoutListener() {
+                    //the longest name length of network list
+                    var longestNameLength = 0
+                    val BASE_NAME_SIZE = 200
+                    val SYMBOL_SIZE = 14
+                    availableNetworks.forEach { network ->
+                        if (network.networkName.length > longestNameLength) longestNameLength = network.networkName.length
+                    }
+                    //set correct view width (for showing full name of network in dropdown menu)
+                    networkAdapter.selectedItemWidth = BASE_NAME_SIZE + (longestNameLength * SYMBOL_SIZE)
                 }
-                //set correct view width (for showing full name of network in dropdown menu)
-                networkAdapter.selectedItemWidth = BASE_NAME_SIZE + (longestNameLength * SYMBOL_SIZE)
-            }
-            adapter = networkAdapter
-            prepareSpinner(R.drawable.warning_background, networkItemIndex) { position, _ ->
-                val selectedItem = networkAdapter.getItem(position)
-                updateNotDefinedNetworkWarning(selectedItem, dialogType)
-                if (selectedItem.isAccountAvailable) {
-                    onNetworkSelected(selectedItem.chainId)
+                adapter = networkAdapter
+                prepareSpinner(R.drawable.warning_background, networkItemIndex) { position, _ ->
+                    val selectedItem = networkAdapter.getItem(position)
+                    updateNotDefinedNetworkWarning(selectedItem, dialogType)
+                    if (selectedItem.isAccountAvailable) {
+                        onNetworkSelected(selectedItem.chainId)
+                    }
                 }
             }
         }
@@ -189,24 +227,31 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-    private fun updateNotDefinedNetworkWarning(item: NetworkDataSpinnerItem, dialogType: WalletConnectAlertType) = with(networkHeader) {
-        val warningRes =
+    private fun updateNotDefinedNetworkWarning(item: NetworkDataSpinnerItem, dialogType: WalletConnectAlertType, networkName: String = "") = with(networkHeader) {
+        val warningRes: Int =
             if (item.isAccountAvailable) {
                 //set correct description for message
                 if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType)
                     R.string.change_account_not_defined_warning_message
+                else if (WalletConnectAlertType.CHANGE_NETWORK == dialogType)
+                    R.string.change_network_warning_message
                 else
                     R.string.not_defined_warning_message
             } else R.string.not_defined_warning_ethereum_message
         accountSpinner.visibleOrGone(item.isAccountAvailable)
         addAccount.apply {
-            visibleOrGone(!item.isAccountAvailable)
-            setupAddAccountListener(item.chainId)
+            if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+                visibleOrGone(true)
+                text = networkName
+            } else {
+                visibleOrGone(!item.isAccountAvailable)
+                setupAddAccountListener(item.chainId)
+            }
         }
         setupWarning(
             warningRes,
             null,
-            WalletConnectAlertType.CHANGE_ACCOUNT != dialogType
+            dialogType
         )
         binding.confirmationButtons.confirm.isEnabled = item.isAccountAvailable
     }
@@ -316,13 +361,45 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-    private fun setupWarning(warningRes: Int, networkName: String? = null, warningColor: Boolean = true/*color for message*/) = with(binding) {
+    private fun setupWarning(
+        warningRes: Int,
+        networkName: String? = null,
+        dialogType: WalletConnectAlertType? = null
+    ) = with(binding) {
         warringIcon.setImageResource(R.drawable.ic_warning)
-        networkName?.let { warning.setTextWithArgs(warningRes, networkName) }.orElse { warning.setText(warningRes) }
-        if (warningColor) {
-            warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
-        } else {
-            warning.setTextColor(ContextCompat.getColor(context, R.color.darkGray70))
+        networkName?.let {
+            warning.setTextWithArgs(warningRes, networkName)
+        }.orElse {
+            if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+                //create message with link for getting to "Settings" page (to "Advanced" tab)
+                val message: String = context.resources.getString(warningRes)
+                val wordForLink: String = "Settings"//word which would be clickable in warning message
+                val wordForLinkStartFrom: Int = message.indexOf(wordForLink)//number of first letter
+                val clickableSpan = object : ClickableSpan() {//create callback for link
+                    override fun onClick(v: View) {
+                        this@DappConfirmationDialog.cancel()//close dialog button
+                        //get instance of MainActivity from cache
+                        val mainActivityInstance = ((context as ContextThemeWrapper).baseContext as MainActivity)
+                        //set "settings" tab (in bottom menu) to chosen state
+                        mainActivityInstance.binding.bottomNavigation.menu.findItem(R.id.settings).isChecked = true
+                        mainActivityInstance.replaceFragment(AdvancedFragment.newInstance(), R.string.advanced)//go to AdvancedFragment
+                    }
+                }
+                val ss: SpannableString = SpannableString(message)//wrapper for clickable substring on w.message
+                //set clickable range to w.message
+                ss.setSpan(clickableSpan, wordForLinkStartFrom, wordForLinkStartFrom + wordForLink.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                warning.apply {//paste message (with link) to textView
+                    text = ss
+                    movementMethod = LinkMovementMethod.getInstance()//settings for link correct work
+                }
+            } else {
+                warning.setText(warningRes)
+            }
+        }
+        when (dialogType) {
+            WalletConnectAlertType.CHANGE_ACCOUNT, WalletConnectAlertType.CHANGE_NETWORK ->
+                warning.setTextColor(ContextCompat.getColor(context, R.color.darkGray70))
+            else -> warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
         }
     }
 
@@ -334,6 +411,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
 
     /**
      * Network Type - enum for comparing network type
+     *
      */
     enum class KindOfNetwork {
         MAIN, TEST, EQUAL;

@@ -89,13 +89,13 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             setOnDismissListener { shouldScan = true }
             setView(meta, viewDetails)
             handleNetwork(network, dialogType)
-            updateAccountSpinner()
+            updateAccountSpinner(dialogType)
             show()
         }
     }
 
-    private fun DappConfirmationDialog.updateAccountSpinner() {
-        setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts) { account ->
+    private fun DappConfirmationDialog.updateAccountSpinner(dialogType: WalletConnectAlertType) {
+        setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts, dialogType) { account ->
             viewModel.setNewAccount(account)
         }
     }
@@ -103,10 +103,11 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     private fun DappConfirmationDialog.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         when (dialogType) {
             WalletConnectAlertType.NO_ALERT -> setNoAlert()
-            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning(viewModel.availableNetworks, dialogType, Int.InvalidId) { chainId ->
-                viewModel.setAccountForSelectedNetwork(chainId)
-                updateAccountSpinner()
-            }
+            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING ->
+                setNotDefinedNetworkWarning(viewModel.availableNetworks, dialogType, Int.InvalidId, network) { chainId ->
+                    viewModel.setAccountForSelectedNetwork(chainId)
+                    updateAccountSpinner(dialogType)
+                }
             WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
             WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
             WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network, viewModel.account.chainId)
@@ -115,7 +116,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
     protected fun updateConnectionDialog(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog?.apply {
-            updateAccountSpinner()
+            updateAccountSpinner(dialogType)
             handleNetwork(network, dialogType)
         }
     }

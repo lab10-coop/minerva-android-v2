@@ -59,6 +59,7 @@ class AccountManagerImpl(
     override var rawAccounts: List<Account> = emptyList()
     override var cachedTokens: Map<Int, List<ERCToken>> = mapOf()
     override val areMainNetworksEnabled: Boolean get() = walletManager.areMainNetworksEnabled
+    override val isChangeNetworkEnabled: Boolean get() = localStorage.isChangeNetworkEnabled
     override val isProtectKeysEnabled: Boolean get() = localStorage.isProtectKeysEnabled
     override val isProtectTransactionsEnabled: Boolean get() = localStorage.isProtectTransactionsEnabled
     override val masterSeed: MasterSeed get() = walletManager.masterSeed
