@@ -12,5 +12,6 @@ data class WalletConnectPeerMeta(
     val icons: List<String> = listOf(),
     val peerId: String = String.Empty,
     val address: String = String.Empty,
-    val chainId: Int = Int.InvalidId
+    val chainId: Int = Int.InvalidId,
+    val isMobileWalletConnect: Boolean = false
 )

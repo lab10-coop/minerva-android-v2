@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/advanced_action_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_regular"
+            android:textColor="@color/advancedActionColor"
+            android:textSize="@dimen/text_normal"
+            android:visibility="gone"
+            tools:text="Clear" />
+
+        <ImageView
+            android:id="@+id/advanced_action_arrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:visibility="gone"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:gravity="center_vertical"
+            android:src="@drawable/ic_arrow_right"
+            tools:ignore="ContentDescription" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/advanced_action_change_network_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+</merge>

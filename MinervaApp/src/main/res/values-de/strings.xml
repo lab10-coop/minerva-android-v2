@@ -73,8 +73,9 @@
     <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
     <string name="remove_service_dialog_message">Do you really want to remove this service?</string>
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
-    <string name="hide_account_dialog_message">After confirming this message, this account is hidden but can still be used to receive transfers.\n\nTo make the account visible again, you have to tap on ‘+’ in the Values screen, select it from your addresses list and add the account.</string>
-    <string name="hide_account_dialog_title">Hide account</string>
+    <string name="hide_account_dialog_message_part_1">After confirming this message, this account will be hidden and because the network is UNMAINTAINED, the account CANNOT be shown again.</string>
+    <string name="hide_account_dialog_message_part_2">To access this account again, you have to import the private key into a wallet software which still supports this network.</string>
+    <string name="hide_account_dialog_title">Permanently hide \n\t\t\t\t\taccount</string>
     <string name="remove_owner">Remove owner</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -262,6 +263,7 @@
     <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
     <string name="Connect">Verbinden</string>
     <string name="connect_to_website">Mit Website verbinden</string>
+    <string name="change_network">change network</string>
     <string name="all_my_assets">All my Assets</string>
     <string name="free_ats_warning">You can only get 5 tATS per day and you need to have at least one ARTIS (τ1) account.</string>
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
@@ -276,6 +278,7 @@
     <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please click \'Add account\' button above.</string>
     <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
     <string name="change_account_not_defined_warning_message">You can change the existing WalletConnect \n connections  with a website (DApp) to another \n network and/or address. The changes will also be \n visible on the Service screen.</string>
+    <string name="change_network_warning_message">The connected website (DApp) has requested to change the network. If you want, you can deactivate this behavior in your Settings.</string>
     <string name="dapp_disconnected">%s session disconnected</string>
     <string name="dapp_unnamed">Unnamed</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
@@ -395,6 +398,9 @@
     <string name="transaction_cost_format">%1$s %2$s (%3$s)</string>
     <string name="advanced">Erweitert</string>
     <string name="clear_token_cache_title">Token Zwischenspeicher leeren</string>
+    <string name="change_network_prompt_title">Disable network change prompt</string>
+    <string name="change_network_prompt_description">This will disable the website (DApps) triggered network change for existing WalletConnection connections.</string>
+    <string name="change_network_prompt_action_text">checkbox</string>
     <string name="clear_token_cache_description">Dies leert die auf deinem Telefon gepeicherten Token-Informatonen. Alle benötgten Daten (z.B. Icons und Werte) werden neu geladen.</string>
     <string name="clear_token_cache_action_text">Leeren</string>
     <string name="clear">Leeren</string>

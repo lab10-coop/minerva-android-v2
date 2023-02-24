@@ -9,6 +9,9 @@ enum class WCMethod {
     @SerializedName("wc_sessionUpdate")
     SESSION_UPDATE,
 
+    @SerializedName("wallet_switchEthereumChain")
+    SWITCH_ETHEREUM_CHAIN,
+
     @SerializedName("eth_sign")
     ETH_SIGN,
 
