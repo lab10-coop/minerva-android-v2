@@ -18,6 +18,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
     //current DApp session wallet connection
     var dAppSessionMeta: WalletConnectPeerMeta? = null
+    var numberOfProvidedNetworks = 0
 
     init {
         setContentView(binding.root)
@@ -32,7 +33,8 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
      */
     fun setView(
         meta: WalletConnectPeerMeta,
-        viewDetails: ViewDetailsV2
+        viewDetails: ViewDetailsV2,
+        _numberOfProvidedNetworks: Int
     )
     = with(binding) {
         //set current wallet connection dapp session
@@ -43,6 +45,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
             confirmationButtons.confirm.text = viewDetails.confirmButtonName
             connectionName.text = viewDetails.connectionName
         }
+        numberOfProvidedNetworks = _numberOfProvidedNetworks
     }
 
     // todo: check if this is correct
@@ -53,7 +56,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         confirmationButtons.confirm.isEnabled = true
         networkHeader.apply {
             networkWarning.visible()
-            networkWarning.text = "Fully supported (x networks)" // todo: localize
+            networkWarning.text = "Fully supported (${numberOfProvidedNetworks} networks)" // todo: localize
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
@@ -78,7 +81,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     private fun setOtherUnsupportedWarning() = with(binding) {
         networkHeader.apply {
             networkWarning.visible()
-            networkWarning.text = "Fully supported (x networks)" // todo: localize
+            networkWarning.text = "Fully supported (${numberOfProvidedNetworks} networks)" // todo: localize
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()

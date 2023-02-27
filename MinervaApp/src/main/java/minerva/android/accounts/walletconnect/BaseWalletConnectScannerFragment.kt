@@ -183,7 +183,8 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                     networkNames,
                     getString(R.string.connect_to_website),
                     getString(R.string.connect)
-                )
+                ),
+                viewModel.availableNetworks.size
             )
             var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
             if (!networksSupported) {
