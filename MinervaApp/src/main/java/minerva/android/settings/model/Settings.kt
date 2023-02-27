@@ -37,7 +37,8 @@ enum class SettingsRowType(val iconRes: Int) {
     CURRENCY(R.drawable.ic_currency),
     LANGUAGE(Int.EmptyResource),
     TWITTER(R.drawable.ic_twitter),
-    COMMUNITY(R.drawable.ic_community),
+    VISIT_MINERVA(R.drawable.ic_visit_minerva),
+    OFFICIAL_MINERVA_LINK3(R.drawable.ic_official_minerva_link3),
     APP_VERSION(Int.EmptyResource),
     LICENCE(Int.EmptyResource),
     TERMS_OF_SERVICE(Int.EmptyResource),
@@ -107,8 +108,9 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
         ),
         Settings(
             getString(R.string.info), listOf(
+                SettingRow(getString(R.string.visit_minerva), R.drawable.ic_visit_minerva, rowType = SettingsRowType.VISIT_MINERVA),
                 SettingRow(getString(R.string.follow_on_twitter), R.drawable.ic_twitter, rowType = SettingsRowType.TWITTER),
-                SettingRow(getString(R.string.join_community), R.drawable.ic_community, rowType = SettingsRowType.COMMUNITY),
+                SettingRow(getString(R.string.official_minerva_link3), R.drawable.ic_official_minerva_link3, rowType = SettingsRowType.OFFICIAL_MINERVA_LINK3),
                 SettingRow(
                     getString(R.string.version),
                     detailText = BuildConfig.VERSION_NAME,
@@ -132,5 +134,3 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
             ), SettingsSection.LEGAL, false
         )
     )
-
-
