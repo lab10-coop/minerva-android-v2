@@ -384,57 +384,6 @@
     <string name="fund_at_risk_warning">Act Carefully!</string>
 
 
-    <!--  Deprecated phrases (good to get deleted) -->
-    <string name="welcome_message">Restore your old wallet or create your new Minerva digital wallet.</string>
-    <string name="restore_old_wallet">Restore old wallet</string>
-    <string name="enter_your_new_wallet">Enter your new wallet</string>
-    <string name="instruction">What you can do with your new Minerva digital wallet:</string>
-    <string name="identity_instruction">Create new identities and use them to log in to different services.</string>
-    <string name="accounts_instruction">Own digital assets and use them for transactions and trading.</string>
-    <string name="services_instruction">Have a control over all the services you are sharing your data with.</string>
-    <string name="no_such_file_error_message">No backup data found for the Secret Recovery Phrase you entered. Please make sure that your device is currently online, you entered the Secret Recovery Phrase in the correct order and that you\’re using Secret Recovery Phrase which was created by the Minerva Wallet.</string>
-    <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="invalid_qr_code_message">Invalid QR code, please try again</string>
-    <string name="requested_data_message">Please, use identity with requested data</string>
-    <string name="show_address">Show address</string>
-    <string name="networks">Networks</string>
-    <string name="creating_account_error">Creating new account failed</string>
-    <string name="refresh_balances_error">Error while refreshing balances</string>
-    <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
-    <string name="soon">Soon</string>
-    <string name="for_developers">For Developers</string>
-    <string name="token_reset">Reset tokens</string>
-    <string name="collectibles">Collectibles</string>
-    <string name="rearrange_assets">Rearrange Assets</string>
-    <string name="add_tats">Add 5 tATS</string>
-    <string name="Connect">Connect</string>
-    <string name="free_ats_warning">You can only get 5 tATS per day and you need to have at least one ARTIS (τ1) account.</string>
-    <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
-    <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
-    <string name="dapp_deleted">Dapp deleted</string>
-    <string name="sending">Sending</string>
-    <string name="undefined_transaction">Undefined transaction</string>
-    <string name="feature_enabled_soon">This feature will be enabled soon</string>
-    <string name="authentication_fail">Authentication failed!</string>
-    <string name="authentication_fail_message">There was unexpected authentication error. Please try again.</string>
-    <string name="polygon_label">Polygon (Matic)</string>
-    <string name="make_sure_your_device_is_currently_online">Make sure your device\n is currently online.</string>
-    <string name="your_identity_label">Your identity</string>
-    <string name="your_data_label">Your data</string>
-    <string name="your_money_label">Your money</string>
-    <string name="your_own_them_label">Own them</string>
-    <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
-    <string name="default_dapp_dialog_confirm">Open</string>
-    <string name="uniswap_dialog_description">To use your Minerva Wallet, in Uniswap tap "Connect Wallet" then "Wallet Connect"</string>
-    <string name="uniswap_dialog_confirm">Open Uniswap</string>
-    <string name="honeyswap_dialog_description">To use your Minerva Wallet, in Honeyswap tap "Connect Wallet" then "Wallet Connect"</string>
-    <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
-    <string name="default_placeholder">default</string>
-    <string name="services_network_filter_main_color">#6442d1</string>
-    <string name="exclamation_mark">!</string>
-
 
 
 
