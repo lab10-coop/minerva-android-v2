@@ -9,15 +9,8 @@
     <string name="edit_order">Reihenfolge ändern</string>
     <string name="settings">Einstellungen</string>
     <string name="welcome_to_minerva">Willkommen in Minerva!</string>
-    <string name="welcome_message">Stelle deine bestehende Wallet wieder her oder erstelle eine neue via Minerva Wallet.</string>
     <string name="create_new_wallet">Neue Wallet erstellen</string>
-    <string name="restore_old_wallet">Alte wallet</string>
-    <string name="enter_your_new_wallet">Enter your new wallet</string>
     <string name="import_wallet">Importieren</string>
-    <string name="instruction">Was du mit deiner neuen Minerva Wallet alles machen kannst:</string>
-    <string name="identity_instruction">Erstelle neue Identitäten und verwende sie um dich bei verschiedenen Services anzumelden.</string>
-    <string name="accounts_instruction">Besitze digitale Werte und verwende diese für Transaktionen und Handel.</string>
-    <string name="services_instruction">Behalte die Kontrolle über die Services mit denen du deine Daten teilst.</string>
     <string name="enter_your_backup_words">Gib deine Secret Recovery Phrase ein</string>
     <string name="edit">Bearbeiten</string>
     <string name="remove">Löschen</string>
@@ -57,7 +50,6 @@
     <string name="share">Teilen</string>
     <string name="backup_instruction">Die Secret Recovery Phrase wird verwendet um deine Wallet und alle benötigten Schlüssel wiederherzustellen:</string>
     <string name="mnemonic_saved_to_clip_board">Secret Recovery Phrase in die Zwischenablage kopiert</string>
-    <string name="no_such_file_error_message">Keine Sicherung gefunden für die Secret Recovery Phrase die du eingegeben hast. Bitte stell\’ sicher das dein Gerät derzeit mit dem Internet verbunden ist, das du die Secret Recovery Phrase in der richtigen Reihenfolge eingegeben hast.</string>
     <string name="backup_alert_title">Du hast derzeit noch keine Sicherung von deiner Minerva Wallet erstellt.</string>
     <string name="sync_alert_title">Du bist aktuell nicht mit dem Internet verbunden. Bitte stell\' sicher das du regelmäßig online bist damit deine Daten und Einstellungen vollständig wiederhergestellt werden können.</string>
     <string name="backup_alert_message">Dies ist notwendig um deine Identitäten und Accounts wie von dir eingerichet wiederherstellt werden können.</string>
@@ -70,37 +62,28 @@
     <string name="required_field">Pflichtfeld</string>
     <string name="choose_an_identity">Wähle eine Identität</string>
     <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
-    <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
     <string name="remove_service_dialog_message">Do you really want to remove this service?</string>
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
     <string name="hide_account_dialog_message_part_1">After confirming this message, this account will be hidden and because the network is UNMAINTAINED, the account CANNOT be shown again.</string>
     <string name="hide_account_dialog_message_part_2">To access this account again, you have to import the private key into a wallet software which still supports this network.</string>
     <string name="hide_account_dialog_title">Permanently hide \n\t\t\t\t\taccount</string>
     <string name="remove_owner">Remove owner</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
     <string name="replace">Replace</string>
     <string name="replace_all">Replace all</string>
     <string name="add_as_new">Add as new</string>
     <string name="identity">Identity</string>
     <string name="select_identity_message">Please select identity</string>
-    <string name="invalid_qr_code_message">Invalid QR code, please try again</string>
-    <string name="requested_data_message">Please, use identity with requested data</string>
     <string name="send">Send</string>
     <string name="receive">Receive</string>
     <string name="amount">Amount</string>
-    <string name="show_address">Show address</string>
     <string name="add_safe_account">Add safe account</string>
     <string name="login_success_title">Painless Login Successful</string>
     <string name="login_success_message">You successfully logged into Service</string>
-    <string name="quick_login_success_message">Allow Charging Station Dashboard to send you push\nnotifications and proceed with painless login request?</string>
     <string name="login_failure_title">Painless Login Failure</string>
     <string name="login_failure_message">Login to service failed</string>
     <string name="dismiss">Dismiss</string>
     <string name="last_used">Last used:</string>
     <string name="add_account">Add account</string>
-    <string name="networks">Networks</string>
-    <string name="creating_account_error">Creating new account failed</string>
     <string name="transaction_success_title">Transaction Successful</string>
     <string name="transaction_success_message">You successfully transferred  %1$s %2$s</string>
     <string name="transaction_error_title">Error: Transaction failed</string>
@@ -116,8 +99,6 @@
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
     <string name="identity_saved_to_clipboard">Identity saved to clipboard</string>
     <string name="private_key_saved_to_clipboard">Private Key saved to clipboard</string>
-    <string name="refresh_balances_error">Error while refreshing balances</string>
-    <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
     <string name="activities_error">Error while fetching activities</string>
     <string name="removed">Removed</string>
     <string name="hidden">Hidden</string>
@@ -155,26 +136,14 @@
     <string name="open">Open</string>
     <string name="confirm_payment">Confirm payment</string>
     <string name="share_via">Share via</string>
-    <string name="soon">Soon</string>
-    <string name="no_funds">No funds</string>
-    <string name="no_funds_message">Please add at least 0.1 ATS to this ARTIS (Tau1) account</string>
     <string name="processing">Processing</string>
     <string name="channel_id">MinervaLoginChannel</string>
     <string name="message">Message</string>
-    <string name="known_user_login_message">You are already registered user of Charging Station\nDashboard with the identity %s</string>
     <string name="not_existed_identity_message">Identity that you already logged in does no exist</string>
     <string name="fill_requested_data_message">Pls fill Identity %s with requested data</string>
     <string name="add_owner">Add owner</string>
     <string name="current_owners">Current owners</string>
     <string name="owner_address">Owner address</string>
-    <string name="login_notification_title">Painless Login Request by Charging Station Dashboard</string>
-    <string name="login_request_message">Please double tap to confirm login</string>
-    <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
-    <string name="cannot_remove_account_title">You can\'t remove a account with funds</string>
-    <string name="cannot_remove_safe_account_message">Please remove other owners first and then transfer your funds to another account</string>
-    <string name="cannot_remove_account_message">Please transfer your funds to another account</string>
-    <string name="safe_account_removal_error">You can not remove this Safe Account</string>
-    <string name="safe_accounts_count_format">+%d Safe Accounts</string>
     <string name="did">DID</string>
     <string name="required">Required</string>
     <string name="change_account">Change Account</string>
@@ -223,13 +192,11 @@
     <string name="your_preferences">Deine Einstellungen</string>
     <string name="info">Info</string>
     <string name="legal">Rechtliches</string>
-    <string name="for_developers">Für Entwickler</string>
     <string name="use_main_networks">Mainnets verwenden</string>
     <string name="follow_on_twitter">Folge uns auf Twitter</string>
     <string name="join_community">Minerva Wallet auf Telegram</string>
     <string name="version">App Version</string>
     <string name="terms_of_service">AGBs</string>
-    <string name="token_reset">Token zurücksetzen</string>
     <string name="privacy_policy">Datenschutzerklärung</string>
     <string name="test_networks">Testnets</string>
     <string name="main_networks">Mainnets</string>
@@ -238,14 +205,10 @@
     <string name="outdated_wallet_error_message">The wallet backup data seems to be outdated, suggesting that you are using it on another device. If you continue using this wallet on this device anyway, no further backups will be made and data may get lost if something happens to this device. If this is the primary device you want to use your wallet with, you need to reinstall the app and recover the latest wallet data with the Secret Recovery Phrase.</string>
     <string name="wallet_connect_with_count_title">WalletConnect (%d)</string>
     <string name="wallet_connect_title">WalletConnect</string>
-    <string name="funds_at_risk_message">The use of main networks like xDai Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your Secret Recovery Phrase.</string>
-    <string name="fund_at_risk_warning">Act Carefully!</string>
     <string name="i_understand">I understand</string>
     <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
-    <string name="collectibles">Collectibles</string>
     <string name="tokens">Tokens</string>
     <string name="manage_token">Manage Assets</string>
-    <string name="rearrange_assets">Rearrange Assets</string>
     <string name="add_asset">Add Asset</string>
     <string name="contract_address_or_name">Contract Address or name</string>
     <string name="minerva_support">Minerva supports all %s Tokens. Please enter Token Name or Token Contract Address.</string>
@@ -254,27 +217,22 @@
     <string name="decimals">Decimals</string>
     <string name="invalid_account_address">Error: Invalid account address</string>
     <string name="invalid_token_address">Error: Invalid asset address</string>
-    <string name="add_tats">Add 5 tATS</string>
     <string name="buy_crypto">Crypto kaufen</string>
     <string name="wc_message">WalletConnect lets you connect to desktop websites by scaning a QR code.</string>
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
     <string name="connected">Verbunden</string>
     <string name="disconnect">Trennen</string>
     <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
-    <string name="Connect">Verbinden</string>
     <string name="connect_to_website">Mit Website verbinden</string>
     <string name="change_network">change network</string>
     <string name="all_my_assets">All my Assets</string>
-    <string name="free_ats_warning">You can only get 5 tATS per day and you need to have at least one ARTIS (τ1) account.</string>
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
     <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
-    <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
     <string name="unsupported_network_id_message">This website requests a connection to Chain id: %s, which is not yet supported by Minerva Wallet.</string>
     <string name="unsupported_network_name_message">This website requests a connection to Chain: %s, which is not yet supported by Minerva Wallet.</string>
     <string name="chain_id">Chain id: %s</string>
     <string name="chain_name">Chain: %s</string>
     <string name="missing_account_message">You don\'t have an account on %s yet. Please click \'Add account\' button above.</string>
-    <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
     <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please click \'Add account\' button above.</string>
     <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
     <string name="change_account_not_defined_warning_message">You can change the existing WalletConnect \n connections  with a website (DApp) to another \n network and/or address. The changes will also be \n visible on the Service screen.</string>
@@ -282,7 +240,6 @@
     <string name="dapp_disconnected">%s session disconnected</string>
     <string name="dapp_unnamed">Unnamed</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
-    <string name="dapp_deleted">Dapp deleted</string>
     <string name="confirm">Confirm</string>
     <string name="message_signing_request">Message signing request</string>
     <string name="export_private_key">Privater Schlüssel</string>
@@ -299,7 +256,6 @@
     <string name="custom">Custom</string>
     <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
     <string name="unknown_tx_speed">Unknown time</string>
-    <string name="sending">Sending</string>
     <string name="rapid">Rapid</string>
     <string name="fast">Fast</string>
     <string name="standard">Standard</string>
@@ -308,8 +264,6 @@
     <string name="unlimited">Unlimited</string>
     <string name="allowance_receiver">For</string>
     <string name="allowance">Allowance</string>
-    <string name="undefined_transaction">Undefined transaction</string>
-    <string name="feature_enabled_soon">This feature will be enabled soon</string>
     <string name="wc_connection_error_message">Your WalletConnect connection was closed, you will have to reconnect again to the website</string>
     <string name="enable">Aktivieren</string>
     <string name="create">Sichern</string>
@@ -322,8 +276,6 @@
     <string name="authentication_title">Use yor phone authentication</string>
     <string name="device_not_secured">Your device is not secured!</string>
     <string name="device_not_secured_message">Please change your device security settings and try again.</string>
-    <string name="authentication_fail">Authentication failed!</string>
-    <string name="authentication_fail_message">There was unexpected authentication error. Please try again.</string>
     <string name="choose_your_crypto">Choose your crypto</string>
     <string name="continue_to_ramp">Continue to Ramp</string>
     <string name="create_new_account">Add account</string>
@@ -347,7 +299,6 @@
     <string name="hide">Verstecken</string>
     <string name="no_addresses_left_info">Du hast die maximale Anzahl von Accounts erreicht</string>
     <string name="ethereum_label">Ethereum</string>
-    <string name="polygon_label">Polygon</string>
     <string name="celo_label">Celo</string>
     <string name="xdai_label">Gnosis Chain</string>
     <string name="create_your_first_account_header">Create your \nfirst account!</string>
@@ -362,15 +313,10 @@
     <string name="restore_wallet_title">Bestehende Wallet importieren</string>
     <string name="type_here">Type here</string>
     <string name="no_backup_data_found_for_the_secret_recovery_phrase_you_entered">No backup data found for the Secret Recovery Phrase you entered. \n\n Make sure your device \n is currently online.</string>
-    <string name="make_sure_your_device_is_currently_online">Make sure your device\n is currently online.</string>
     <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please join our community on <a href="https://t.me/MinervaWallet">Telegram</a> or <a href="https://minerva.digital/discord ">Discord</a>.</string>
     <string name="terms_of_service_info">Wenn du fortfährst, stimmst du den <a href="https://docs.minerva.digital/legal/terms">Nutzungsbedingungen</a> zu.</string>
     <string name="import_with_recovery_phrase">Importieren mit Recovery Phrase</string>
     <string name="import_info">Importiere eine bestehende Wallet oder lass Minerve eine neue für dich erstellen</string>
-    <string name="your_identity_label">Deine Identität</string>
-    <string name="your_data_label">Deine Daten</string>
-    <string name="your_money_label">Dein Geld</string>
-    <string name="your_own_them_label">Own them</string>
     <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
     <string name="empty" />
     <string name="nft_header">NFTs</string>
@@ -379,12 +325,6 @@
     <string name="more_label"> mehr</string>
     <string name="amount_label">Anzahl: %s</string>
 
-    <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
-    <string name="default_dapp_dialog_confirm">Open</string>
-    <string name="uniswap_dialog_description">To use your Minerva Wallet, in Uniswap tap "Connect Wallet" then "Wallet Connect"</string>
-    <string name="uniswap_dialog_confirm">Open Uniswap</string>
-    <string name="honeyswap_dialog_description">To use your Minerva Wallet, in Honeyswap tap "Connect Wallet" then "Wallet Connect"</string>
-    <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
     <string name="nft_graphic_error_message">Dieses NFT kann nicht angezeigt werden.</string>
     <string name="cd_dapp_icon">Dapp icon</string>
     <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
@@ -408,15 +348,12 @@
     <string name="error_invalid_token_id">Fehler: Ungültige Token ID</string>
     <string name="token_type">Typ</string>
     <string name="you_dont_own_this_token">Du besitzt diesen Token nicht</string>
-    <string name="default_placeholder">standard</string>
-    <string name="services_network_filter_main_color">#6442d1</string>
     <string name="unmaintained_network">UNMAINTAINED NETWORK</string>
     <string name="unmaintained_network_warning">WARNUNG: Nicht mehr unterstütztes Netzwerk</string>
     <string name="unmaintained_network_learn_dialog">Mehr erfahren</string>
     <string name="unmaintained_network_message_1">This network is not maintained \nanymore and over time transfers from accounts might be not possible any \nmore.</string>
     <string name="unmaintained_network_message_2">If you experience such a problem \nyou will have to export the private key and import it to another wallet, which still supports transactions on that network.\n\nFurther assistance can be given on our support channels.</string>
     <string name="unmaintained_network_message_3">Diese Nachricht nicht mehr anzeigen</string>
-    <string name="exclamation_mark">!</string>
     <string name="my_favorites">Meine Favoriten</string>
     <string name="my_favorites_item_description">"Private NFT-Kollektion"</string>
     <string name="open_in_explorer">Im Explorer öffnen</string>
@@ -428,6 +365,24 @@
     <string name="unknown_type">Unknown Type</string>
     <string name="paste_button_text">Paste from clipboard</string>
     <string name="switch_network">You need to switch to %s networks in the Settings first</string>
+
+
+    <!-- Disabled features  -->
+    <string name="quick_login_success_message">Allow Charging Station Dashboard to send you push\nnotifications and proceed with painless login request?</string>
+    <string name="no_funds_message">Please add at least 0.1 ATS to this ARTIS (Tau1) account</string>
+    <string name="known_user_login_message">You are already registered user of Charging Station\nDashboard with the identity %s</string>
+    <string name="login_notification_title">Painless Login Request by Charging Station Dashboard</string>
+    <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
+    <string name="cannot_remove_account_title">You can\'t remove a account with funds</string>
+    <string name="cannot_remove_safe_account_message">Please remove other owners first and then transfer your funds to another account</string>
+    <string name="cannot_remove_account_message">Please transfer your funds to another account</string>
+    <string name="safe_account_removal_error">You can not remove this Safe Account</string>
+    <string name="safe_accounts_count_format">+%d Safe Accounts</string>
+    <string name="funds_at_risk_message">The use of main networks like Gnosis Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your Secret Recovery Phrase.</string>
+    <string name="fund_at_risk_warning">Act Carefully!</string>
+
+
+
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
