@@ -226,7 +226,8 @@
     <string name="for_developers">Für Entwickler</string>
     <string name="use_main_networks">Mainnets verwenden</string>
     <string name="follow_on_twitter">Folge uns auf Twitter</string>
-    <string name="join_community">Minerva Wallet auf Telegram</string>
+    <string name="visit_minerva">View our website</string>
+    <string name="official_minerva_link3">official_minerva_link3</string>
     <string name="version">App Version</string>
     <string name="terms_of_service">AGBs</string>
     <string name="token_reset">Token zurücksetzen</string>

@@ -15,11 +15,9 @@ import minerva.android.databinding.FragmentSettingsBinding
 import minerva.android.extension.launchActivity
 import minerva.android.extension.openUri
 import minerva.android.extensions.showBiometricPrompt
-import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.backup.BackupActivity
-import minerva.android.settings.dialog.TokenResetDialog
 import minerva.android.settings.model.SettingsRowType
 import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
@@ -29,7 +27,6 @@ import minerva.android.wrapped.startAuthenticationWrappedActivity
 import minerva.android.wrapped.startCurrencyWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-
 
 class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
@@ -117,7 +114,8 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
         when (type) {
             BACKUP -> showBackupActivity()
             TWITTER -> context?.openUri(BuildConfig.TWITTER_APP, BuildConfig.TWITTER_WEB)
-            COMMUNITY -> context?.openUri(BuildConfig.TELEGRAM_APP, BuildConfig.TELEGRAM_WEB)
+            VISIT_MINERVA -> context?.openUri(webUri = BuildConfig.VISIT_MINERVA)
+            OFFICIAL_MINERVA_LINK3 -> context?.openUri(webUri = BuildConfig.OFFICIAL_MINERVA_LINK3)
             TERMS_OF_SERVICE -> context?.openUri(webUri = BuildConfig.TERMS_OF_SERVICE)
             PRIVACY_POLICY -> context?.openUri(webUri = BuildConfig.PRIVACY_POLICY)
             AUTHENTICATION -> startAuthenticationWrappedActivity(requireContext())

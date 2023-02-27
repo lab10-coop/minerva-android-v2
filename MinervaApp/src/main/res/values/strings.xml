@@ -227,7 +227,8 @@
     <string name="for_developers">For Developers</string>
     <string name="use_main_networks">Use Main Networks</string>
     <string name="follow_on_twitter">Follow us on Twitter</string>
-    <string name="join_community">Join Minerva\'s community</string>
+    <string name="visit_minerva">Visit minerva.digital</string>
+    <string name="official_minerva_link3">Official Minerva links</string>
     <string name="version">App Version</string>
     <string name="terms_of_service">Terms of Service</string>
     <string name="token_reset">Reset tokens</string>
