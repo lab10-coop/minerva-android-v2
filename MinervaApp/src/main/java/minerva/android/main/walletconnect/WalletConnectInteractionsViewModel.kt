@@ -20,6 +20,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.ChainId

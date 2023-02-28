@@ -17,6 +17,7 @@ import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
@@ -63,6 +64,10 @@ abstract class BaseWalletConnectScannerViewModel(
     private val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
 
     val availableNetworks: List<NetworkDataSpinnerItem> get() = prepareAvailableNetworks()
+
+    val networks: List<Network> = NetworkManager.networks
+        .filter { it.isActive }
+        .filter { it.testNet != accountManager.areMainNetworksEnabled }
 
     val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(selectedChainId)
 

@@ -15,6 +15,7 @@ import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.identity.IdentityManager
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.QrCode

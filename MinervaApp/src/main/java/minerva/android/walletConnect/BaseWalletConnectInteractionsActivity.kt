@@ -19,6 +19,7 @@ import minerva.android.main.handler.replaceFragment
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.ServicesFragment
 import minerva.android.utils.AlertDialogHandler
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
@@ -30,6 +31,7 @@ import minerva.android.widget.dialog.models.ViewDetails
 import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.*
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 import java.math.BigDecimal
 
 abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
@@ -371,7 +373,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                     getString(R.string.connect_to_website),
                     getString(R.string.connect)
                 ),
-                viewModel.availableNetworks.size
+                viewModel.networks.size
             )
             var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
             if (!networksSupported) {

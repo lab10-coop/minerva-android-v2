@@ -8,6 +8,7 @@ import minerva.android.extension.margin
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
@@ -18,6 +19,7 @@ import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV1
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV2
 import minerva.android.widget.dialog.walletconnect.DappDialog
+import timber.log.Timber
 
 abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
@@ -184,7 +186,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                     getString(R.string.connect_to_website),
                     getString(R.string.connect)
                 ),
-                viewModel.availableNetworks.size
+                viewModel.networks.size
             )
             var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
             if (!networksSupported) {
