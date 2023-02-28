@@ -288,48 +288,49 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                 *arrayOf(KindOfNetwork.MAIN.name.toLowerCase()))
     }
 
-
-    fun setUnsupportedNetworkMessage(network: BaseNetworkData, requestChainId: Int = Int.InvalidId) = with(binding) {
+    /**
+     * Set Unsupported Network Message - set details for popap message
+     * @param network - data from api (dapp) response
+     * @param requestChainId - chain id of current established network
+     * @param areMainNetworksEnabled - type of using network mode (test or main)
+     */
+    fun setUnsupportedNetworkMessage(network: BaseNetworkData, requestChainId: Int = Int.InvalidId, areMainNetworksEnabled: Boolean) = with(binding) {
         networkHeader.network.apply {
             networkHeader.network.text = getHeaderText(network, context)
-            setCompoundDrawablesRelativeWithIntrinsicBounds(
-                R.drawable.ic_alert_small,
-                NO_ICON,
-                NO_ICON,
-                NO_ICON
-            )
+            setCompoundDrawablesRelativeWithIntrinsicBounds( R.drawable.ic_alert_small, NO_ICON, NO_ICON, NO_ICON)
             setBackgroundResource(R.drawable.error_background)
             setTextColor(ContextCompat.getColor(context, R.color.alertRed))
         }
-
-        warning.text = if (requestChainId == Int.InvalidId)
-            getWarningText(network, context)
-        else {
-            var warningText: String = String.Empty
-
-            //using "try/catch" for prevent exception while getting network from api(unsupported chain)
-            try {
-                val requestNetwork = NetworkManager.getNetwork(requestChainId)
-                val responseNetwork = NetworkManager.getNetwork(network.chainId)//network from api (DApp) response
-
-                //when network type the same (main or test) get default warning message; when isn't the same - regarding change network type by type of api response
-                warningText = if (requestNetwork.testNet == responseNetwork.testNet) {
-                    getWarningText(network, context)
-                } else {
-                    if (requestNetwork.testNet) {
+        var warningText: String = String.Empty
+        //case for generate message about - ~"network type MUST be changed to opposite ..."~
+        try {//using "try/catch" for prevent exception while getting network from api(unsupported chain)
+            val responseNetwork = NetworkManager.getNetwork(network.chainId)//network from api (DApp) response
+            if (requestChainId != Int.InvalidId) {//MANUALLY DAPP CLICKING CASE
+                val requestNetwork = NetworkManager.getNetwork(requestChainId)//account network which we want to change
+                if (requestNetwork.testNet != responseNetwork.testNet) {//if types(MAIN, TEST) of networks are different - generate message
+                    warningText = if (requestNetwork.testNet) {
                         getWarningText(network, context, KindOfNetwork.TEST)
                     } else {
                         getWarningText(network, context, KindOfNetwork.MAIN)
                     }
                 }
-            } catch (e: Exception) { }
-
-            //if we get error from api get default warning text
-            if (warningText == String.Empty)
-                getWarningText(network, context)
-            else {
-                warningText
+            } else {//SCANNER CASE
+                if (areMainNetworksEnabled) {
+                    if (responseNetwork.testNet) {
+                        warningText = getWarningText(network, context, KindOfNetwork.MAIN)
+                    }
+                } else {
+                    if (responseNetwork.testNet == false) {
+                        warningText = getWarningText(network, context, KindOfNetwork.TEST)
+                    }
+                }
             }
+        } catch (e: Exception) { /*DO NOTHING*/ }
+        //if we get error from api get default warning text
+        warning.text = if (warningText == String.Empty)
+            getWarningText(network, context)
+        else {
+            warningText
         }
         confirmationButtons.confirm.isEnabled = false
         showWaring()
