@@ -47,12 +47,8 @@ abstract class BaseWalletConnectScannerViewModel(
     private val _closeState: MutableLiveData<Boolean> = MutableLiveData(false)
     val closeState: LiveData<Boolean> get() = _closeState
 
-    /**
-     * To Close State - set _closeState to "true" (move application to background if this isn't "scanner"(desktop) case)
-     */
-    private fun toCloseState() {
-        _closeState.value = true
-    }
+    val areMainNetworksEnabled: Boolean
+        get() = accountManager.areMainNetworksEnabled
 
     protected open val selectedChainId
         get() = when {
@@ -263,4 +259,11 @@ abstract class BaseWalletConnectScannerViewModel(
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
+
+    /**
+     * To Close State - set _closeState to "true" (move application to background if this isn't "scanner"(desktop) case)
+     */
+    private fun toCloseState() {
+        _closeState.value = true
+    }
 }
