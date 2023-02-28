@@ -145,7 +145,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                 val selectedAddress = viewModel.availableAddresses[0]
                 // todo: turn this into a function
                 // todo: check if address is checksummed
-                val accounts = viewModel.availableNetworks
+                val accounts = viewModel.networks
                     .map { network -> "eip155:" + network.chainId + ":" + selectedAddress }
 
                 // approve session
