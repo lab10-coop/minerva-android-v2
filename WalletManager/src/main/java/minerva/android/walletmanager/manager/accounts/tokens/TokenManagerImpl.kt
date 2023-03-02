@@ -17,8 +17,7 @@ import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenReposit
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepository
 import minerva.android.blockchainprovider.repository.superToken.SuperTokenRepository
-import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.BuildConfig.*
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
@@ -663,7 +662,7 @@ class TokenManagerImpl(
         String.format(TOKEN_TX_REQUEST, getTokenExplorerURL(account.chainId), account.address)
 
     private fun getTokensOwnedApiURL(account: Account): String =
-        String.format(TOKENS_OWNED_REQUEST, getTokensOwnedURL(account.chainId), account.address)
+        String.format(TOKENS_OWNED_REQUEST, getTokensOwnedURL(account.chainId, false), account.address)
 
     private fun getAPIKey(chainId: Int) =
         when (chainId) {
@@ -703,19 +702,18 @@ class TokenManagerImpl(
         }
 
     @VisibleForTesting
-    fun getTokensOwnedURL(chainId: Int) =
-        when (chainId) {
-            GNO -> GNO_TOKENS_OWNED_URL
-            MATIC -> POLYGON_TOKENS_OWNED_URL
-            ATS_SIGMA -> ARTIS_SIGMA_TOKENS_OWNED_URL
-            BSC -> BSC_TOKENS_OWNED_URL
-            ETH_MAIN -> ETH_TOKENS_OWNED_URL
-            ARB_ONE -> ARB_TOKENS_OWNED_URL
-            OPT -> OPT_TOKENS_OWNED_URL
-            CELO -> CELO_TOKENS_OWNED_URL
-            AVA_C -> AVA_TOKENS_OWNED_URL
-            else -> throw NetworkNotFoundThrowable()
-        }
+    override fun getTokensOwnedURL(chainId: Int, menuCase: Boolean): String = when (chainId) {
+        GNO -> String.format(TOKENSOWNED_BASE_API_ADDRESS, GNO_SHORT_NAME)
+        MATIC -> String.format(TOKENSOWNED_BASE_API_ADDRESS, MATIC_SHORT_NAME)
+        ATS_SIGMA -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ATS_SIGMA_SHORT_NAME)
+        BSC -> String.format(TOKENSOWNED_BASE_API_ADDRESS, BSC_SHORT_NAME)
+        ETH_MAIN -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ETH_MAIN_SHORT_NAME)
+        ARB_ONE -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ARB_ONE_SHORT_NAME)
+        OPT -> String.format(TOKENSOWNED_BASE_API_ADDRESS, OPT_SHORT_NAME)
+        CELO -> String.format(TOKENSOWNED_BASE_API_ADDRESS, CELO_SHORT_NAME)
+        AVA_C -> String.format(TOKENSOWNED_BASE_API_ADDRESS, AVA_C_SHORT_NAME)
+        else -> if (menuCase) { "" } else { throw NetworkNotFoundThrowable() }
+    }
 
     /**
      * arguments: tokens MutableMap<ChainId, List<ERC20Token>>
@@ -1119,5 +1117,15 @@ class TokenManagerImpl(
         private const val ERC721_TX_ACTION = "tokennfttx"
         private const val TOKEN_ADDRESS_SEPARATOR = ","
         private const val TOKEN_LIMIT_PER_CALL = 25
+        private const val TOKENSOWNED_BASE_API_ADDRESS = "https://tokensowned-api.minerva.digital/%s/v1/"
+        private const val GNO_SHORT_NAME = "xdai"
+        private const val MATIC_SHORT_NAME = "matic"
+        private const val ATS_SIGMA_SHORT_NAME = "artis_s1"
+        private const val BSC_SHORT_NAME = "bsc"
+        private const val ETH_MAIN_SHORT_NAME = "eth"
+        private const val ARB_ONE_SHORT_NAME = "arbitrum"
+        private const val OPT_SHORT_NAME = "optimism"
+        private const val CELO_SHORT_NAME = "celo"
+        private const val AVA_C_SHORT_NAME = "avalanche"
     }
 }

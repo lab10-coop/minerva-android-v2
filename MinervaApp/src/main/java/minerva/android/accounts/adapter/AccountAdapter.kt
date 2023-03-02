@@ -115,5 +115,7 @@ class AccountAdapter(
     override fun onEditName(account: Account) = listener.onEditName(account)
 
     override fun openInExplorer(account: Account) = listener.openInExplorer(account)
+
+    override fun openTokensownedApi(account: Account) = listener.openTokensownedApi(account)
 }
 
