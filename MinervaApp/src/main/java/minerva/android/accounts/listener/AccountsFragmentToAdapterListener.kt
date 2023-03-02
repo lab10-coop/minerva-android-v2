@@ -43,6 +43,12 @@ interface AccountsFragmentToAdapterListener {
     fun openInExplorer(account: Account)
 
     /**
+     * Open Tokensowned Api - method for opening in browser wallet transactions info by specified account
+     * @param account - Account which (transaction) info we need to show
+     */
+    fun openTokensownedApi(account: Account)
+
+    /**
      * Add Account - method which calls "add account" functional from parent activity
      */
     fun addAccount()
