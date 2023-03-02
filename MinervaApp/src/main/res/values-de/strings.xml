@@ -358,6 +358,7 @@
     <string name="my_favorites">Meine Favoriten</string>
     <string name="my_favorites_item_description">"Private NFT-Kollektion"</string>
     <string name="open_in_explorer">Im Explorer öffnen</string>
+    <string name="open_tokensowned_api">Open Tokensowned</string>
     <string name="already_in_use">In Verwendung</string>
     <string name="free">Verfügbar</string>
     <string name="change_account_dialog">ACCOUNT WECHSELN</string>
