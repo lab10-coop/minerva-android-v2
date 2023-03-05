@@ -94,7 +94,11 @@ class ServicesViewModel(
             is Pairing -> walletConnectRepository.killPairingByTopic(dapp.topic)
             // todo: somehow the list doesn't live update yet
             // todo: observe for error?
-            is DappSessionV2 -> walletConnectRepository.killPairingByTopic(dapp.topic)
+            is DappSessionV2 -> {
+                // the order of these two must be like this.
+                walletConnectRepository.killPairingBySessionTopic(dapp.topic)
+                walletConnectRepository.killSessionByTopic(dapp.topic)
+            }
         }
     }
 

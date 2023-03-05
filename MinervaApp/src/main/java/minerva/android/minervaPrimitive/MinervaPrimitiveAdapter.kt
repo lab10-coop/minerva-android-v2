@@ -144,9 +144,11 @@ class MinervaPrimitiveViewHolder(
                 menuInflater.inflate(R.menu.remove_menu, menu)
                 setMenuItems(minervaPrimitive)
                 setOnMenuItemClickListener {
-                    if (it.itemId == R.id.remove || it.itemId == R.id.disconnect) listener.onRemoved(minervaPrimitive)
-                    else if (it.itemId == R.id.change_account) listener.onChangeAccount(minervaPrimitive)
-                    else if (it.itemId == R.id.end_session) listener.onEndSession(minervaPrimitive)
+                    when (it.itemId) {
+                        R.id.remove, R.id.disconnect -> listener.onRemoved(minervaPrimitive)
+                        R.id.change_account -> listener.onChangeAccount(minervaPrimitive)
+                        R.id.end_session -> listener.onEndSession(minervaPrimitive)
+                    }
                     true
                 }
             }.also {

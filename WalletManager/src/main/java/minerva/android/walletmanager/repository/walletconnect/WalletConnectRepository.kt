@@ -34,6 +34,7 @@ interface WalletConnectRepository {
     fun killSessionByPeerId(peerId: String): Completable
     fun killSessionByTopic(topic: String)
     fun killPairingByTopic(topic: String)
+    fun killPairingBySessionTopic(sessionTopic: String)
     val connectionStatusFlowable: Flowable<WalletConnectStatus>
     fun getWCSessionFromQr(qrCode: String): WalletConnectSession
     fun getSessionsFlowable(): Flowable<List<DappSession>>
@@ -56,6 +57,7 @@ interface WalletConnectRepository {
     fun getV1Sessions(): Single<List<DappSessionV1>>
     fun getV2Sessions(): List<DappSessionV2>
     fun getV2Pairings(): List<Pairing>
+    fun getV2PairingsWithoutActiveSession(): List<Pairing>
     fun getSessionsAndPairings(): Single<List<MinervaPrimitive>>
     fun dispose()
     fun getDappSessionById(peerId: String): Single<DappSessionV1>

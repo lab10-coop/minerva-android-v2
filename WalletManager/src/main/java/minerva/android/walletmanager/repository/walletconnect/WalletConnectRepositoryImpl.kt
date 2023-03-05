@@ -478,6 +478,26 @@ class WalletConnectRepositoryImpl(
                 )
             }
 
+    override fun getV2PairingsWithoutActiveSession(): List<Pairing> {
+        val sessions = SignClient.getListOfActiveSessions()
+        return CoreClient.Pairing.getPairings()
+            .filter { pairing -> !sessions.any { session -> session.pairingTopic == pairing.topic} }
+            // todo: create some mapper instead
+            .map { pairing ->
+                Pairing(
+                    String.Empty,
+                    pairing.topic,
+                    pairing.peerAppMetaData?.name ?: String.Empty,
+                    // todo: check which icon is good
+                    pairing.peerAppMetaData?.icons?.getOrNull(0) ?: String.Empty,
+                    String.Empty,
+                    String.Empty,
+                    Int.InvalidValue,
+                    pairing.peerAppMetaData
+                )
+            }
+    }
+
     override fun getV2Sessions(): List<DappSessionV2> =
         SignClient.getListOfActiveSessions()
             // todo: create some mapper instead
@@ -505,22 +525,24 @@ class WalletConnectRepositoryImpl(
         dappDao.getAll()
             .map { EntitiesToDappSessionsMapper.map(it) }
 
+    // only returns pairings without active sessions
     override fun getSessionsAndPairings(): Single<List<MinervaPrimitive>> =
         dappDao.getAll().firstOrError()
             .map {
                 EntitiesToDappSessionsMapper
                     .map(it)
                     .mergeWithoutDuplicates(getV2Sessions())
-                    .mergeWithoutDuplicates(getV2Pairings()) // todo: only add pairings when there is no session already
+                    .mergeWithoutDuplicates(getV2PairingsWithoutActiveSession())
             }
 
+    // only returns pairings without active sessions
     override fun getSessionsAndPairingsFlowable(): Flowable<List<MinervaPrimitive>> =
         dappDao.getAll()
             .map {
                 EntitiesToDappSessionsMapper
                     .map(it)
                     .mergeWithoutDuplicates(getV2Sessions())
-                    .mergeWithoutDuplicates(getV2Pairings()) // todo: only add pairings when there is no session already
+                    .mergeWithoutDuplicates(getV2PairingsWithoutActiveSession())
             }
 
     override fun getSessions(): Single<List<DappSession>> =
@@ -772,9 +794,20 @@ class WalletConnectRepositoryImpl(
         }
     }
 
-    // todo: check if the pairing is killed if also the session is killed.
+    // only the pairing is killed and not the session
     override fun killPairingByTopic(topic: String) {
         val disconnectParams = Core.Params.Disconnect(topic)
+
+        // todo: return this error to be subscribed to, like in killSessionByPeerId(peerId)
+        CoreClient.Pairing.disconnect(disconnectParams) { error ->
+            Timber.e(error.toString())
+        }
+    }
+
+    // only the pairing is killed and not the session
+    override fun killPairingBySessionTopic(sessionTopic: String) {
+        val session = SignClient.getActiveSessionByTopic(sessionTopic) ?: return
+        val disconnectParams = Core.Params.Disconnect(session.pairingTopic)
 
         // todo: return this error to be subscribed to, like in killSessionByPeerId(peerId)
         CoreClient.Pairing.disconnect(disconnectParams) { error ->
