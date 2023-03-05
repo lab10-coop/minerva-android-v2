@@ -77,10 +77,9 @@ class WalletConnectRepositoryImpl(
     private fun sessionProposalToWalletConnectProposalNamespace(sessionProposal: Sign.Model.SessionProposal): WalletConnectProposalNamespace {
         val eip155TempNamespace = sessionProposal.requiredNamespaces[EIP155]!!
         return WalletConnectProposalNamespace(
-            chains = eip155TempNamespace.chains,
+            chains = eip155TempNamespace.chains ?: emptyList(),
             methods = eip155TempNamespace.methods,
-            events = eip155TempNamespace.events,
-            extensions = eip155TempNamespace.extensions
+            events = eip155TempNamespace.events
         )
     }
 
@@ -214,7 +213,7 @@ class WalletConnectRepositoryImpl(
                 when (deletedSession) {
                     is Sign.Model.DeletedSession.Success -> {
                         Timber.i("onSessionDelete Success")
-                        val session = SignClient.getSettledSessionByTopic(deletedSession.topic)
+                        val session = SignClient.getActiveSessionByTopic(deletedSession.topic)
                         val name = session?.metaData?.name
                         // todo: fetching the name of the session doesn't seem to work.
                         // todo: also we could give a reason for the session end here.
@@ -480,7 +479,7 @@ class WalletConnectRepositoryImpl(
             }
 
     override fun getV2Sessions(): List<DappSessionV2> =
-        SignClient.getListOfSettledSessions()
+        SignClient.getListOfActiveSessions()
             // todo: create some mapper instead
             .map { session -> DappSessionV2(
                 String.Empty,
@@ -544,7 +543,7 @@ class WalletConnectRepositoryImpl(
         dappDao.getDappSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
 
     fun getDappSessionByTopic(topic: String, address: String = String.Empty, chainId: Int = Int.InvalidValue): DappSessionV2? {
-        val session = SignClient.getSettledSessionByTopic(topic) ?: return null
+        val session = SignClient.getActiveSessionByTopic(topic) ?: return null
         val networkName = getNetworkNameOrNull(chainId) ?: String.Empty
         // todo: create some mapper instead
         return DappSessionV2(
@@ -596,7 +595,10 @@ class WalletConnectRepositoryImpl(
                 Pair(
                     EIP155,
                     Sign.Model.Namespace.Session(
-                        namespace.accounts, namespace.methods, namespace.events, namespace.extensions)
+                        chains = namespace.chains,
+                        accounts = namespace.accounts,
+                        methods = namespace.methods,
+                        events = namespace.events)
                 )
             )
         val relayProtocol = null
@@ -793,7 +795,7 @@ class WalletConnectRepositoryImpl(
         fun namespacesCountNonEip155Chains(namespaces: Map<String, Sign.Model.Namespace.Proposal>): Int {
             return namespaces.entries
                 .filter { entry -> entry.key != EIP155 }
-                .flatMap { entry -> entry.value.chains }
+                .flatMap { entry -> entry.value.chains ?: emptyList() }
                 .size
         }
 
@@ -844,10 +846,14 @@ class WalletConnectRepositoryImpl(
             )
 
             CoreClient.initialize(
+                metaData = appMetaData,
                 relayServerUrl = serverUrl,
                 connectionType = connectionType,
                 application = application,
-                metaData = appMetaData
+                // no relay
+                onError = { error ->
+                    Timber.e(error.toString())
+                }
             )
 
             val init = Sign.Params.Init(core = CoreClient)

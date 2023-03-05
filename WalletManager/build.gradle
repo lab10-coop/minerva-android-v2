@@ -84,7 +84,7 @@ dependencies {
     implementation project(':ApiProvider')
     implementation project(':BlockchainProvider')
     implementation project(':WalletConnect')
-    implementation(platform("com.walletconnect:android-bom:1.1.0"))
+    implementation(platform("com.walletconnect:android-bom:1.6.1"))
     implementation("com.walletconnect:android-core")
     implementation("com.walletconnect:sign")
 
@@ -102,7 +102,7 @@ dependencies {
     implementation room.values()
     implementation okhttp.values()
     kapt "org.xerial:sqlite-jdbc:3.36.0"
-    kapt "androidx.room:room-compiler:2.2.6"
+    kapt "androidx.room:room-compiler:2.5.0"
 }
 
 Object localProperty(String propertyName) {

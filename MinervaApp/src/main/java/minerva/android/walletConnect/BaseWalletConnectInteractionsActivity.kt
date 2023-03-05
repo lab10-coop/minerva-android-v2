@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import com.google.firebase.iid.FirebaseInstanceId
 import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
@@ -19,7 +18,6 @@ import minerva.android.main.handler.replaceFragment
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.ServicesFragment
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
@@ -31,7 +29,6 @@ import minerva.android.widget.dialog.models.ViewDetails
 import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.*
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 import java.math.BigDecimal
 
 abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
@@ -313,18 +310,11 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         return true
     }
 
-    // todo: move somewhere else?
-    private fun areAllExtensionsSupported(eip155ProposalNamespace: WalletConnectProposalNamespace): Boolean {
-        // todo: check extensions
-        return true
-    }
-
     // todo: implement
     // todo: why is this the same as BaseWalletConnectScannerFragment?
     private fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int, eip155ProposalNamespace: WalletConnectProposalNamespace) {
         val networksSupported = areAllNetworksSupported(numberOfNonEip155Chains, eip155ProposalNamespace)
         val methodOrEventSupported = areAllMethodsAndEventsSupported(eip155ProposalNamespace)
-        val extensionsSupported = areAllExtensionsSupported(eip155ProposalNamespace)
 
         confirmationDialogDialog = DappConfirmationDialogV2(this,
             {
@@ -332,15 +322,17 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 val selectedAddress = viewModel.availableAddresses[0]
                 // todo: turn this into a function
                 // todo: check if address is checksummed
-                val accounts = viewModel.networks
-                    .map { network -> "eip155:" + network.chainId + ":" + selectedAddress }
+                val chains = viewModel.networks
+                    .map { network -> "eip155:${network.chainId}" }
+                val accounts = chains
+                    .map { chain -> "$chain:$selectedAddress" }
 
                 // approve session
                 val sessionNamespace = WalletConnectSessionNamespace(
+                    chains,
                     accounts,
                     methods = eip155ProposalNamespace.methods,
-                    events = eip155ProposalNamespace.events,
-                    extensions = null // todo
+                    events = eip155ProposalNamespace.events
                 )
                 viewModel.approveSessionV2(meta.proposerPublicKey, sessionNamespace, true)
                 clearAllDialogs()
@@ -353,8 +345,6 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                     reason = "Network(s) not supported"
                 } else if (!methodOrEventSupported) {
                     reason = "Method(s) or Event(s) not supported"
-                } else if (!extensionsSupported) {
-                    reason = "Extension(s) not supported"
                 }
                 viewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
                 clearAllDialogs()

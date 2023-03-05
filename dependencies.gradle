@@ -1,7 +1,7 @@
 ext {
-    _compileSdk = 31
+    _compileSdk = 33
     _buildToolsVersion = "30.0.3"
-    _targetSdk = 31
+    _targetSdk = 33
     _minSdkVersion = 24
     kotlinVersion = '1.6.20'
 
@@ -69,7 +69,7 @@ ext {
     flexboxVersion = '2.0.1'
     flashbarVersion = '1.0.4'
     mockitoInline = '3.4.0'
-    roomVersion = '2.2.6'
+    roomVersion = '2.5.0'
 
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",

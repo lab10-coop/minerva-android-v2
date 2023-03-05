@@ -8,7 +8,6 @@ import minerva.android.extension.margin
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
@@ -19,7 +18,6 @@ import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV1
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV2
 import minerva.android.widget.dialog.walletconnect.DappDialog
-import timber.log.Timber
 
 abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
@@ -126,18 +124,11 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         return true
     }
 
-    // todo: move somewhere else?
-    private fun areAllExtensionsSupported(eip155ProposalNamespace: WalletConnectProposalNamespace): Boolean {
-        // todo: check extensions
-        return true
-    }
-
     // todo: implement
     // todo: why is this the same as BaseWalletConnectInteractionsActivity?
     protected fun showConnectionDialogV2(meta: WalletConnectPeerMeta, numberOfNonEip155Chains: Int, eip155ProposalNamespace: WalletConnectProposalNamespace) {
         val networksSupported = areAllNetworksSupported(numberOfNonEip155Chains, eip155ProposalNamespace)
         val methodOrEventSupported = areAllMethodsAndEventsSupported(eip155ProposalNamespace)
-        val extensionsSupported = areAllExtensionsSupported(eip155ProposalNamespace)
 
         confirmationDialogDialog = DappConfirmationDialogV2(requireContext(),
             {
@@ -145,15 +136,17 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                 val selectedAddress = viewModel.availableAddresses[0]
                 // todo: turn this into a function
                 // todo: check if address is checksummed
-                val accounts = viewModel.networks
-                    .map { network -> "eip155:" + network.chainId + ":" + selectedAddress }
+                val chains = viewModel.networks
+                    .map { network -> "eip155:${network.chainId}" }
+                val accounts = chains
+                    .map { chain -> "$chain:$selectedAddress" }
 
                 // approve session
                 val sessionNamespace = WalletConnectSessionNamespace(
+                    chains,
                     accounts,
                     methods = eip155ProposalNamespace.methods,
-                    events = eip155ProposalNamespace.events,
-                    extensions = null // todo
+                    events = eip155ProposalNamespace.events
                 )
                 viewModel.approveSessionV2(meta.proposerPublicKey, sessionNamespace, true)
                 binding.closeButton.margin(bottom = INCREASED_MARGIN)
@@ -166,8 +159,6 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                     reason = "Network(s) not supported"
                 } else if (!methodOrEventSupported) {
                     reason = "Method(s) or Event(s) not supported"
-                } else if (!extensionsSupported) {
-                    reason = "Extension(s) not supported"
                 }
                 viewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
                 shouldScan = true
