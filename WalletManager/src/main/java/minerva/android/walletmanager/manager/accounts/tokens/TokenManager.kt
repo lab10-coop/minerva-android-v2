@@ -92,4 +92,12 @@ interface TokenManager {
         tokenAddress: String,
         ownerAddress: String
     ): Single<Boolean>
+
+    /**
+     * Get Tokens Owned URL - get base part of tokens-owned URL by specified chain id
+     * @param chainId - id of network for which we trying to get link
+     * @param menuCase - get data for menu option
+     * @return - base part of tokens-owned URL or empty string
+     */
+    fun getTokensOwnedURL(chainId: Int, menuCase: Boolean): String
 }

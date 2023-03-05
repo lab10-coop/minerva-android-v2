@@ -27,6 +27,12 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         }
         get() = sharedPreferences.getBoolean(ARE_MAIN_NETS_ENABLED, true)
 
+    override var isChangeNetworkEnabled: Boolean
+        set(value) {
+            sharedPreferences.edit().putBoolean(IS_CHANGE_NETWORK_ENABLED, value).apply()
+        }
+        get() = sharedPreferences.getBoolean(IS_CHANGE_NETWORK_ENABLED, true)
+
     override fun saveIsMnemonicRemembered(isRemembered: Boolean) {
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()
     }
@@ -148,5 +154,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val PROTECT_TRANSACTIONS_ENABLED = "protect_transactions_enabled"
         private const val CURRENT_FIAT = "current_fiat"
         private const val DEFAULT_CURRENCY = "EUR"
+        private const val IS_CHANGE_NETWORK_ENABLED = "is_change_network_enabled"
     }
 }

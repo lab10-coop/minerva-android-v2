@@ -22,4 +22,9 @@ interface AccountsAdapterListener {
      * @param account - Account which info we need to show
      */
     fun openInExplorer(account: Account)
+    /**
+     * Open Tokensowned Api - open in browser wallet transactions info by specified account
+     * @param account - Account which info we need to show
+     */
+    fun openTokensownedApi(account: Account)
 }

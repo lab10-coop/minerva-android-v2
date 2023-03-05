@@ -20,7 +20,6 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.ChainId
@@ -71,18 +70,18 @@ class WalletConnectInteractionsViewModel(
     private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
     val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
 
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+
     /**
-     * On Change Account - method which update of viewModel state
+     * Change Wallet Connect State - method which update of viewModel state
      * @param state - new (viewModel::_walletConnectStatus) state
      */
-    fun onChangeAccount(state: WalletConnectState) {
+    fun changeWalletConnectState(state: WalletConnectState) {
         if (state != _walletConnectStatus.value) {
             _walletConnectStatus.value = state
         }
     }
-
-    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
-    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     fun dispose() {
         walletConnectRepository.dispose()
@@ -124,7 +123,7 @@ class WalletConnectInteractionsViewModel(
         dapps.forEach { session ->
             with(session) {
                 walletConnectRepository.connect(
-                    WalletConnectSession(topic, version, key, bridge),
+                    WalletConnectSession(topic, version, key, bridge, isMobileWalletConnect = isMobileWalletConnect),
                     peerId,
                     remotePeerId,
                     dapps
@@ -469,7 +468,7 @@ class WalletConnectInteractionsViewModel(
     // todo: why is this duplicate with ServicesScannerViewModel??
     override fun handleSessionRequest(sessionRequest: OnSessionRequestData) {
         //if ethereum was chosen set unknown id for showing all networks
-        val id: Int? = if (ChainId.ETH_MAIN == sessionRequest.chainId) null else sessionRequest.chainId
+        val id: Int? = if (ChainId.ETH_MAIN == sessionRequest.chainId && null == sessionRequest.type) null else sessionRequest.chainId
         when {
             id == null -> {
                 accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
@@ -512,7 +511,7 @@ class WalletConnectInteractionsViewModel(
             OnSessionRequestResult(
                 sessionRequest.meta,
                 requestedNetwork,
-                WalletConnectAlertType.CHANGE_ACCOUNT_WARNING
+                if (null != sessionRequest.type) WalletConnectAlertType.CHANGE_NETWORK else WalletConnectAlertType.CHANGE_ACCOUNT_WARNING
             )
         }.orElse {
             OnSessionRequestResult(

@@ -9,6 +9,7 @@ data class WalletConnectSession(
     val bridge: String? = String.Empty,
     var relayProtocol: String? = String.Empty,
     var relayData: String? = String.Empty,
+    val isMobileWalletConnect: Boolean = false
 ) {
     fun toUri(): String {
         if (version == "1") {

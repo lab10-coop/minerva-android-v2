@@ -40,8 +40,3 @@ data class OnEthSendTransactionRequest(
 object DefaultRequest : WalletConnectState()
 data class WrongTransactionValueState(val transaction: WalletConnectTransaction) : WalletConnectState()
 data class UpdateOnSessionRequest(val network: BaseNetworkData, val dialogType: WalletConnectAlertType) : WalletConnectState()
-
-/**
- * To Service Fragment Request - state which transfers to ServicesFragment
- */
-object ToServiceFragmentRequest : WalletConnectState()

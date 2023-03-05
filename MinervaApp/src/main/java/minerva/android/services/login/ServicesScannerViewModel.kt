@@ -1,5 +1,6 @@
 package minerva.android.services.login
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.SingleSource
@@ -225,9 +226,11 @@ class ServicesScannerViewModel(
         }
     }
 
+    @SuppressLint("WrongConstant")
     private fun getWalletCredentialAction(lastUsed: Long, name: String, status: Int): WalletAction =
         WalletAction(
-            WalletActionType.CREDENTIAL, status,
+            WalletActionType.CREDENTIAL,
+            status,
             lastUsed,
             hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )

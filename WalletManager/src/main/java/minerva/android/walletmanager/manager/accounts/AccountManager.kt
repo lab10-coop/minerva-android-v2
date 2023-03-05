@@ -16,6 +16,7 @@ import minerva.android.walletmanager.model.wallet.MasterSeed
 interface AccountManager : Manager {
     val masterSeed: MasterSeed
     val areMainNetworksEnabled: Boolean
+    val isChangeNetworkEnabled: Boolean
     val isProtectKeysEnabled: Boolean
     val isProtectTransactionsEnabled: Boolean
     var hasAvailableAccounts: Boolean

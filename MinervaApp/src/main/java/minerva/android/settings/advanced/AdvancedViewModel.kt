@@ -15,6 +15,16 @@ class AdvancedViewModel(private val  walletConfigManager: WalletConfigManager) :
     private val _resetTokensLiveData = MutableLiveData<Event<Result<Any>>>()
     val resetTokensLiveData: LiveData<Event<Result<Any>>> = _resetTokensLiveData
 
+    val isChangeNetworkEnabled: Boolean
+        get() = walletConfigManager.isChangeNetworkEnabled
+
+    /**
+     * Change State Of Change Network Enabled - method for toggling state of IS_CHANGE_NETWORK_ENABLED
+     */
+    fun changeStateOfChangeNetworkEnabled() {
+        walletConfigManager.isChangeNetworkEnabled = !isChangeNetworkEnabled
+    }
+
     fun resetTokens() {
         launchDisposable {
             walletConfigManager.removeAllTokens()

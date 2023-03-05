@@ -13,5 +13,5 @@
     android:paddingBottom="@dimen/margin_xxsmall"
     android:paddingEnd="@dimen/margin_xxsmall"
     android:textColor="@color/dappStatusColorGray"
-    tools:text="ARTIS  (τ1) super  name" />
+    tools:text="ARTIS" />
 

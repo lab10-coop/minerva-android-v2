@@ -31,7 +31,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/icon"
-        tools:text="Kleros • Curate super looooooooooooooooooooooooooongg title" />
+        tools:text="Kleros" />
 
     <org.apmem.tools.layouts.FlowLayout
         android:id="@+id/network_layout"
@@ -73,7 +73,16 @@
             android:spinnerMode="dropdown"
             android:textAlignment="center"
             android:visibility="gone"
+            tools:visibility="visible"
             tools:listitem="@layout/spinner_network_wallet_connect" />
+
+        <ImageView
+            android:id="@+id/arrow_separator"
+            android:layout_width="@dimen/margin_normal"
+            android:layout_height="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:src="@drawable/arrow_separator_ic"
+            android:visibility="gone"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/add_account"
@@ -103,6 +112,7 @@
             android:gravity="center"
             android:spinnerMode="dropdown"
             android:visibility="gone"
+            tools:visibility="visible"
             tools:listitem="@layout/spinner_network_wallet_connect" />
 
         <com.google.android.material.textview.MaterialTextView

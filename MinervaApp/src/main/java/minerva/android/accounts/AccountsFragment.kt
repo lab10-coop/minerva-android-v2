@@ -202,6 +202,19 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
+    override fun openTokensownedApi(account: Account) {
+        if (account.address.isNotEmpty()) {//build full web path to show transaction info
+            val baseTokensownedLinkPart = viewModel.getTokensOwnedURL(account.chainId)//get base part of url
+            if (!baseTokensownedLinkPart.isEmpty()) {
+                //concat each (2) parts of url and replace details of account
+                val path = String.format("$baseTokensownedLinkPart$LAST_TOKENSOWNED_LINK_PART", account.address)
+                startActivity(//creating and start web Intent
+                    Intent(Intent.ACTION_VIEW, Uri.parse(path))
+                )
+            }
+        }
+    }
+
     override fun getTokens(account: Account): List<AccountToken> = viewModel.getTokens(account)
     fun updateTokensRate() = viewModel.updateTokensRate()
     fun refreshBalances() = viewModel.refreshCoinBalances()
@@ -211,7 +224,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     private fun showExportDialog(account: Account) =
         ExportPrivateKeyDialog(requireContext(), account).show()
-
 
     private fun initFragment() {
         binding.apply {
@@ -403,5 +415,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         const val ITEM = 1 //token info(item) case
         const val ADD_ITEM = -1 //add new account (button) case
         private const val RECEIVE_TRANSACTION_INDEX = 1
+        private const val LAST_TOKENSOWNED_LINK_PART = "tokensowned/%s?fetchTokenJson=ERC-1155"
     }
 }

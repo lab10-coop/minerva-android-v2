@@ -2,21 +2,15 @@ package minerva.android.settings.advanced
 
 import android.os.Bundle
 import android.view.View
-import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.databinding.FragmentAdvancedBinding
-import minerva.android.databinding.FragmentAppVersionBinding
-import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_MARGIN
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
-import minerva.android.settings.SettingsViewModel
-import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.advanced.adapter.AdvancedAdapter
+import minerva.android.settings.advanced.model.AdvancedSection
 import minerva.android.settings.advanced.model.AdvancedSectionRowType
-import minerva.android.settings.advanced.model.propagateSections
 import minerva.android.settings.dialog.TokenResetDialog
 import minerva.android.utils.VerticalMarginItemDecoration
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -36,14 +30,32 @@ class AdvancedFragment : BaseFragment(R.layout.fragment_advanced) {
         AdvancedAdapter { onSectionClicked(it) }
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAdvancedBinding.bind(view)
         setupRecycleView()
-        propagateSections()
         setupObservers()
     }
+
+    /**
+    * Get Advanced Sections - parse advanced sections data by viewModel for getting/filling necessary data
+    * @return list with parsed data
+    */
+    private fun getAdvancedSections(): List<AdvancedSection> =
+        listOf<AdvancedSection>(
+            AdvancedSection(
+                title = R.string.clear_token_cache_title,
+                description = R.string.clear_token_cache_description,
+                actionText = R.string.clear_token_cache_action_text,
+                rowType = AdvancedSectionRowType.CLEAR_TOKEN_CACHE,
+            ),
+            AdvancedSection(
+                title = R.string.change_network_prompt_title,
+                description = R.string.change_network_prompt_description,
+                rowType = AdvancedSectionRowType.CHANGE_NETWORK_PROMPT,
+                isSwitchChecked = viewModel.isChangeNetworkEnabled
+            )
+        )
 
     private fun setupObservers() = with(viewModel){
         resetTokensLiveData.observe(viewLifecycleOwner, EventObserver { handleResetTokenState(it) })
@@ -53,7 +65,7 @@ class AdvancedFragment : BaseFragment(R.layout.fragment_advanced) {
         binding.sections.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = advancedAdapter
-            advancedAdapter.updateList(propagateSections())
+            advancedAdapter.updateList(getAdvancedSections())
             addItemDecoration(getRecyclerViewItemDecorator())
         }
     }
@@ -71,6 +83,7 @@ class AdvancedFragment : BaseFragment(R.layout.fragment_advanced) {
     private fun onSectionClicked(sectionRowType: AdvancedSectionRowType) {
         when(sectionRowType){
             AdvancedSectionRowType.CLEAR_TOKEN_CACHE -> onClearTokenCacheClicked()
+            AdvancedSectionRowType.CHANGE_NETWORK_PROMPT -> viewModel.changeStateOfChangeNetworkEnabled()
         }
     }
 

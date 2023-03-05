@@ -124,6 +124,13 @@ class AccountsViewModel(
         getSessions(accountManager.getAllAccounts())
     }
 
+    /**
+     * Get Tokens Owned URL - get base part of tokens-owned URL by specified chain id
+     * @param chainId - id of network for which we trying to get link
+     * @return - base part of tokens-owned URL or empty string
+     */
+    fun getTokensOwnedURL(chainId: Int): String = tokenManager.getTokensOwnedURL(chainId, menuCase = true)
+
     private fun fetchNFTData(){
         launchDisposable {
             tokenManager.fetchNFTsDetails()

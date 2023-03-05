@@ -8,7 +8,8 @@ data class WCSession(
     val key: String,
     val bridge: String?,
     var relayProtocol: String?,
-    var relayData: String?
+    var relayData: String?,
+    val isMobileWalletConnect: Boolean = false
 ) {
     companion object {
         fun from(from: String): WCSession {

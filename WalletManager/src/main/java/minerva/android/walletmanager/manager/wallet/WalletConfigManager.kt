@@ -46,4 +46,5 @@ interface WalletConfigManager : Manager {
     val isBackupAllowed: Boolean
     val isSynced: Boolean
     var areMainNetworksEnabled: Boolean
+    var isChangeNetworkEnabled: Boolean
 }

@@ -284,18 +284,18 @@ class WalletConnectRepositoryImpl(
                 }
             }
 
-            onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId ->
+            onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId, type ->
                 logger.logToFirebase("${LoggerMessages.ON_SESSION_REQUEST}$peerId")
                 status.onNext(
                     OnSessionRequest(
                         WCPeerToWalletConnectPeerMetaMapper.map(meta),
                         chainId,
                         Topic(peerId, remotePeerId),
-                        handshakeId
+                        handshakeId,
+                        type = type
                     )
                 )
             }
-
             onFailure = { error, peerId, isForceTermination ->
                 if (isForceTermination) {
                     logger.logToFirebase("${LoggerMessages.CONNECTION_TERMINATION} $error, peerId: $peerId")

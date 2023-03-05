@@ -13,5 +13,6 @@ data class WalletConnectPeerMeta(
     val peerId: String = String.Empty, // for walletconnect 1.0
     val address: String = String.Empty, // for walletconnect 1.0
     val chainId: Int = Int.InvalidId, // for walletconnect 1.0
-    val proposerPublicKey: String = String.Empty // for walletconnect 2.0
+    val proposerPublicKey: String = String.Empty, // for walletconnect 2.0
+    val isMobileWalletConnect: Boolean = false
 )

@@ -4,7 +4,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.walletconnect.*
 
 sealed class WalletConnectStatus
-data class OnSessionRequest(val meta: WalletConnectPeerMeta, val chainId: Int?, val topic: Topic, val handshakeId: Long) :
+data class OnSessionRequest(val meta: WalletConnectPeerMeta, val chainId: Int?, val topic: Topic, val handshakeId: Long, val type: Int? = null) :
     WalletConnectStatus()
 data class OnSessionRequestV2(val meta: WalletConnectPeerMeta, val numberOfNonEip155Chains: Int, val eip155ProposalNamespace: WalletConnectProposalNamespace): WalletConnectStatus()
 
