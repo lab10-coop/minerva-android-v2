@@ -134,7 +134,7 @@ class RampViewModel(
                     ChainId.CELO,
                     "CELO",
                     "CELO_CELO",
-                    R.drawable.ic_celo_coin,
+                    R.drawable.ic_celo_v2_coin,
                     getNetworkName(ChainId.CELO)
                 ),
                 RampCrypto(
