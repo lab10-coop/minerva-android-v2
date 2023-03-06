@@ -323,8 +323,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
         confirmationDialogDialog = DappConfirmationDialogV2(this,
             {
-                // todo: set availableAddresses in confirmationDialog and make the user select one.
-                val selectedAddress = viewModel.availableAddresses[0]
+                val selectedAddress = viewModel.address
                 // todo: turn this into a function
                 // todo: check if address is checksummed
                 val chains = viewModel.networks
@@ -378,8 +377,8 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             }
             setWarnings(walletConnectV2AlertType)
 
-            // todo: set addresses in spinner instead of accounts
-            //updateAccountSpinner()
+            // set addresses in spinner instead of accounts
+            updateAddressSpinner()
             show()
         }
     }
@@ -394,6 +393,13 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 //change state of confirm button for prevent the same db records
                 changeClickableConfirmButtonState(account.address, account.chainId)
             }
+        }
+    }
+
+    // walletconnect 2.0
+    private fun DappConfirmationDialogV2.updateAddressSpinner() {
+        setupAddressSpinner(viewModel.availableAddresses) { address ->
+            viewModel.setNewAddress(address)
         }
     }
 

@@ -1,14 +1,20 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
-import kotlinx.android.synthetic.main.dapp_network_header.*
+import android.view.View
+import android.widget.AdapterView
+import androidx.core.view.isGone
 import minerva.android.R
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.FIRST_ICON
+import minerva.android.accounts.walletconnect.DappAddressSpinnerAdapter
 import minerva.android.accounts.walletconnect.WalletConnectV2AlertType
 import minerva.android.databinding.DappConfirmationDialogV2Binding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
+import minerva.android.kotlinUtils.EmptyResource
+import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.widget.DynamicWidthSpinner
 import minerva.android.widget.dialog.models.ViewDetailsV2
 
 class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -> Unit) :
@@ -48,6 +54,47 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         numberOfProvidedNetworks = _numberOfProvidedNetworks
     }
 
+    fun setupAddressSpinner(availableAddresses: List<String>, onAddressSelected: (String) -> Unit) {
+        networkHeader.accountSpinner.apply {
+            val accountAdapter = DappAddressSpinnerAdapter(
+                context,
+                R.layout.spinner_network_wallet_connect,
+                availableAddresses
+            ).apply { setDropDownViewResource(R.layout.spinner_network_wallet_connect) }
+
+            visibleOrGone(isAddressSpinnerVisible(availableAddresses.size))
+            addOnGlobalLayoutListener {
+                accountAdapter.selectedItemWidth = networkHeader.accountSpinner.width
+            }
+            adapter = accountAdapter
+            val defaultPosition = Int.FirstIndex
+            prepareSpinner(R.drawable.rounded_background_purple_frame, defaultPosition) { position, view ->
+                onAddressSelected(accountAdapter.getItem(position))
+                accountAdapter.selectedItemWidth = view?.width
+            }
+        }
+    }
+
+    private fun isAddressSpinnerVisible(listSize: Int): Boolean = listSize > Int.EmptyResource && networkHeader.addAccount.isGone
+
+    private fun DynamicWidthSpinner.prepareSpinner(backgroundResId: Int, selectionIndex: Int, onClick: (Int, View?) -> Unit) {
+        setBackgroundResource(backgroundResId)
+        setPopupBackgroundResource(R.drawable.rounded_small_white_background)
+        setSelection(selectionIndex, false)
+        onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                adapterView: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                onClick(position, view)
+            }
+
+            override fun onNothingSelected(adapterView: AdapterView<*>?) {}
+        }
+    }
+
     // todo: check if this is correct
     private fun setNoAlert() = with(binding) {
         warringIcon.gone()
@@ -60,6 +107,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
+            addressSpinner.visible()
         }
     }
 
@@ -71,6 +119,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
+            addressSpinner.visible()
         }
         confirmationButtons.confirm.isEnabled = false
         // todo: localize
@@ -85,6 +134,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
+            addressSpinner.visible()
         }
         confirmationButtons.confirm.isEnabled = false
         // todo: localize

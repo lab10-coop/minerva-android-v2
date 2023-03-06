@@ -35,6 +35,7 @@ abstract class BaseWalletConnectScannerViewModel(
     private val unsupportedNetworkRepository: UnsupportedNetworkRepository
 ) : BaseViewModel() {
     abstract var account: Account
+    abstract var address: String
     abstract fun hideProgress()
     abstract fun setLiveDataOnDisconnected(sessionName: String)
     abstract fun setLiveDataOnConnectionError(error: Throwable, sessionName: String)
@@ -145,6 +146,11 @@ abstract class BaseWalletConnectScannerViewModel(
 
     fun setNewAccount(newAccount: Account) {
         account = newAccount
+    }
+
+    // for walletconnect 2.0
+    fun setNewAddress(newAddress: String) {
+        address = newAddress
     }
 
     fun approveSession(meta: WalletConnectPeerMeta, isMobileWalletConnect: Boolean) {

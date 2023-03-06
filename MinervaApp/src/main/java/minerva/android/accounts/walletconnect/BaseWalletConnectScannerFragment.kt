@@ -132,8 +132,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
         confirmationDialogDialog = DappConfirmationDialogV2(requireContext(),
             {
-                // todo: set availableAddresses in confirmationDialog and make the user select one.
-                val selectedAddress = viewModel.availableAddresses[0]
+                val selectedAddress = viewModel.address
                 // todo: turn this into a function
                 // todo: check if address is checksummed
                 val chains = viewModel.networks
@@ -187,8 +186,8 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             }
             setWarnings(walletConnectV2AlertType)
 
-            // todo: set addresses in spinner instead of accounts
-            //updateAccountSpinner()
+            // set addresses in spinner instead of accounts
+            updateAddressSpinner()
             show()
         }
     }
@@ -196,6 +195,13 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     private fun DappConfirmationDialogV1.updateAccountSpinner(dialogType: WalletConnectAlertType) {
         setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts, dialogType) { account ->
             viewModel.setNewAccount(account)
+        }
+    }
+
+    // walletconnect 2.0
+    private fun DappConfirmationDialogV2.updateAddressSpinner() {
+        setupAddressSpinner(viewModel.availableAddresses) { address ->
+            viewModel.setNewAddress(address)
         }
     }
 
@@ -212,6 +218,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING ->
                 setUnsupportedNetworkMessage(network, viewModel.account.chainId, viewModel.areMainNetworksEnabled)
             WalletConnectAlertType.CHANGE_ACCOUNT -> { /* do nothing */ }
+            WalletConnectAlertType.CHANGE_NETWORK -> { /* do nothing */ }
         }
     }
 

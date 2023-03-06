@@ -52,7 +52,8 @@ class WalletConnectInteractionsViewModel(
     private val tokenManager: TokenManager,
     private val accountManager: AccountManager,
     walletActionsRepository: WalletActionsRepository,
-    unsupportedNetworkRepository: UnsupportedNetworkRepository
+    unsupportedNetworkRepository: UnsupportedNetworkRepository,
+    override var address: String
 ) : BaseWalletConnectScannerViewModel(
     accountManager,
     walletConnectRepository,
