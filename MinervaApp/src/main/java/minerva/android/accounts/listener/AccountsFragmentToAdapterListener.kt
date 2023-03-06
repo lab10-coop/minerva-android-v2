@@ -10,7 +10,7 @@ interface AccountsFragmentToAdapterListener {
     fun onSendTokenTransaction(account: Account, tokenAddress: String, isTokenError: Boolean)
     fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean = false)
     fun onCreateSafeAccount(account: Account)
-    fun onAccountHide(index: Int)
+    fun onAccountHide(account: Account)
     fun onShowAddress(account: Account)
     fun onShowSafeAccountSettings(account: Account, position: Int)
     fun onWalletConnect(index: Int)

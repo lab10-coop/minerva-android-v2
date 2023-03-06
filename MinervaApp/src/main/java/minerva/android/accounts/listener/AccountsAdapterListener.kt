@@ -7,7 +7,7 @@ interface AccountsAdapterListener {
     fun onSendCoinClicked(account: Account)
     fun onSendTokenClicked(account: Account, tokenAddress: String, isTokenError: Boolean)
     fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean = false)
-    fun onAccountHide(index: Int)
+    fun onAccountHide(account: Account)
     fun onCreateSafeAccountClicked(account: Account)
     fun onShowAddress(account: Account)
     fun onShowSafeAccountSettings(account: Account, index: Int)
