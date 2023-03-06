@@ -220,7 +220,7 @@ class AccountViewHolder(
                 R.id.openTokensownedApi -> listener.openTokensownedApi(account)
                 R.id.exportPrivateKey -> listener.onExportPrivateKey(account)
                 R.id.editName -> listener.onEditName(account)
-                R.id.hide -> listener.onAccountHide(index)
+                R.id.hide -> listener.onAccountHide(account)
             }
             true
         }

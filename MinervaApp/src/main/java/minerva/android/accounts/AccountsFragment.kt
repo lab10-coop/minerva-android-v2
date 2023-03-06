@@ -123,10 +123,14 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
-    override fun onAccountHide(index: Int) =
-        HideAccountDialog(requireContext(), index, ::hideAccount).show()
+    override fun onAccountHide(account: Account) =
+        if (!account.isActiveNetwork && account.showWarning) {
+            HideAccountUnmaintainedDialog(requireContext(), account, ::hideAccount).show()
+        } else {
+            HideAccountDialog(requireContext(), account, ::hideAccount).show()
+        }
 
-    private fun hideAccount(index: Int) = viewModel.hideAccount(index)
+    private fun hideAccount(account: Account) = viewModel.hideAccount(account)
 
     override fun onEditName(account: Account) =
         EditAccountNameDialog(requireContext(), account, ::changeAccountName).show()
