@@ -6,7 +6,6 @@ import android.graphics.drawable.LayerDrawable
 import android.view.Gravity
 import androidx.core.content.ContextCompat
 import minerva.android.R
-import minerva.android.kotlinUtils.InvalidId
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
@@ -63,7 +62,7 @@ private fun getMainIcon(chainId: Int): Int =
         ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_arbitrum
         OPT, OPT_KOV, OPT_GOR, OPT_BED -> R.drawable.ic_optimism
         ZKS_ALPHA -> R.drawable.ic_zksync
-        CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo
+        CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo_v2
         AVA_C, AVA_FUJ -> R.drawable.ic_avalanche
         else -> R.drawable.ic_default_token
     }
@@ -85,7 +84,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
         ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_ethereum_l2
         OPT, OPT_KOV, OPT_GOR, OPT_BED -> R.drawable.ic_ethereum_l2
         ZKS_ALPHA -> R.drawable.ic_ethereum_l2
-        CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo_coin
+        CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo_v2_coin
         AVA_C, AVA_FUJ -> R.drawable.ic_avalanche
         else -> R.drawable.ic_default_token
     }
