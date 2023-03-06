@@ -7,13 +7,13 @@ import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.Window
 import minerva.android.R
-import minerva.android.databinding.DialogHideAccountBinding
+import minerva.android.databinding.DialogHideUnmaintainedAccountBinding
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 
-class HideAccountDialog(context: Context, private val account: Account, private val onHideClick: (Account) -> Unit) :
+class HideAccountUnmaintainedDialog(context: Context, private val account: Account, private val onHideClick: (Account) -> Unit) :
     Dialog(context, R.style.DialogStyle) {
 
-    private val binding = DialogHideAccountBinding.inflate(LayoutInflater.from(context))
+    private val binding = DialogHideUnmaintainedAccountBinding.inflate(LayoutInflater.from(context))
 
     init {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
