@@ -108,7 +108,7 @@
                     android:lines="2"
                     android:textColor="@color/white"
                     android:textSize="@dimen/text_large"
-                    app:icon="@drawable/ic_celo_v2"
+                    app:icon="@drawable/ic_celo"
                     app:name="@string/celo_label" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
