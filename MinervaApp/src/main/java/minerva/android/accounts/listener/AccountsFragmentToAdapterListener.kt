@@ -10,7 +10,7 @@ interface AccountsFragmentToAdapterListener {
     fun onSendTokenTransaction(account: Account, tokenAddress: String, isTokenError: Boolean)
     fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean = false)
     fun onCreateSafeAccount(account: Account)
-    fun onAccountHide(index: Int)
+    fun onAccountHide(account: Account)
     fun onShowAddress(account: Account)
     fun onShowSafeAccountSettings(account: Account, position: Int)
     fun onWalletConnect(index: Int)
@@ -41,6 +41,12 @@ interface AccountsFragmentToAdapterListener {
      * @param account - Account which info we need to show
      */
     fun openInExplorer(account: Account)
+
+    /**
+     * Open Tokensowned Api - method for opening in browser wallet transactions info by specified account
+     * @param account - Account which (transaction) info we need to show
+     */
+    fun openTokensownedApi(account: Account)
 
     /**
      * Add Account - method which calls "add account" functional from parent activity

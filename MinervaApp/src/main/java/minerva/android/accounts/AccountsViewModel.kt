@@ -124,6 +124,13 @@ class AccountsViewModel(
         getSessions(accountManager.getAllAccounts())
     }
 
+    /**
+     * Get Tokens Owned URL - get base part of tokens-owned URL by specified chain id
+     * @param chainId - id of network for which we trying to get link
+     * @return - base part of tokens-owned URL or empty string
+     */
+    fun getTokensOwnedURL(chainId: Int): String = tokenManager.getTokensOwnedURL(chainId, menuCase = true)
+
     private fun fetchNFTData(){
         launchDisposable {
             tokenManager.fetchNFTsDetails()
@@ -176,36 +183,33 @@ class AccountsViewModel(
             session.address.equals(account.address, true) && session.chainId == account.chainId
         } != null
 
-    fun hideAccount(index: Int) {
-        val account = rawAccounts[index]
-        launchDisposable {
-            accountManager.hideAccount(account)
-                .observeOn(Schedulers.io())
-                .andThen(
-                    walletConnectRepository.killAllAccountSessions(
-                        accountManager.toChecksumAddress(account.address, account.chainId),
-                        account.chainId
-                    )
+    fun hideAccount(account: Account) = launchDisposable {
+        accountManager.hideAccount(account)
+            .observeOn(Schedulers.io())
+            .andThen(
+                walletConnectRepository.killAllAccountSessions(
+                    accountManager.toChecksumAddress(account.address, account.chainId),
+                    account.chainId
                 )
-                .andThen(
-                    walletActionsRepository.saveWalletActions(
-                        listOf(
-                            getHideAccountAction(
-                                account
-                            )
+            )
+            .andThen(
+                walletActionsRepository.saveWalletActions(
+                    listOf(
+                        getHideAccountAction(
+                            account
                         )
                     )
                 )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { _accountHideLiveData.value = Event(Unit) },
-                    onError = {
-                        Timber.e("Hiding account with index ${account.id} failure")
-                        handleHideAccountErrors(it)
-                    }
-                )
-        }
+            )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onComplete = { _accountHideLiveData.value = Event(Unit) },
+                onError = {
+                    Timber.e("Hiding account with index ${account.id} failure")
+                    handleHideAccountErrors(it)
+                }
+            )
     }
 
     fun getTokens(account: Account): List<AccountToken> {
@@ -846,6 +850,7 @@ class AccountsViewModel(
     }
 
     fun indexOfRawAccounts(account: Account): Int = rawAccounts.indexOf(account)
+
     fun stopPendingAccounts() {
         rawAccounts.forEach { account -> account.isPending = false }
     }

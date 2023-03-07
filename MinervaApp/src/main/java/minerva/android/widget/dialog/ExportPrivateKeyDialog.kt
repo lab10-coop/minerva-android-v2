@@ -8,6 +8,7 @@ import android.transition.TransitionManager
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Window
+import android.view.WindowManager
 import minerva.android.R
 import minerva.android.databinding.ExportPrivateKeyDialogBinding
 import minerva.android.extension.gone
@@ -28,7 +29,7 @@ class ExportPrivateKeyDialog(context: Context, private val account: Account) : D
         initView()
     }
 
-    private fun initView() {
+    private fun initView() =
         binding.apply {
             showPrivateKeyButton.setOnClickListener { showPrivateKey() }
             privateKeyLabel.apply {
@@ -39,15 +40,15 @@ class ExportPrivateKeyDialog(context: Context, private val account: Account) : D
                 setupShareButton(shareButton, account.privateKey)
             }
         }
-    }
 
-    private fun showPrivateKey() {
+    private fun showPrivateKey() =
         binding.apply {
+            //disable ability to make screenshot
+            window?.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
             TransitionManager.beginDelayedTransition(binding.root)
             showPrivateKeyButton.gone()
             privateKeyLabel.togglePasswordTransformation()
             copyButton.visible()
             shareButton.visible()
         }
-    }
 }

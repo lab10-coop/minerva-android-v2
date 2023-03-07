@@ -20,7 +20,7 @@
     <string name="new_identity">New Identity</string>
     <string name="identity_label">Identity: %s</string>
     <string name="edit_identity_order">Rearrange Identities</string>
-    <string name="edit_account_order">Rearrange Accounts</string>
+    <string name="edit_account_order">Rearrange accounts</string>
     <string name="edit_service_order">Rearrange Services</string>
     <string name="edit_credentials_order">Rearrange Credentials</string>
     <string name="personal_data">Personal data</string>
@@ -66,7 +66,10 @@
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
     <string name="hide_account_dialog_message_part_1">After confirming this message, this account will be hidden and because the network is UNMAINTAINED, the account CANNOT be shown again.</string>
     <string name="hide_account_dialog_message_part_2">To access this account again, you have to import the private key into a wallet software which still supports this network.</string>
-    <string name="hide_account_dialog_title">Permanently hide \n\t\t\t\t\taccount</string>
+    <string name="hide_account_dialog_title_part_1">Permanently hide</string>
+    <string name="hide_account_dialog_title_part_2">account</string>
+    <string name="hide_account_dialog_message">After confirming this message, this account is hidden but can still be used to receive transfers.\n\nTo make the account visible again, you have to tap on ‘+’ in the Values screen, select it from your addresses list and add the account.</string>
+    <string name="hide_account_dialog_title">Hide account</string>
     <string name="remove_owner">Remove owner</string>
     <string name="replace">Replace</string>
     <string name="replace_all">Replace all</string>
@@ -317,7 +320,7 @@
     <string name="restore_wallet_title">Import existing wallet</string>
     <string name="type_here">Type here</string>
     <string name="no_backup_data_found_for_the_secret_recovery_phrase_you_entered">No backup data found for the Secret Recovery Phrase you entered. \n\n Make sure your device \n is currently online.</string>
-    <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please join our community on <a href="https://t.me/MinervaWallet">Telegram</a> or <a href="https://minerva.digital/discord ">Discord</a>.</string>
+    <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please reach out to us via the channels shown on the Settings screen.</string>
     <string name="terms_of_service_info">By proceeding you agree to the <a href="https://docs.minerva.digital/legal/terms">Terms of Service</a></string>
     <string name="import_with_recovery_phrase">Import with Recovery Phrase</string>
     <string name="import_info">Import an existing wallet or create a new one</string>
@@ -361,6 +364,7 @@
     <string name="my_favorites">My Favorites</string>
     <string name="my_favorites_item_description">"Personal collection of NFTs"</string>
     <string name="open_in_explorer">Open in Explorer</string>
+    <string name="open_tokensowned_api">Open Tokensowned</string>
     <string name="already_in_use">Already in use</string>
     <string name="free">Free</string>
     <string name="change_account_dialog">CHANGE ACCOUNT</string>

@@ -1,6 +1,5 @@
 package minerva.android.wrapped
 
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -177,7 +176,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         ?: throw MissingFormatArgumentException("No fragment was passed to Activity")
 
     companion object {
-        const val TITLE_FORMAT = "   %s"  //hacks for padding between logo and title
+        const val TITLE_FORMAT = "%s"//(deleted)hacks for padding between logo and title
         const val TITLE = "title"
         const val SUBTITLE = "subtitle"
         const val INDEX = "index"

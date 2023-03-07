@@ -7,7 +7,7 @@ interface AccountsAdapterListener {
     fun onSendCoinClicked(account: Account)
     fun onSendTokenClicked(account: Account, tokenAddress: String, isTokenError: Boolean)
     fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean = false)
-    fun onAccountHide(index: Int)
+    fun onAccountHide(account: Account)
     fun onCreateSafeAccountClicked(account: Account)
     fun onShowAddress(account: Account)
     fun onShowSafeAccountSettings(account: Account, index: Int)
@@ -22,4 +22,9 @@ interface AccountsAdapterListener {
      * @param account - Account which info we need to show
      */
     fun openInExplorer(account: Account)
+    /**
+     * Open Tokensowned Api - open in browser wallet transactions info by specified account
+     * @param account - Account which info we need to show
+     */
+    fun openTokensownedApi(account: Account)
 }

@@ -43,6 +43,15 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/openTokensownedApi"
+        android:enabled="true"
+        android:icon="@drawable/ic_open_in_explorer"
+        android:title="@string/open_tokensowned_api"
+        android:visible="false"
+        tools:visible="true"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/exportPrivateKey"
         android:enabled="true"
         android:icon="@drawable/ic_key"
