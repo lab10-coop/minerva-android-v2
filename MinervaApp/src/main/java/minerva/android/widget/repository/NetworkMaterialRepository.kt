@@ -6,7 +6,6 @@ import android.graphics.drawable.LayerDrawable
 import android.view.Gravity
 import androidx.core.content.ContextCompat
 import minerva.android.R
-import minerva.android.kotlinUtils.InvalidId
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC

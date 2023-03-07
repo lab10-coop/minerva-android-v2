@@ -150,7 +150,7 @@
     "gasPrice": "20000000000",
     "minGasPrice": "0",
     "tokens": [],
-    "color": "#35d07f",
+    "color": "#000000",
     "testNet": false,
     "chainId": 42220,
     "explore": "https://celoscan.io/",
@@ -414,7 +414,7 @@
     "gasPrice": "20000000000",
     "minGasPrice": "0",
     "tokens": [],
-    "color": "#35d07f",
+    "color": "#000000",
     "testNet": true,
     "chainId": 44787,
     "explore": "https://alfajores.celoscan.io/"
@@ -430,7 +430,7 @@
     "gasPrice": "20000000000",
     "minGasPrice": "0",
     "tokens": [],
-    "color": "#35d07f",
+    "color": "#000000",
     "testNet": true,
     "chainId": 62320,
     "explore": "https://explorer.celo.org/baklava/"
