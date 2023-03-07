@@ -139,6 +139,7 @@
     <string name="open">Open</string>
     <string name="confirm_payment">Confirm payment</string>
     <string name="share_via">Share via</string>
+    <string name="no_funds">No funds</string>
     <string name="processing">Processing</string>
     <string name="channel_id">MinervaLoginChannel</string>
     <string name="message">Message</string>
@@ -147,6 +148,7 @@
     <string name="add_owner">Add owner</string>
     <string name="current_owners">Current owners</string>
     <string name="owner_address">Owner address</string>
+    <string name="login_request_message">Please double tap to confirm login</string>
     <string name="did">DID</string>
     <string name="required">Required</string>
     <string name="change_account">Change Account</string>

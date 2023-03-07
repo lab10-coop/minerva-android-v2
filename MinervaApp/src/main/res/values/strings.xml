@@ -20,7 +20,7 @@
     <string name="new_identity">New Identity</string>
     <string name="identity_label">Identity: %s</string>
     <string name="edit_identity_order">Rearrange Identities</string>
-    <string name="edit_account_order">Rearrange Accounts</string>
+    <string name="edit_account_order">Rearrange accounts</string>
     <string name="edit_service_order">Rearrange Services</string>
     <string name="edit_credentials_order">Rearrange Credentials</string>
     <string name="personal_data">Personal data</string>
