@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_white_background">
+
+    <TextView
+        android:id="@+id/title_part_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_large"
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/hide_account_dialog_title_part_1"
+        android:textColor="@color/advancedTitleColor"
+        android:textSize="@dimen/text_large"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/title_part_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/hide_account_dialog_title_part_2"
+        android:textColor="@color/advancedTitleColor"
+        android:textSize="@dimen/text_large"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_part_1" />
+
+    <LinearLayout
+        android:id="@+id/exclamation_mark"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:layout_width="@dimen/margin_large"
+        android:layout_height="@dimen/margin_large"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_part_2">
+
+        <ImageView
+            android:layout_gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_unmaintained_network_exclamation_mark"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/message_part_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:text="@string/hide_account_dialog_message_part_1"
+        android:textColor="@color/warningMessageOrange"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/exclamation_mark" />
+
+    <TextView
+        android:id="@+id/message_part_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:text="@string/hide_account_dialog_message_part_2"
+        android:textColor="@color/advancedTitleColor"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/message_part_1" />
+
+    <Button
+        android:id="@+id/hide_button"
+        style="@style/PurpleButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dialog_hide_account_button_margin_in_between"
+        android:layout_marginTop="@dimen/margin_large"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/dialog_hide_account_button_margin_bottom"
+        android:text="@string/hide_now"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cancel_button"
+        app:layout_constraintTop_toBottomOf="@id/message_part_2" />
+
+    <Button
+        android:id="@+id/cancel_button"
+        style="@style/OutlinedButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_large"
+        android:layout_marginEnd="@dimen/dialog_hide_account_button_margin_in_between"
+        android:layout_marginBottom="@dimen/dialog_hide_account_button_margin_bottom"
+        android:text="@string/cancel"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/hide_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/message_part_2" />
+</androidx.constraintlayout.widget.ConstraintLayout>
