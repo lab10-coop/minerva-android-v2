@@ -9,6 +9,7 @@
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/margin_x_average"
         tools:itemCount="5"
         tools:listitem="@layout/order_list_row"/>
 
