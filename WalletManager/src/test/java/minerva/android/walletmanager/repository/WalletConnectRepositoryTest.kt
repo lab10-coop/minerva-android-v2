@@ -57,6 +57,7 @@ class WalletConnectRepositoryTest {
 
         clientMap = ConcurrentHashMap()
         clientMap["peerId"] = client
+        // to test WalletConnect 2.0  WalletConnectRepositoryImpl.initializeWalletConnect2(application) would need to be called here.
         repository = WalletConnectRepositoryImpl(signatureRepository, database, logger, client, clientMap).also {
             it.currentEthMessage =
                 WCEthereumSignMessage(type = WCEthereumSignMessage.WCSignType.MESSAGE, raw = listOf("test1", "test2"))

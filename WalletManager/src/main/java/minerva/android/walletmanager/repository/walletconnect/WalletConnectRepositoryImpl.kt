@@ -250,7 +250,11 @@ class WalletConnectRepositoryImpl(
                 // todo
             }
         }
-        SignClient.setWalletDelegate(walletDelegate)
+        try {
+            SignClient.setWalletDelegate(walletDelegate)
+        } catch (e: IllegalStateException) {
+            Timber.e(e.toString())
+        }
 
         return true
     }
@@ -499,23 +503,28 @@ class WalletConnectRepositoryImpl(
     }
 
     override fun getV2Sessions(): List<DappSessionV2> =
-        SignClient.getListOfActiveSessions()
-            // todo: create some mapper instead
-            .map { session -> DappSessionV2(
-                String.Empty,
-                session.topic,
-                "2",
-                session.metaData?.name ?: String.Empty,
-                // todo: check which icon is good
-                session.metaData?.icons?.getOrNull(0) ?: String.Empty,
-                String.Empty,
-                String.Empty,
-                String.Empty,
-                Int.InvalidValue,
-                false, // todo: how do we know this here.
-                session.metaData,
-                session.namespaces
-            ) }
+        try {
+            SignClient.getListOfActiveSessions()
+                // todo: create some mapper instead
+                .map { session -> DappSessionV2(
+                    String.Empty,
+                    session.topic,
+                    "2",
+                    session.metaData?.name ?: String.Empty,
+                    // todo: check which icon is good
+                    session.metaData?.icons?.getOrNull(0) ?: String.Empty,
+                    String.Empty,
+                    String.Empty,
+                    String.Empty,
+                    Int.InvalidValue,
+                    false, // todo: how do we know this here.
+                    session.metaData,
+                    session.namespaces
+                ) }
+        } catch (e: IllegalStateException) {
+            Timber.e(e.toString())
+            emptyList<DappSessionV2>()
+        }
 
     override fun getV1Sessions(): Single<List<DappSessionV1>> =
         dappDao.getAll().firstOrError()
