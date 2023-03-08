@@ -310,7 +310,7 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
             )
         )
         viewModel.viewStateLiveData.observeForever(stateObserver)
-        viewModel.validateResult("wc:123456789")
+        viewModel.validateResult("wc:123456789@1")
         stateCaptor.run {
             verify(stateObserver).onChanged(capture())
             firstValue shouldBe CorrectWalletConnectResult

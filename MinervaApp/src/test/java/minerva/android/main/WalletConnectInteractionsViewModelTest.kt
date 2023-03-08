@@ -906,7 +906,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             )
         )
         viewModel.walletConnectStatus.observeForever(requestObserver)
-        viewModel.handleDeepLink("wc:123456789bridge=123key=123")
+        viewModel.handleDeepLink("wc:123456789@1?bridge=123&key=123")
         requestCaptor.run {
             verify(requestObserver).onChanged(capture())
             firstValue shouldBe CorrectWalletConnectCodeState

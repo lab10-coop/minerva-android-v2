@@ -483,23 +483,28 @@ class WalletConnectRepositoryImpl(
             }
 
     override fun getV2PairingsWithoutActiveSession(): List<Pairing> {
-        val sessions = SignClient.getListOfActiveSessions()
-        return CoreClient.Pairing.getPairings()
-            .filter { pairing -> !sessions.any { session -> session.pairingTopic == pairing.topic} }
-            // todo: create some mapper instead
-            .map { pairing ->
-                Pairing(
-                    String.Empty,
-                    pairing.topic,
-                    pairing.peerAppMetaData?.name ?: String.Empty,
-                    // todo: check which icon is good
-                    pairing.peerAppMetaData?.icons?.getOrNull(0) ?: String.Empty,
-                    String.Empty,
-                    String.Empty,
-                    Int.InvalidValue,
-                    pairing.peerAppMetaData
-                )
-            }
+        try {
+            val sessions = SignClient.getListOfActiveSessions()
+            return CoreClient.Pairing.getPairings()
+                .filter { pairing -> !sessions.any { session -> session.pairingTopic == pairing.topic} }
+                // todo: create some mapper instead
+                .map { pairing ->
+                    Pairing(
+                        String.Empty,
+                        pairing.topic,
+                        pairing.peerAppMetaData?.name ?: String.Empty,
+                        // todo: check which icon is good
+                        pairing.peerAppMetaData?.icons?.getOrNull(0) ?: String.Empty,
+                        String.Empty,
+                        String.Empty,
+                        Int.InvalidValue,
+                        pairing.peerAppMetaData
+                    )
+                }
+        } catch (e: IllegalStateException) {
+            Timber.e(e.toString())
+            return emptyList<Pairing>()
+        }
     }
 
     override fun getV2Sessions(): List<DappSessionV2> =
