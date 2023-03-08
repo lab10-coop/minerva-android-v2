@@ -56,9 +56,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `set dapp session flowable`() {
-        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSessionV1(name = ""))))
-        whenever(walletConnectRepository.getV2Sessions()).thenReturn(emptyList())
-        whenever(walletConnectRepository.getV2PairingsWithoutActiveSession()).thenReturn(emptyList())
+        whenever(walletConnectRepository.getSessionsAndPairingsFlowable()).thenReturn(Flowable.just(listOf(DappSessionV1(name = ""))))
         viewModel.setDappSessionsFlowable(listOf(Service(name = "name")))
         viewModel.dappSessionsLiveData.observeForever(dappSessionObserver)
         dappSessionCaptor.run {
@@ -69,9 +67,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
     @Test
     fun `set dapp session flowable and error occurs`() {
         val error = Throwable()
-        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.error(error))
-        whenever(walletConnectRepository.getV2Sessions()).thenReturn(emptyList())
-        whenever(walletConnectRepository.getV2PairingsWithoutActiveSession()).thenReturn(emptyList())
+        whenever(walletConnectRepository.getSessionsAndPairingsFlowable()).thenReturn(Flowable.error(error))
         viewModel.setDappSessionsFlowable(listOf(Service(name = "name")))
         viewModel.errorLiveData.observeForever(errorObserver)
         errorCaptor.run {
