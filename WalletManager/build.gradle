@@ -39,8 +39,8 @@ android {
         buildConfigField "String", "ETHERSCAN_KEY", System.env.ETHERSCAN_KEY ?: localProperty("etherscan.key")
         buildConfigField "String", "INFURA_API_KEY", System.env.INFURA_API_KEY ?: localProperty("infura.key")
         buildConfigField "String", "BSCSCAN_KEY", System.env.BSCSCAN_KEY ?: localProperty("bscscan.key")
-        buildConfigField "String", "WALLETCONNET_PROJECT_ID", System.env.WALLETCONNET_PROJECT_ID ?: localProperty("walletconnect.project.id")
-        buildConfigField "String", "WALLETCONNET_RELAY_URL", System.env.WALLETCONNET_RELAY_URL ?: localProperty("walletconnect.relay.url")
+        buildConfigField "String", "WALLETCONNECT_PROJECT_ID", System.env.WALLETCONNECT_PROJECT_ID ?: localProperty("walletconnect.project.id")
+        buildConfigField "String", "WALLETCONNECT_RELAY_URL", System.env.WALLETCONNECT_RELAY_URL ?: localProperty("walletconnect.relay.url")
     }
 
     buildTypes {

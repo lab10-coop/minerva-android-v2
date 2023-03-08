@@ -863,8 +863,8 @@ class WalletConnectRepositoryImpl(
         }
 
         fun initializeWalletConnect2(application: Application) {
-            val projectId = BuildConfig.WALLETCONNET_PROJECT_ID
-            val relayUrl = BuildConfig.WALLETCONNET_RELAY_URL
+            val projectId = BuildConfig.WALLETCONNECT_PROJECT_ID
+            val relayUrl = BuildConfig.WALLETCONNECT_RELAY_URL
 
             val serverUrl = "wss://$relayUrl?projectId=${projectId}"
             val connectionType = ConnectionType.AUTOMATIC
