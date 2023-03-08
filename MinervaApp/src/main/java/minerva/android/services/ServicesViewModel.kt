@@ -31,12 +31,13 @@ class ServicesViewModel(
     private val walletConnectRepository: WalletConnectRepository
 ) : BaseViewModel() {
 
-    val servicesLiveData: LiveData<List<Service>> =
+    private val _servicesLiveData: MutableLiveData<List<Service>> =
         Transformations.map(serviceManager.walletConfigLiveData) {
             it.peekContent().services.apply {
                 setDappSessionsFlowable(this)
             }
-        }
+        } as MutableLiveData<List<Service>>
+    val servicesLiveData: LiveData<List<Service>> = _servicesLiveData
 
     private val _serviceRemovedLiveData = MutableLiveData<Event<Unit>>()
     val serviceRemovedLiveData: LiveData<Event<Unit>> get() = _serviceRemovedLiveData
@@ -80,26 +81,34 @@ class ServicesViewModel(
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(onError = { Timber.e(it) })
             }
-            // todo: somehow the list doesn't live update yet
-            // todo: observe for error?
-            is DappSessionV2 -> walletConnectRepository.killSessionByTopic(dapp.topic)
+            is DappSessionV2 -> {
+                walletConnectRepository.killSessionByTopic(dapp.topic)
+                // Update servicesLiveData
+                // todo: this seems to be a bit hacky, fix this.
+                val updatedServices = serviceManager.walletConfigLiveData.value?.peekContent()?.services?.apply {
+                    setDappSessionsFlowable(this)
+                } ?: emptyList()
+                updatedServices.let { _servicesLiveData.postValue(it) }
+            }
         }
 
     }
 
     fun removePairing(dapp: MinervaPrimitive) {
         when (dapp) {
-            // todo: somehow the list doesn't live update yet
-            // todo: observe for error?
             is Pairing -> walletConnectRepository.killPairingByTopic(dapp.topic)
-            // todo: somehow the list doesn't live update yet
-            // todo: observe for error?
             is DappSessionV2 -> {
                 // the order of these two must be like this.
                 walletConnectRepository.killPairingBySessionTopic(dapp.topic)
                 walletConnectRepository.killSessionByTopic(dapp.topic)
             }
         }
+        // Update servicesLiveData
+        // todo: this seems to be a bit hacky, fix this.
+        val updatedServices = serviceManager.walletConfigLiveData.value?.peekContent()?.services?.apply {
+            setDappSessionsFlowable(this)
+        } ?: emptyList()
+        updatedServices.let { _servicesLiveData.postValue(it) }
     }
 
     private fun getWalletAction(name: String): WalletAction =
