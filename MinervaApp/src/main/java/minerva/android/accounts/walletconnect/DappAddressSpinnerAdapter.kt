@@ -12,19 +12,22 @@ import minerva.android.databinding.SpinnerNetworkWalletConnectBinding
 import minerva.android.extension.dpToPx
 import minerva.android.kotlinUtils.EmptyResource
 import minerva.android.kotlinUtils.OneElement
+import minerva.android.walletmanager.model.AddressWrapper
+import minerva.android.walletmanager.utils.AddressConverter
+import minerva.android.walletmanager.utils.AddressType
 
 class DappAddressSpinnerAdapter(
     context: Context,
     @LayoutRes
     private val layoutResource: Int,
-    private val addresses: List<String>
-) : ArrayAdapter<String>(context, layoutResource, addresses) {
+    private val addresses: List<AddressWrapper>
+) : ArrayAdapter<AddressWrapper>(context, layoutResource, addresses) {
 
     var selectedItemWidth: Int? = null
 
     override fun getCount(): Int = addresses.size
 
-    override fun getItem(position: Int): String = addresses[position]
+    override fun getItem(position: Int): AddressWrapper = addresses[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
@@ -36,7 +39,7 @@ class DappAddressSpinnerAdapter(
         LayoutInflater.from(context).inflate(layoutResource, parent, false).apply {
             getItem(position).let { item ->
                 SpinnerNetworkWalletConnectBinding.bind(this).network.apply {
-                    text = item
+                    text = "#${item.index.inc()}: ${AddressConverter.getShortAddress(AddressType.NORMAL_ADDRESS, item.address)}"
                     setTextColor(ContextCompat.getColor(context, R.color.gray))
                     val arrowRes = if (isDropdown) {
                         selectedItemWidth?.let { selectedItemWidth -> width = selectedItemWidth }

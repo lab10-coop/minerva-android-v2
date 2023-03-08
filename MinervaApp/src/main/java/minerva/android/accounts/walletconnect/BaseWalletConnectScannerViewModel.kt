@@ -10,6 +10,8 @@ import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.AddressStatus
+import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
@@ -73,9 +75,10 @@ abstract class BaseWalletConnectScannerViewModel(
 
     val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(selectedChainId)
 
-    val availableAddresses: List<String> get() = accountManager.getAllAccountsForSelectedNetworksType()
+    // using AddressWrapper because id and address are needed, AddressStatus doesn't matter here.
+    val availableAddresses: List<AddressWrapper> get() = accountManager.getAllAccountsForSelectedNetworksType()
         .filter { account -> account.shouldShow }
-        .map { account -> account.address }
+        .map { account -> AddressWrapper(account.id, account.address, AddressStatus.ALREADY_IN_USE) }
         .distinct()
 
     private fun prepareAvailableNetworks(): List<NetworkDataSpinnerItem> =

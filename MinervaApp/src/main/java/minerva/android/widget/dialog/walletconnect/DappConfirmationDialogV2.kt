@@ -13,6 +13,7 @@ import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.EmptyResource
 import minerva.android.kotlinUtils.FirstIndex
+import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.DynamicWidthSpinner
 import minerva.android.widget.dialog.models.ViewDetailsV2
@@ -54,7 +55,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         numberOfProvidedNetworks = _numberOfProvidedNetworks
     }
 
-    fun setupAddressSpinner(availableAddresses: List<String>, onAddressSelected: (String) -> Unit) {
+    fun setupAddressSpinner(availableAddresses: List<AddressWrapper>, onAddressSelected: (String) -> Unit) {
         networkHeader.accountSpinner.apply {
             val accountAdapter = DappAddressSpinnerAdapter(
                 context,
@@ -69,7 +70,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
             adapter = accountAdapter
             val defaultPosition = Int.FirstIndex
             prepareSpinner(R.drawable.rounded_background_purple_frame, defaultPosition) { position, view ->
-                onAddressSelected(accountAdapter.getItem(position))
+                onAddressSelected(accountAdapter.getItem(position).address)
                 accountAdapter.selectedItemWidth = view?.width
             }
         }
@@ -111,11 +112,10 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         }
     }
 
-    // todo: implement
     private fun setUnsupportedNetworkWarning() = with(binding) {
         networkHeader.apply {
             networkWarning.visible()
-            networkWarning.text = "The request is not supported."
+            networkWarning.text = "The request is not supported." // todo: localize
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
@@ -126,7 +126,6 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         manual.text = "If you would like to get this website supported, please engage with the Minerva team."
     }
 
-    // todo: implement
     private fun setOtherUnsupportedWarning() = with(binding) {
         networkHeader.apply {
             networkWarning.visible()
