@@ -174,7 +174,7 @@ ext {
     ]
 
     okhttp = [
-            kotson: "com.squareup.okhttp:okhttp:4.10.0"
+            kotson: "com.squareup.okhttp3:okhttp:4.10.0"
     ]
 
     startupDependencies = [startup: "androidx.startup:startup-runtime:$startupVersion"]
