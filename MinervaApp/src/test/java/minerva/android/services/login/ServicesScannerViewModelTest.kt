@@ -61,7 +61,8 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
             accountManager,
             logger,
             identityManager,
-            unsupportedNetworkRepository
+            unsupportedNetworkRepository,
+            address = ""
         )
     }
 

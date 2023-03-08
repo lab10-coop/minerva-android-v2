@@ -58,7 +58,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             tokenManager,
             accountManager,
             walletActionsRepository,
-            unsupportedNetworkRepository
+            unsupportedNetworkRepository,
+            address = ""
         )
 
     private val requestObserver: Observer<WalletConnectState> = mock()
