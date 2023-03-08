@@ -200,6 +200,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
     // walletconnect 2.0
     private fun DappConfirmationDialogV2.updateAddressSpinner() {
+        viewModel.setNewAddress(viewModel.availableAddresses[0].address)
         setupAddressSpinner(viewModel.availableAddresses) { address ->
             viewModel.setNewAddress(address)
         }
