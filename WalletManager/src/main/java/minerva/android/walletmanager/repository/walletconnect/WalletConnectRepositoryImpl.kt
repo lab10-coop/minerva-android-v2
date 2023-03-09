@@ -1,10 +1,12 @@
 package minerva.android.walletmanager.repository.walletconnect
 
+import android.annotation.SuppressLint
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
@@ -14,6 +16,7 @@ import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.ONE
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
@@ -56,6 +59,7 @@ class WalletConnectRepositoryImpl(
     private val dappDao = minervaDatabase.dappSessionDao()
     private var reconnectionAttempts: MutableMap<String, Int> = mutableMapOf()
 
+    @SuppressLint("CheckResult")
     override fun connect(
         session: WalletConnectSession,
         peerId: String,
@@ -78,15 +82,40 @@ class WalletConnectRepositoryImpl(
 
             onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId, type ->
                 logger.logToFirebase("${LoggerMessages.ON_SESSION_REQUEST}$peerId")
-                status.onNext(
-                    OnSessionRequest(
-                        WCPeerToWalletConnectPeerMetaMapper.map(meta),
-                        chainId,
-                        Topic(peerId, remotePeerId),
-                        handshakeId,
-                        type = type
+                if (Int.ONE == type) {//"CHANGE_TYPE" case - get data from db for setting details into popap dialog
+                    getDappSessionById(peerId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeBy(
+                            onSuccess = { dappSession ->
+                                status.onNext(
+                                    OnSessionRequest(
+                                        meta = WCPeerToWalletConnectPeerMetaMapper.map(
+                                            if (dappSession.iconUrl.isNotEmpty()) {//add icon of api to popap dialog
+                                                meta.copy(icons = listOf(dappSession.iconUrl))
+                                            } else {
+                                                meta
+                                            }
+                                        ),
+                                        chainId,
+                                        Topic(peerId, remotePeerId),
+                                        handshakeId,
+                                        type = type
+                                    )
+                                )
+                            }
+                        )
+                } else {
+                    status.onNext(
+                        OnSessionRequest(
+                            WCPeerToWalletConnectPeerMetaMapper.map(meta),
+                            chainId,
+                            Topic(peerId, remotePeerId),
+                            handshakeId,
+                            type = type
+                        )
                     )
-                )
+                }
             }
             onFailure = { error, peerId, isForceTermination ->
                 if (isForceTermination) {
@@ -290,9 +319,10 @@ class WalletConnectRepositoryImpl(
         accountAddress: String,
         accountChainId: Int,
         accountName: String,
-        networkName: String
+        networkName: String,
+        handshakeId: Long
     ): Completable =
-        if (clientMap[connectionPeerId]?.approveSession(listOf(accountAddress), accountChainId, connectionPeerId) == true) {
+        if (clientMap[connectionPeerId]?.approveSession(listOf(accountAddress), accountChainId, connectionPeerId, handshakeId) == true) {
             logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} ${connectionPeerId}")
             //update specified dapp session db record by specified parameters
             updateDappSession(connectionPeerId, accountAddress, accountChainId, accountName, networkName)
