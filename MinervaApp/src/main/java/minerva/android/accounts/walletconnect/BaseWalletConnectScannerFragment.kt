@@ -107,10 +107,9 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         if (numberOfNonEip155Chains > 0) {
             return false
         }
-        if (/* todo: unsupported evm chains */ false) {
-            return false
-        }
-        return true
+        return viewModel.networks
+            .map { "eip155:${it.chainId}" }
+            .containsAll(eip155ProposalNamespace.chains)
     }
 
     // todo: move somewhere else?

@@ -71,7 +71,7 @@ abstract class BaseWalletConnectScannerViewModel(
 
     val networks: List<Network> = NetworkManager.networks
         .filter { it.isActive }
-        .filter { it.testNet != accountManager.areMainNetworksEnabled }
+        .filter { !it.testNet == accountManager.areMainNetworksEnabled }
 
     val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(selectedChainId)
 
