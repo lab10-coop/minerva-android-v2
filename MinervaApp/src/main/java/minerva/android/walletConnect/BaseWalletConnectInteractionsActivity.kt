@@ -342,7 +342,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             },
             {
                 // reject session
-                // todo: localize reason?
+                // not localized because it is not user facing
                 var reason = "User rejection"
                 if (!networksSupported) {
                     reason = "Network(s) not supported"
@@ -356,8 +356,8 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             // todo: and enable/disable connect button?
             var networkNames = WalletConnectRepositoryImpl.proposalNamespacesToChainNames(eip155ProposalNamespace)
             when {
-                numberOfNonEip155Chains == 1 -> networkNames = networkNames + "Non EVM Chain" // todo: localize
-                numberOfNonEip155Chains > 1 -> networkNames = networkNames + "Non EVM Chains" // todo: localize
+                numberOfNonEip155Chains == 1 -> networkNames = networkNames + getString(R.string.non_evm_chain)
+                numberOfNonEip155Chains > 1 -> networkNames = networkNames + getString(R.string.non_evm_chains)
             }
             setView(
                 meta,

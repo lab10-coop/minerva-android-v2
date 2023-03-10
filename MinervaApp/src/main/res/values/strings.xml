@@ -372,6 +372,14 @@
     <string name="unknown_type">Unknown Type</string>
     <string name="paste_button_text">Paste from clipboard</string>
     <string name="switch_network">You need to switch to %s networks in the Settings first</string>
+    <string name="non_evm_chain">Non EVM Chain</string>
+    <string name="non_evm_chains">Non EVM Chains</string>
+    <string name="no_active_session">No active session</string>
+    <string name="requested_networks">Requested: %s</string>
+    <string name="fully_supported">Fully supported (%d networks)</string>
+    <string name="request_not_supported">The request is not supported.</string>
+    <string name="website_networks_not_supported">If you would like to get this website supported, please engage with the Minerva team.</string>
+    <string name="events_methods_not_supported">This website requests events or methods that are not supported. Please engage with the Minerva team.</string>
 
     <!-- Disabled features  -->
     <string name="quick_login_success_message">Allow Charging Station Dashboard to send you push\nnotifications and proceed with painless login request?</string>

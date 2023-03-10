@@ -136,6 +136,7 @@
     <string name="open">Open</string>
     <string name="confirm_payment">Confirm payment</string>
     <string name="share_via">Share via</string>
+    <string name="no_funds">No funds</string>
     <string name="processing">Processing</string>
     <string name="channel_id">MinervaLoginChannel</string>
     <string name="message">Message</string>
@@ -144,6 +145,7 @@
     <string name="add_owner">Add owner</string>
     <string name="current_owners">Current owners</string>
     <string name="owner_address">Owner address</string>
+    <string name="login_request_message">Please double tap to confirm login</string>
     <string name="did">DID</string>
     <string name="required">Required</string>
     <string name="change_account">Change Account</string>
@@ -225,6 +227,7 @@
     <string name="disconnect">Trennen</string>
     <string name="end_session">End session</string>
     <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
+    <string name="Connect">Connect</string>
     <string name="connect_to_website">Mit DApp verbinden</string>
     <string name="change_network">change network</string>
     <string name="all_my_assets">All my Assets</string>
@@ -368,7 +371,14 @@
     <string name="unknown_type">Unknown Type</string>
     <string name="paste_button_text">Paste from clipboard</string>
     <string name="switch_network">You need to switch to %s networks in the Settings first</string>
-
+    <string name="non_evm_chain">Non EVM Chain</string>
+    <string name="non_evm_chains">Non EVM Chains</string>
+    <string name="no_active_session">No active session</string>
+    <string name="requested_networks">Requested: %s</string>
+    <string name="fully_supported">Fully supported (%d networks)</string>
+    <string name="request_not_supported">The request is not supported.</string>
+    <string name="website_networks_not_supported">If you would like to get this website supported, please engage with the Minerva team.</string>
+    <string name="events_methods_not_supported">This website requests events or methods that are not supported. Please engage with the Minerva team.</string>
 
     <!-- Disabled features  -->
     <string name="quick_login_success_message">Allow Charging Station Dashboard to send you push\nnotifications and proceed with painless login request?</string>

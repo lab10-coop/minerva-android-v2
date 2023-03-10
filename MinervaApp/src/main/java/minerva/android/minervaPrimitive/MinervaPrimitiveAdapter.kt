@@ -104,7 +104,6 @@ class MinervaPrimitiveViewHolder(
             .joinToString(" • ") { getShortAddress(AddressType.NORMAL_ADDRESS, it) }
         networkLabel.text = WalletConnectRepositoryImpl
             .sessionNamespacesToChainNames(namespaces)
-            // todo: move to localization?
             .joinToString(" • ")
     }
 
@@ -114,7 +113,7 @@ class MinervaPrimitiveViewHolder(
             .error(R.drawable.ic_services)
             .into(minervaPrimitiveLogo)
         setSessionItemsVisibility(true)
-        sessionInfoLabel.text = "No active session" // todo: move to localization
+        sessionInfoLabel.text = view.context.getString(R.string.no_active_session)
         networkLabel.text = String.Empty
     }
 

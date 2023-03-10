@@ -46,8 +46,11 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     = with(binding) {
         //set current wallet connection dapp session
         dAppSessionMeta = meta
-        // todo: localization
-        setupHeader(meta.name, "Requested: " + viewDetails.networkNames.joinToString(" • "), getIcon(meta))
+        setupHeader(
+            meta.name,
+            context.getString(R.string.requested_networks, viewDetails.networkNames.joinToString(" • ")),
+            getIcon(meta)
+        )
         binding.apply {
             confirmationButtons.confirm.text = viewDetails.confirmButtonName
             connectionName.text = viewDetails.connectionName
@@ -104,7 +107,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         confirmationButtons.confirm.isEnabled = true
         networkHeader.apply {
             networkWarning.visible()
-            networkWarning.text = "Fully supported (${numberOfProvidedNetworks} networks)" // todo: localize
+            networkWarning.text = context.getString(R.string.fully_supported, numberOfProvidedNetworks)
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
@@ -115,29 +118,27 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     private fun setUnsupportedNetworkWarning() = with(binding) {
         networkHeader.apply {
             networkWarning.visible()
-            networkWarning.text = "The request is not supported." // todo: localize
+            networkWarning.text = context.getString(R.string.request_not_supported)
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
             addressSpinner.visible()
         }
         confirmationButtons.confirm.isEnabled = false
-        // todo: localize
-        manual.text = "If you would like to get this website supported, please engage with the Minerva team."
+        manual.text = context.getString(R.string.website_networks_not_supported)
     }
 
     private fun setOtherUnsupportedWarning() = with(binding) {
         networkHeader.apply {
             networkWarning.visible()
-            networkWarning.text = "Fully supported (${numberOfProvidedNetworks} networks)" // todo: localize
+            networkWarning.text = context.getString(R.string.fully_supported, numberOfProvidedNetworks)
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
             addressSpinner.visible()
         }
         confirmationButtons.confirm.isEnabled = false
-        // todo: localize
-        manual.text = "This website requests events or methods that are not supported. Please engage with the Minerva team."
+        manual.text = context.getString(R.string.events_methods_not_supported)
     }
 
     fun setWarnings(alertType: WalletConnectV2AlertType) {
