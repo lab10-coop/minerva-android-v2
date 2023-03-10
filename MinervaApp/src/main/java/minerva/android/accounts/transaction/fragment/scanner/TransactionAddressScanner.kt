@@ -25,11 +25,15 @@ class TransactionAddressScanner : BaseScannerFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as AddressScannerListener
+        if (context is AddressScannerListener) {
+            listener = context
+        } else {
+            throw ClassCastException("$context must implement AddressScannerListener")
+        }
     }
 
-    override fun onCallbackAction(qrCode: String) {
-        if (WalletConnectUriUtils.isValidWalletConnectUri(qrCode)) {
+    override fun onCallbackAction(result: String) {
+        if (WalletConnectUriUtils.isValidWalletConnectUri(result)) {
             Toast.makeText(
                 context,
                 getString(R.string.scan_wallet_connect_qr_message),
@@ -38,7 +42,7 @@ class TransactionAddressScanner : BaseScannerFragment() {
             binding.scannerProgressBar.invisible()
             return
         }
-        listener.setScanResult(AddressParser.parse(qrCode))
+        listener.setScanResult(AddressParser.parse(result))
         shouldScan = false
     }
 
