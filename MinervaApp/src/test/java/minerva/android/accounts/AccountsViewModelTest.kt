@@ -275,7 +275,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.hideAccount(0)
+        viewModel.hideAccount(Account(1))
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -289,7 +289,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.accountHideLiveData.observeForever(accountRemoveObserver)
-        viewModel.hideAccount(0)
+        viewModel.hideAccount(Account(1))
         accountRemoveCaptor.run {
             verify(accountRemoveObserver).onChanged(capture())
         }

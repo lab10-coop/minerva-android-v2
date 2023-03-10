@@ -92,7 +92,7 @@ class AccountAdapter(
     override fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String, isGroup: Boolean) =
         listener.onNftCollectionClicked(account, tokenAddress, collectionName, isGroup)
 
-    override fun onAccountHide(index: Int) = listener.onAccountHide(index)
+    override fun onAccountHide(account: Account) = listener.onAccountHide(account)
 
     override fun onCreateSafeAccountClicked(account: Account) = listener.onCreateSafeAccount(account)
 
