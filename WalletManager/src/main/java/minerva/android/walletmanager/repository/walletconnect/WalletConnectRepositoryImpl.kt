@@ -82,7 +82,7 @@ class WalletConnectRepositoryImpl(
 
             onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId, type ->
                 logger.logToFirebase("${LoggerMessages.ON_SESSION_REQUEST}$peerId")
-                if (Int.ONE == type) {//"CHANGE_TYPE" case - get data from db for setting details into popap dialog
+                if (WCClient.CHANGE_TYPE == type) {//"CHANGE_TYPE" case - get data from db for setting details into popap dialog
                     getDappSessionById(peerId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
