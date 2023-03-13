@@ -2,6 +2,7 @@ package minerva.android.walletConnect.model.session
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 
 data class WCPeerMeta(
     val name: String = PEER_NAME,
@@ -10,7 +11,8 @@ data class WCPeerMeta(
     val icons: List<String> = listOf(),
     val chainId: Int = Int.InvalidIndex,
     val peerId: String = String.Empty,
-    val isMobileWalletConnect: Boolean = false
+    val isMobileWalletConnect: Boolean = false,
+    val handshakeId: Long = Long.InvalidValue
 )
 
 const val PEER_NAME = "Minerva Wallet"

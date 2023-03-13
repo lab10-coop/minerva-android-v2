@@ -3,8 +3,8 @@ package minerva.android.walletmanager.repository.walletconnect
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import java.util.*
 
@@ -25,9 +25,17 @@ interface WalletConnectRepository {
      * @param accountChainId - chainId of account which was specified
      * @param accountName - name (with index) of account which was specified
      * @param networkName - network name of account which was specified
+     * @param handshakeId - additional "id" between db and api
      * @return Completable
      */
-    fun updateSession(connectionPeerId: String, accountAddress: String, accountChainId: Int, accountName: String, networkName: String): Completable
+    fun updateSession(
+        connectionPeerId: String,
+        accountAddress: String,
+        accountChainId: Int,
+        accountName: String,
+        networkName: String,
+        handshakeId: Long = Long.InvalidValue): Completable
+
     fun rejectSession(peerId: String)
     fun killSession(peerId: String): Completable
     val connectionStatusFlowable: Flowable<WalletConnectStatus>

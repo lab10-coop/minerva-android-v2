@@ -266,7 +266,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.account = Account(1, chainId = 2)
         viewModel.stateLiveData.observeForever(stateObserver)
         whenever(repository.approveSession(any(), any(), any(), any())).thenReturn(Completable.complete())
-        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = false)
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url", isMobileWalletConnect = false))
         verify(repository).approveSession(any(), any(), any(), any())
         stateCaptor.run {
             verify(stateObserver).onChanged(capture())
