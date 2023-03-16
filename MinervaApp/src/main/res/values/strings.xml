@@ -309,7 +309,11 @@
     <string name="celo_label">Celo</string>
     <string name="xdai_label">Gnosis Chain</string>
     <string name="create_your_first_account_header">Create your \nfirst account!</string>
-    <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
+    <string name="last_step">Last Step!</string>
+    <string name="lets_go">Let\'s go!</string>
+    <string name="select_networks_to_create_accounts">Select networks to create \naccounts</string>
+    <string name="info_mgs_1">You can easily add more accounts on every</string>
+    <string name="info_mgs_2">supported network via \t</string>
     <string name="skip">Skip</string>
     <string name="edit_name">Edit Name</string>
     <string name="account_name_label">Account name</string>
