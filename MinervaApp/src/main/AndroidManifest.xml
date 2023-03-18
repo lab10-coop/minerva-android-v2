@@ -30,6 +30,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="wc" />
+                <data
+                    android:host="wc"
+                    android:scheme="minerva" />
             </intent-filter>
         </activity>
         <activity

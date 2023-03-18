@@ -889,7 +889,7 @@ class WalletConnectRepositoryImpl(
                 description = "Minerva is like your physical wallet and it simplifies everything around your identities and moneys, while you always stay in control over your assets.",
                 url = "https://minerva.digital/",
                 icons = listOf("https://minerva.digital/i/minerva-owl.svg"),
-                redirect = "kotlin-wallet-wc:/request" // todo:Custom Redirect URI
+                redirect = "minerva://wc"
             )
 
             CoreClient.initialize(

@@ -6,6 +6,7 @@ import minerva.android.R
 import minerva.android.extension.launchActivity
 import minerva.android.main.MainActivity
 import minerva.android.splash.BaseLaunchAppActivity
+import timber.log.Timber
 
 class HandlingWalletConnectDeepLinkActivity : BaseLaunchAppActivity() {
 
@@ -16,6 +17,7 @@ class HandlingWalletConnectDeepLinkActivity : BaseLaunchAppActivity() {
     }
 
     override fun showMainActivity() {
+        Timber.i("Handling deep link with scheme: ${intent?.data?.scheme}")
         launchActivity<MainActivity> {
             putExtra(BaseWalletConnectInteractionsActivity.MOBILE_WALLET_CONNECT_DATA, intent?.data)
             addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
