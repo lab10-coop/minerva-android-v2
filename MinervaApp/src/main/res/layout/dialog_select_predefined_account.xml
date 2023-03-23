@@ -8,120 +8,125 @@
     app:cardCornerRadius="@dimen/rounded_background_big"
     app:cardElevation="@dimen/no_elevation">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/margin_small"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="208dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/background_rounded_2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.6" />
-
-        <TextView
-            android:id="@+id/header_msg_1"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_xxlarge"
-            android:fontFamily="@font/rubik_medium"
-            android:gravity="center"
-            android:text="@string/last_step"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_large"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:paddingBottom="@dimen/margin_small"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/header_msg_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_small"
-            android:gravity="center"
-            android:lines="2"
-            android:text="@string/select_networks_to_create_accounts"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_normal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/header_msg_1" />
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="208dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/background_rounded_2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/predefined_network_list"
-            android:visibility="visible"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:layout_marginTop="@dimen/margin_xxlarge"
-            android:layout_marginEnd="@dimen/margin_normal"
-            android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/header_msg_2" >
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.6" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/predefined_network_list_recycler_view"
+            <TextView
+                android:id="@+id/header_msg_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/predefined_network_list_item"
-                tools:itemCount="2" />
-        </LinearLayout>
+                android:layout_marginTop="@dimen/margin_xxlarge"
+                android:fontFamily="@font/rubik_medium"
+                android:gravity="center"
+                android:text="@string/last_step"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_large"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/info_mgs_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_xlarge"
-            android:fontFamily="@font/rubik_regular"
-            android:gravity="center"
-            android:text="@string/info_mgs_1"
-            android:textColor="@color/titleColor"
-            android:textSize="@dimen/text_small"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/predefined_network_list" />
+            <TextView
+                android:id="@+id/header_msg_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
+                android:gravity="center"
+                android:lines="2"
+                android:text="@string/select_networks_to_create_accounts"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/header_msg_1" />
 
-        <TextView
-            android:id="@+id/info_mgs_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/rubik_regular"
-            android:gravity="center"
-            android:paddingStart="@dimen/margin_normal"
-            android:paddingEnd="@dimen/margin_normal"
-            android:text="@string/info_mgs_2"
-            android:textColor="@color/titleColor"
-            android:textSize="@dimen/text_small"
-            app:drawableEndCompat="@drawable/ic_info_mgs_2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/info_mgs_1" />
+            <LinearLayout
+                android:id="@+id/predefined_network_list"
+                android:visibility="visible"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_normal"
+                android:layout_marginTop="@dimen/margin_xxlarge"
+                android:layout_marginEnd="@dimen/margin_normal"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/header_msg_2" >
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/predefined_network_list_button"
-            android:layout_width="280dp"
-            android:layout_height="@dimen/margin_xxlarge"
-            android:layout_marginTop="@dimen/margin_big"
-            app:cornerRadius="@dimen/margin_xsmall"
-            android:text="@string/lets_go"
-            android:textAllCaps="false"
-            android:textSize="16sp"
-            android:backgroundTint="@color/colorPrimary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/info_mgs_2" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/predefined_network_list_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:listitem="@layout/predefined_network_list_item"
+                    tools:itemCount="2" />
+            </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/info_mgs_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_xlarge"
+                android:fontFamily="@font/rubik_regular"
+                android:gravity="center"
+                android:text="@string/info_mgs_1"
+                android:textColor="@color/titleColor"
+                android:textSize="@dimen/text_small"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/predefined_network_list" />
+
+            <TextView
+                android:id="@+id/info_mgs_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/rubik_regular"
+                android:gravity="center"
+                android:paddingStart="@dimen/margin_normal"
+                android:paddingEnd="@dimen/margin_normal"
+                android:text="@string/info_mgs_2"
+                android:textColor="@color/titleColor"
+                android:textSize="@dimen/text_small"
+                app:drawableEndCompat="@drawable/ic_info_mgs_2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/info_mgs_1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/predefined_network_list_button"
+                android:layout_width="280dp"
+                android:layout_height="@dimen/margin_xxlarge"
+                android:layout_marginTop="@dimen/margin_big"
+                app:cornerRadius="@dimen/margin_xsmall"
+                android:text="@string/lets_go"
+                android:textAllCaps="false"
+                android:textSize="@dimen/text_normal"
+                android:backgroundTint="@color/colorPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/info_mgs_2" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.cardview.widget.CardView>

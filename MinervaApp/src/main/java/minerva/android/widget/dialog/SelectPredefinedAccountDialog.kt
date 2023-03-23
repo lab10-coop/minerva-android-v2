@@ -23,7 +23,7 @@ import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.widget.repository.getMainIcon
 
-class SelectPredefinedAccountDialog(context: Context, private val predefinedNetworkOnClick: (Int) -> Unit) :
+class SelectPredefinedAccountDialog(context: Context, private val predefinedNetworkOnClick: (List<Int>) -> Unit) :
     Dialog(context, R.style.DialogStyle), PredefinedNetworkListHandleClick {
 
     private val binding = DialogSelectPredefinedAccountBinding.inflate(LayoutInflater.from(context))
@@ -47,7 +47,6 @@ class SelectPredefinedAccountDialog(context: Context, private val predefinedNetw
         //get active (not testNet) networks without GNO (because GNO will be added later (instead of hard sorting) like first item of list)
         val networks: MutableList<Network> = NetworkManager.networks.filter { it.isActive && !it.testNet && ChainId.GNO != it.chainId }.toMutableList()
         networks.add(Int.FirstIndex, NetworkManager.getNetwork(ChainId.GNO))//add GNO to networks list like first item
-
         binding.apply {
             predefinedNetworkListRecyclerView.apply {
                 layoutManager = flexboxLayoutManager
@@ -56,15 +55,17 @@ class SelectPredefinedAccountDialog(context: Context, private val predefinedNetw
             }
         }
         predefinedNetworkListButton.setOnClickListener {
-            val network = predefinedNetworkListAdapter.currentList[ predefinedNetworkListAdapter.activeNetworkPosition ]
-            doOnSelectedNetwork(network.chainId)
+            doOnSelectedNetwork(predefinedNetworkListAdapter.getActivesIds())
         }
     }
 
+    /**
+     * Set To Active State - method which toggle active state for chosen network item
+     */
     override fun setToActiveState(position: Int) = predefinedNetworkListAdapter.update(position)
 
-    private fun doOnSelectedNetwork(chainId: Int) {
-        predefinedNetworkOnClick(chainId)
+    private fun doOnSelectedNetwork(chainIds: List<Int>) {
+        predefinedNetworkOnClick(chainIds)
         dismiss()
     }
 }
@@ -77,14 +78,26 @@ class SelectPredefinedAccountDialog(context: Context, private val predefinedNetw
 class PredefinedNetworkListAdapter(private val context: Context, private val dialog: SelectPredefinedAccountDialog) :
     ListAdapter<Network, PredefinedNetworkListAdapter.PredefinedNetworkListViewHolder>(PredefinedNetworkListViewHolderDiffCallback)
 {
-    var activeNetworkPosition: Int = 0//store position of previous clicked item (network)
+    val activeNetworkList: MutableList<Int> = mutableListOf(Int.FirstIndex)//store list of active networks(default active for GNO chain)
+
+    /**
+     * Get Actives Ids - get chain ids of chosen networks
+     * @return list with chosen networks ids
+     */
+    fun getActivesIds(): List<Int> = activeNetworkList.map { currentList[it].chainId }
 
     /**
      * Update - update state of adapter
      * @param position - last user chosen item (Network)
      */
     fun update(position: Int) {
-        activeNetworkPosition = position
+        activeNetworkList.apply {
+            if (contains(position)) {
+                remove(position)
+            } else {
+                add(position)
+            }
+        }
         notifyDataSetChanged()
     }
 
@@ -121,7 +134,7 @@ class PredefinedNetworkListAdapter(private val context: Context, private val dia
                 }
                 */
                 predefinedNetworkListIcon.setBackgroundResource(getMainIcon(network.chainId))
-                if (bindingAdapterPosition == activeNetworkPosition) {
+                if (activeNetworkList.contains(bindingAdapterPosition)) {
                     networkSelectContainer.strokeColor = context.getColor(R.color.colorPrimary)
                 } else {
                     networkSelectContainer.strokeColor = context.getColor(R.color.white)

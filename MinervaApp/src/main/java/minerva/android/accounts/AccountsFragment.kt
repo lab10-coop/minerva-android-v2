@@ -245,7 +245,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 if (!appUIState.shouldShowSplashScreen && isFirstLaunch) {
                     SelectPredefinedAccountDialog(
                         requireContext(),
-                        ::createAccountForSelectedNetwork
+                        ::createAccountsForSelectedNetworks
                     ).show()
                 }
             }
@@ -383,9 +383,11 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))
 
-    private fun createAccountForSelectedNetwork(chainId: Int) {
-        viewModel.createNewAccount(chainId)
-    }
+    /**
+     * Create Accounts For Selected Networks
+     * @param chainIds - chains ids of networks which accounts have to be created
+     */
+    private fun createAccountsForSelectedNetworks(chainIds: List<Int>): Unit = viewModel.createNewAccounts(chainIds)
 
     private fun logToFirebaseIfNotSynced() {
         if (!viewModel.isSynced) {

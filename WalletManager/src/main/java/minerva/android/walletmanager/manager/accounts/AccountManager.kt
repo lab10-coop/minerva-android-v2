@@ -44,11 +44,25 @@ interface AccountManager : Manager {
     fun getAllFreeAccountForNetwork(chainId: Int): List<AddressWrapper>
     fun toChecksumAddress(address: String, chainId: Int? = null): String
     fun clearFiat()
+
+    /**
+     * Connect Accounts To Networks -
+     * @param networksListWithIdexes - networks which accounts have to be created
+     * @return RXJava.Single - list with names of created accounts
+     */
+    fun connectAccountsToNetworks(networksListWithIdexes: List<Pair<Int, Network>>): Single<List<String>>
     fun connectAccountToNetwork(index: Int, network: Network): Single<String>
     fun changeAccountName(existedAccount: Account, newName: String): Completable
     fun getFirstActiveAccountOrNull(chainId: Int): Account?
     fun getFirstActiveAccountForAllNetworks(): List<Account>
     fun createOrUnhideAccount(network: Network): Single<String>
+
+    /**
+     * Create Accounts - run create accounts procedure
+     * @param networks - networks which accounts have to be created
+     * @return RXJava.Single - list with names of created accounts
+     */
+    fun createAccounts(networks: List<Network>): Single<List<String>>
     fun insertCoinBalance(coinBalance: CoinBalance): Completable
     fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable
     fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance>
