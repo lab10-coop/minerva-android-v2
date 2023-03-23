@@ -8,7 +8,6 @@ import minerva.android.extension.launchActivity
 import minerva.android.main.MainActivity
 import minerva.android.splash.BaseLaunchAppActivity
 import timber.log.Timber
-import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 class HandlingWalletConnectDeepLinkActivity : BaseLaunchAppActivity() {
@@ -35,7 +34,7 @@ class HandlingWalletConnectDeepLinkActivity : BaseLaunchAppActivity() {
         return when (data.scheme) {
             "https", "minerva" -> {
                 val wcUri = uriString.substringAfter("uri=")
-                Uri.parse(URLDecoder.decode(wcUri, StandardCharsets.UTF_8))
+                Uri.parse(android.net.Uri.decode(wcUri))
             }
             else -> data
         }
