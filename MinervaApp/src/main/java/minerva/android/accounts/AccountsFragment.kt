@@ -23,6 +23,7 @@ import minerva.android.kotlinUtils.NO_MARGIN
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
 import minerva.android.utils.VerticalMarginItemDecoration
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.utils.logger.Logger
@@ -245,7 +246,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 if (!appUIState.shouldShowSplashScreen && isFirstLaunch) {
                     SelectPredefinedAccountDialog(
                         requireContext(),
-                        ::createAccountForSelectedNetwork
+                        ::createAccountsForSelectedNetworks
                     ).show()
                 }
             }
@@ -383,9 +384,15 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))
 
-    private fun createAccountForSelectedNetwork(chainId: Int) {
-        viewModel.createNewAccount(chainId)
-    }
+    /**
+     * Create Accounts For Selected Networks
+     * @param chainIds - chains ids of networks which accounts have to be created (or default network)
+     */
+    private fun createAccountsForSelectedNetworks(chainIds: List<Int>): Unit = if (chainIds.isEmpty()) {
+            viewModel.createNewAccounts(listOf(ChainId.GNO))//create "gnosis chain" by default
+        } else {
+            viewModel.createNewAccounts(chainIds.toSet().toList())//remove repeating networks
+        }
 
     private fun logToFirebaseIfNotSynced() {
         if (!viewModel.isSynced) {
