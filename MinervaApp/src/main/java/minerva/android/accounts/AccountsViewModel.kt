@@ -33,6 +33,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.HID
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.*
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
@@ -746,18 +747,28 @@ class AccountsViewModel(
         )
     }
 
-    fun createNewAccount(chainId: Int) {
+    /**
+     * Create New Accounts - method which create new accounts by specified networks ids
+     * @param chainIds - chain ids of networks which accounts have to be created
+     */
+    fun createNewAccounts(chainIds: List<Int>): Unit {
+        val networksByChainsIds: MutableList<Network> = mutableListOf()//get networks by specified chains ids
+        chainIds.forEach { chainId ->
+            networksByChainsIds.add(NetworkManager.getNetwork(chainId))//fill networks list
+        }
         launchDisposable {
-            accountManager.createOrUnhideAccount(NetworkManager.getNetwork(chainId))
-                .flatMapCompletable {
-                    walletActionsRepository.saveWalletActions(
-                        listOf(
+            accountManager.createAccounts(networksByChainsIds)
+                .flatMapCompletable { accountsNames ->
+                    val walletActions: MutableList<WalletAction> = mutableListOf()//prepare data for "wallet_actions_config"
+                    accountsNames.forEach { accountName ->
+                        walletActions.add(
                             getWalletAction(
                                 WalletActionStatus.ADDED,
-                                it
+                                accountName
                             )
                         )
-                    )
+                    }
+                    walletActionsRepository.saveWalletActions( walletActions )
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

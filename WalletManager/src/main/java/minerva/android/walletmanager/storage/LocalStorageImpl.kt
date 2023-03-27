@@ -31,7 +31,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         set(value) {
             sharedPreferences.edit().putBoolean(IS_CHANGE_NETWORK_ENABLED, value).apply()
         }
-        get() = sharedPreferences.getBoolean(IS_CHANGE_NETWORK_ENABLED, true)
+        get() = sharedPreferences.getBoolean(IS_CHANGE_NETWORK_ENABLED, false)
 
     override fun saveIsMnemonicRemembered(isRemembered: Boolean) {
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()

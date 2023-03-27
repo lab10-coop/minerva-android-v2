@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/network_select_container"
+    android:layout_width="68dp"
+    android:layout_height="96dp"
+    android:backgroundTint="@color/white"
+    android:animateLayoutChanges="false"
+    app:cardCornerRadius="@dimen/margin_xsmall"
+    app:cardElevation="@dimen/margin_xxsmall"
+    android:layout_marginEnd="@dimen/margin_xxsmall"
+    android:layout_marginBottom="@dimen/margin_xsmall"
+    app:strokeColor="@color/white"
+    app:strokeWidth="@dimen/margin_xxxsmall" >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"  >
+
+        <ImageView
+            android:id="@+id/predefined_network_list_lock"
+            android:visibility="visible"
+            android:layout_width="@dimen/margin_small"
+            android:layout_height="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginLeft="@dimen/margin_xxsmall" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center" >
+
+            <ImageView
+                android:id="@+id/predefined_network_list_icon"
+                android:visibility="visible"
+                android:layout_width="@dimen/margin_xxxxxxlarge"
+                android:layout_height="@dimen/margin_xxxxxxlarge"
+                android:background="@drawable/ic_default_token" />
+
+            <TextView
+                android:id="@+id/predefined_network_list_item_text"
+                android:layout_width="@dimen/margin_xxlarge"
+                android:layout_height="@dimen/margin_xbig"
+                android:maxHeight="@dimen/margin_xlarge"
+                android:layout_marginTop="@dimen/margin_xsmall"
+                android:text="default name"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="@dimen/text_xxsmall"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

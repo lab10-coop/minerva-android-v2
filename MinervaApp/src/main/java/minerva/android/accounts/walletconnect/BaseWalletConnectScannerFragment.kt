@@ -74,18 +74,20 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         } else { // connect connection case
             ViewDetails(network.name, getString(R.string.connect_to_website), getString(R.string.connect))
         }
-        confirmationDialogDialog = DappConfirmationDialog(requireContext(),
-            {
-                viewModel.approveSession(meta, false)
+
+        confirmationDialogDialog = DappConfirmationDialog(
+            context = requireContext(),
+            approve = {
+                viewModel.approveSession(meta = meta.copy(isMobileWalletConnect = false))
                 binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
             },
-            {
+            deny = {
                 viewModel.rejectSession()
                 shouldScan = true
             },
-            { chainId ->
+            onAddAccountClick = { chainId ->
                 viewModel.addAccount(chainId, dialogType)
-            }).apply {
+        }).apply {
             setOnDismissListener { shouldScan = true }
             setView(meta, viewDetails)
             handleNetwork(network, dialogType)

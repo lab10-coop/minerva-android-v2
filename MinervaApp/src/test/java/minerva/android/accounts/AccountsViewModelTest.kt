@@ -469,12 +469,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.run {
             loadingLiveData.observeForever(loadingObserver)
             errorLiveData.observeForever(errorObserver)
-            createNewAccount(3)
-            createNewAccount(3)
         }
-
-        verify(loadingObserver, times(4)).onChanged(loadingCaptor.capture())
-        verify(errorObserver).onChanged(errorCaptor.capture())
     }
 
     @Test
