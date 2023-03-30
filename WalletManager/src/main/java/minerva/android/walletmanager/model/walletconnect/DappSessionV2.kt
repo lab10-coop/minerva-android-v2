@@ -4,11 +4,12 @@ import com.walletconnect.android.Core
 import com.walletconnect.sign.client.Sign
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletConnect.model.session.WCSession
 
 data class DappSessionV2(
     override val address: String = String.Empty,
     override val topic: String = String.Empty,
-    override val version: String = "2",
+    override val version: String = WCSession.VERSION_2,
     override var name: String = String.Empty,
     override val iconUrl: String = String.Empty,
     override val peerId: String = String.Empty,

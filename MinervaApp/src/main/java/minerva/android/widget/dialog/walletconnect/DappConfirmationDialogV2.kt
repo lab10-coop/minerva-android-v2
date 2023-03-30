@@ -25,7 +25,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
     //current DApp session wallet connection
     var dAppSessionMeta: WalletConnectPeerMeta? = null
-    var numberOfProvidedNetworks = 0
+    var numberOfProvidedNetworks = INITIAL_PROVIDED_NETWORKS
 
     init {
         setContentView(binding.root)
@@ -48,7 +48,8 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         dAppSessionMeta = meta
         setupHeader(
             meta.name,
-            context.getString(R.string.requested_networks, viewDetails.networkNames.joinToString(" • ")),
+            context.getString(R.string.requested_networks, viewDetails.networkNames.joinToString(
+                ACCOUNT_DELIMITER)),
             getIcon(meta)
         )
         binding.apply {
@@ -158,4 +159,8 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
             meta.icons[FIRST_ICON]
         }
 
+    companion object {
+        const val INITIAL_PROVIDED_NETWORKS = 0
+        const val ACCOUNT_DELIMITER = " • "
+    }
 }

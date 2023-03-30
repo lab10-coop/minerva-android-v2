@@ -141,8 +141,8 @@ class WCClient(
         peerId: String = UUID.randomUUID().toString(),
         remotePeerId: String? = null
     ) {
-        if (session.version != "1" || session.bridge == null) {
-            throw Throwable("Only WalletConnect Version 1 supported")
+        if (session.version != WCSession.VERSION_1 || session.bridge == null) {
+            throw Throwable(ONLY_WC_1_ERROR)
         }
 
         if (this.session != null && this.session?.topic != session.topic) {
@@ -410,5 +410,6 @@ class WCClient(
     companion object {
         private const val EXTERNAL_DISCONNECT = "external_disconnect"
         const val CHANGE_TYPE = 1
+        private const val ONLY_WC_1_ERROR = "Only WalletConnect Version 1 supported"
     }
 }

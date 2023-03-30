@@ -17,29 +17,29 @@ data class WCSession(
             val uri = Uri.parse(uriString)
             val topic = uri.userInfo
             val version = uri.host
-            var key: String?
+            val key: String?
             var bridge: String? = null
             var relayProtocol: String? = null
             var relayData: String? = null
 
             when (version) {
-                "1" -> {
+                VERSION_1 -> {
                     key = uri.getQueryParameter(KEY)
                     bridge = uri.getQueryParameter(BRIDGE)
 
                 }
-                "2" -> {
+                VERSION_2 -> {
                     key = uri.getQueryParameter(SYM_KEY)
                     relayProtocol = uri.getQueryParameter(RELAY_PROTOCOL)
                     relayData = uri.getQueryParameter(RELAY_DATA)
                 }
                 else -> {
-                    throw Throwable("Invalid WalletConnect qr code")
+                    throw Throwable(INVALID_WC_ERROR)
                 }
             }
 
             if (topic == null || key == null || (bridge == null && relayProtocol == null)) {
-                throw Throwable("Invalid WalletConnect qr code")
+                throw Throwable(INVALID_WC_ERROR)
             }
 
             return WCSession(topic, version, key, bridge, relayProtocol, relayData)
@@ -52,5 +52,8 @@ data class WCSession(
         private const val SYM_KEY = "symKey"
         private const val WC = "wc:"
         private const val WC_URL_PREFIX = "wc://"
+        const val VERSION_1 = "1"
+        const val VERSION_2 = "2"
+        private const val INVALID_WC_ERROR = "Invalid WalletConnect qr code"
     }
 }

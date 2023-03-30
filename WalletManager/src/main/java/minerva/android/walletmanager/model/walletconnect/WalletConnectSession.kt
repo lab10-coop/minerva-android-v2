@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model.walletconnect
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletConnect.model.session.WCSession
 
 data class WalletConnectSession(
     val topic: String = String.Empty,
@@ -12,10 +13,10 @@ data class WalletConnectSession(
     val isMobileWalletConnect: Boolean = false
 ) {
     fun toUri(): String {
-        if (version == "1") {
+        if (version == WCSession.VERSION_1) {
             return "wc:${topic}@${version}?bridge=${bridge}&key=${key}"
         }
-        if (version == "2") {
+        if (version == WCSession.VERSION_2) {
             var uri = "wc:${topic}@${version}?relay-protocol=${relayProtocol}&symKey=${key}"
             if (relayData != null && relayData != String.Empty) {
                 uri += "&relay-data=${relayData}"

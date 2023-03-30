@@ -101,10 +101,10 @@ class MinervaPrimitiveViewHolder(
         val namespaces = minervaPrimitive.namespaces ?: emptyMap()
         sessionInfoLabel.text = WalletConnectRepositoryImpl
             .namespacesToAddresses(namespaces)
-            .joinToString(" • ") { getShortAddress(AddressType.NORMAL_ADDRESS, it) }
+            .joinToString(ACCOUNT_DELIMITER) { getShortAddress(AddressType.NORMAL_ADDRESS, it) }
         networkLabel.text = WalletConnectRepositoryImpl
             .sessionNamespacesToChainNames(namespaces)
-            .joinToString(" • ")
+            .joinToString(ACCOUNT_DELIMITER)
     }
 
     private fun showPairing(minervaPrimitive: Pairing, binding: MinervaPrimitiveListRowBinding) = with(binding) {
@@ -172,5 +172,9 @@ class MinervaPrimitiveViewHolder(
     private fun showLastUsed(minervaPrimitive: MinervaPrimitive, binding: MinervaPrimitiveListRowBinding) {
         binding.lastUsedLabel.text =
             "${view.context.getString(R.string.last_used)} ${DateUtils.getDateWithTimeFromTimestamp(minervaPrimitive.lastUsed)}"
+    }
+
+    companion object {
+        const val ACCOUNT_DELIMITER = " • "
     }
 }

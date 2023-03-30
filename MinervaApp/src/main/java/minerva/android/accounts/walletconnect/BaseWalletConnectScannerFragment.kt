@@ -13,6 +13,8 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSessionNamespace
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155_DELIMITER
 import minerva.android.widget.dialog.models.ViewDetails
 import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV1
@@ -108,7 +110,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             return false
         }
         return viewModel.networks
-            .map { "eip155:${it.chainId}" }
+            .map { "$EIP155$EIP155_DELIMITER${it.chainId}" }
             .containsAll(eip155ProposalNamespace.chains)
     }
 
@@ -135,9 +137,9 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                 // todo: turn this into a function
                 // todo: check if address is checksummed
                 val chains = viewModel.networks
-                    .map { network -> "eip155:${network.chainId}" }
+                    .map { network -> "$EIP155$EIP155_DELIMITER${network.chainId}" }
                 val accounts = chains
-                    .map { chain -> "$chain:$selectedAddress" }
+                    .map { chain -> "$chain$EIP155_DELIMITER$selectedAddress" }
 
                 // approve session
                 val sessionNamespace = WalletConnectSessionNamespace(
@@ -152,11 +154,11 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             {
                 // reject session
                 // not localized because it is not user facing
-                var reason = "User rejection"
+                var reason = USER_REJECTION_REASON
                 if (!networksSupported) {
-                    reason = "Network(s) not supported"
+                    reason = NETWORK_NOT_SUPPORTED_REASON
                 } else if (!methodOrEventSupported) {
-                    reason = "Method(s) or Event(s) not supported"
+                    reason = METHOD_EVENT_NOT_SUPPORTED_REASON
                 }
                 viewModel.rejectSessionV2(meta.proposerPublicKey, reason, true)
                 shouldScan = true
@@ -239,5 +241,8 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     companion object {
         const val INCREASED_MARGIN = 115f
         const val FIRST_ICON = 0
+        const val USER_REJECTION_REASON = "User rejection"
+        const val NETWORK_NOT_SUPPORTED_REASON = "Network(s) not supported"
+        const val METHOD_EVENT_NOT_SUPPORTED_REASON = "Method(s) or Event(s) not supported"
     }
 }

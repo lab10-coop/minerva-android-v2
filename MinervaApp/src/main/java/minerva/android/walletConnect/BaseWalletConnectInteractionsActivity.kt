@@ -21,6 +21,8 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSessionNamespace
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155_DELIMITER
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.MinervaLoadingDialog
 import minerva.android.widget.dialog.models.ViewDetails
@@ -299,7 +301,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             return false
         }
         return viewModel.networks
-            .map { "eip155:${it.chainId}" }
+            .map { "$EIP155$EIP155_DELIMITER${it.chainId}" }
             .containsAll(eip155ProposalNamespace.chains)
     }
 
@@ -326,9 +328,9 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 // todo: turn this into a function
                 // todo: check if address is checksummed
                 val chains = viewModel.networks
-                    .map { network -> "eip155:${network.chainId}" }
+                    .map { network -> "$EIP155$EIP155_DELIMITER${network.chainId}" }
                 val accounts = chains
-                    .map { chain -> "$chain:$selectedAddress" }
+                    .map { chain -> "$chain$EIP155_DELIMITER$selectedAddress" }
 
                 // approve session
                 val sessionNamespace = WalletConnectSessionNamespace(

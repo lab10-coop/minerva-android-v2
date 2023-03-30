@@ -398,7 +398,6 @@ class WalletConnectInteractionsViewModel(
 
     fun acceptRequest(isMobileWalletConnect: Boolean) {
         currentDappSession?.let { session ->
-            // todo: why chainid? private key should be the same by address..
             transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
                 walletConnectRepository.approveRequest(session.peerId, it.privateKey)
                 successWalletConnectInteraction(isMobileWalletConnect)
@@ -407,10 +406,7 @@ class WalletConnectInteractionsViewModel(
     }
 
     fun acceptRequestV2(session: DappSessionV2) {
-        Timber.i("asdfsadf ${session.address} ${session.chainId}")
-        // todo: why chainid? private key should be the same by address..
         transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
-            Timber.i("asdfsadf2")
             walletConnectRepository.approveRequestV2(session.topic, it.privateKey)
             successWalletConnectInteraction(session.isMobileWalletConnect)
         }
