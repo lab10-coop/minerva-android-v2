@@ -20,7 +20,7 @@ class SplashScreenActivity : BaseLaunchAppActivity(), PassiveVideoToActivityInte
 
     override fun onResume() {
         super.onResume()
-        Handler().postDelayed(Runnable {
+        Handler().postDelayed({
             findViewById<LottieAnimationView>(R.id.animation_view).playAnimation()
         }, ANIMATION_DELAY)
         setupAnimationListeners()
@@ -28,19 +28,19 @@ class SplashScreenActivity : BaseLaunchAppActivity(), PassiveVideoToActivityInte
 
     private fun setupAnimationListeners() {
         findViewById<LottieAnimationView>(R.id.animation_view).addAnimatorListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator?) {
+            override fun onAnimationStart(animation: Animator) {
                 initWalletConfig()
             }
 
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 onAnimationEnd()
             }
 
-            override fun onAnimationCancel(animation: Animator?) {
+            override fun onAnimationCancel(animation: Animator) {
                 // nothing to do
             }
 
-            override fun onAnimationRepeat(animation: Animator?) {
+            override fun onAnimationRepeat(animation: Animator) {
                 // nothing to do
             }
         })

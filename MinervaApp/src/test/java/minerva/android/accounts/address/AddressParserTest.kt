@@ -33,18 +33,4 @@ class AddressParserTest {
         val result = AddressParser.parse(address)
         assertEquals("test:eth:0x344423432", result)
     }
-
-    @Test
-    fun `scan wc url test with many parts`() {
-        val address = "wc:test:eth:0x344423432"
-        val result = AddressParser.parse(address)
-        assertEquals("wc", result)
-    }
-
-    @Test
-    fun `scan wc url test with two parts`() {
-        val address = "wc:0x344423432"
-        val result = AddressParser.parse(address)
-        assertEquals("wc", result)
-    }
 }

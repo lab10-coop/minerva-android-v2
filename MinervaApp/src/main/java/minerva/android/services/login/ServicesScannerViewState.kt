@@ -6,6 +6,9 @@ import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
+
+// todo: why is this duplicate with WalletConnectState?
 
 sealed class ServicesScannerViewState
 object DefaultState : ServicesScannerViewState()
@@ -24,6 +27,11 @@ data class WalletConnectSessionRequestResult(
     val meta: WalletConnectPeerMeta,
     val network: BaseNetworkData,
     val dialogType: WalletConnectAlertType
+) : ServicesScannerViewState()
+data class WalletConnectSessionRequestResultV2(
+    val meta: WalletConnectPeerMeta,
+    val numberOfNonEip155Chains: Int,
+    val eip155ProposalNamespace: WalletConnectProposalNamespace
 ) : ServicesScannerViewState()
 
 data class WalletConnectDisconnectResult(val sessionName: String = String.Empty) : ServicesScannerViewState()

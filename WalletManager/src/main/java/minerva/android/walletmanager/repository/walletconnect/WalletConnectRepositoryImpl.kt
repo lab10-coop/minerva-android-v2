@@ -1,6 +1,15 @@
 package minerva.android.walletmanager.repository.walletconnect
 
 import android.annotation.SuppressLint
+import android.app.Application
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
+import com.google.gson.reflect.TypeToken
+import com.walletconnect.android.Core
+import com.walletconnect.android.CoreClient
+import com.walletconnect.android.relay.ConnectionType
+import com.walletconnect.sign.client.Sign
+import com.walletconnect.sign.client.SignClient
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -14,19 +23,24 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
+import minerva.android.walletmanager.BuildConfig
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.ONE
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
+import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.MESSAGE
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.TYPED_MESSAGE
+import minerva.android.walletConnect.model.ethereum.WCEthereumTransaction
+import minerva.android.walletConnect.model.exceptions.InvalidJsonRpcParamsException
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
+import minerva.android.walletmanager.manager.networks.NetworkManager.getNetworkNameOrNull
 import minerva.android.walletmanager.model.mappers.DappSessionToEntityMapper
 import minerva.android.walletmanager.model.mappers.EntitiesToDappSessionsMapper
 import minerva.android.walletmanager.model.mappers.SessionEntityToDappSessionMapper
@@ -34,9 +48,17 @@ import minerva.android.walletmanager.model.mappers.WCEthTransactionToWalletConne
 import minerva.android.walletmanager.model.mappers.WCPeerToWalletConnectPeerMetaMapper
 import minerva.android.walletmanager.model.mappers.WCSessionToWalletConnectSessionMapper
 import minerva.android.walletmanager.model.mappers.WalletConnectSessionMapper
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.walletconnect.Topic
-import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.CONNECT_PAIRING_2
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_CONNECTION_STATE_CHANGE_2
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_ERROR_2
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_SESSION_DELETE_2
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_SESSION_PROPOSAL_2
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_SESSION_REQUEST_2
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_SESSION_SETTLE_RESPONSE_2
+import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_SESSION_UPDATE_RESPONSE_2
 import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
@@ -47,7 +69,8 @@ class WalletConnectRepositoryImpl(
     minervaDatabase: MinervaDatabase,
     private val logger: Logger,
     private var wcClient: WCClient = WCClient(),
-    private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
+    private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap(),
+    builder: GsonBuilder = GsonBuilder()
 ) : WalletConnectRepository {
     private var status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override var connectionStatusFlowable: Flowable<WalletConnectStatus> =
@@ -58,14 +81,209 @@ class WalletConnectRepositoryImpl(
     private var pingDisposable: Disposable? = null
     private val dappDao = minervaDatabase.dappSessionDao()
     private var reconnectionAttempts: MutableMap<String, Int> = mutableMapOf()
+    private var isInitialized = initialize()
+    private val gson = builder
+        .serializeNulls()
+        .create()
+
+    private fun sessionProposalToWalletConnectProposalNamespace(sessionProposal: Sign.Model.SessionProposal): WalletConnectProposalNamespace {
+        val eip155TempNamespace = sessionProposal.requiredNamespaces[EIP155]!!
+        return WalletConnectProposalNamespace(
+            chains = eip155TempNamespace.chains ?: emptyList(),
+            methods = eip155TempNamespace.methods,
+            events = eip155TempNamespace.events
+        )
+    }
+
+    private fun initialize(): Boolean {
+        if (isInitialized) {
+            return true
+        }
+
+        val walletDelegate = object : SignClient.WalletDelegate {
+            override fun onSessionProposal(sessionProposal: Sign.Model.SessionProposal) {
+                // Triggered when wallet receives the session proposal sent by a Dapp
+                Timber.i("$ON_SESSION_PROPOSAL_2$sessionProposal")
+
+                val numberOfNonEip155Chains = namespacesCountNonEip155Chains(sessionProposal.requiredNamespaces)
+                val eip155ProposalNamespace = sessionProposalToWalletConnectProposalNamespace(sessionProposal)
+
+                // show popup here, only then proceed
+                status.onNext(OnSessionRequestV2(
+                    WalletConnectPeerMeta(
+                        name = sessionProposal.name,
+                        url = sessionProposal.url,
+                        description = sessionProposal.description,
+                        icons = sessionProposal.icons.map { it.toString() },
+                        proposerPublicKey = sessionProposal.proposerPublicKey
+                    ),
+                    numberOfNonEip155Chains,
+                    eip155ProposalNamespace
+                ))
+            }
+
+            override fun onSessionRequest(sessionRequest: Sign.Model.SessionRequest) {
+                // Triggered when a Dapp sends SessionRequest to sign a transaction or a message
+                Timber.i("$ON_SESSION_REQUEST_2$sessionRequest")
+
+                // todo: test this
+                // todo: move somewhere more sensible
+                fun caipChainIdToInt(chainId: String?): Int {
+                    return chainId?.split(EIP155_DELIMITER)?.get(1)?.toInt() ?: Int.InvalidValue
+                }
+                val chainId = caipChainIdToInt(sessionRequest.chainId)
+
+                // todo: use some constants here
+                // todo: maybe all sign messages could be combined in one case?
+                when (sessionRequest.request.method) {
+                    "personal_sign" -> {
+                        // this seems to be something metamask specific
+                        // todo: throw InvalidJsonRpcParamsException?
+                        // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#personal_sign
+                        val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        currentEthMessage = WCEthereumSignMessage(type = PERSONAL_MESSAGE, raw = params)
+                        // todo: isMobileWalletConnect?
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
+                        session?.let {
+                            status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, it))
+                        }
+                    }
+                    "eth_sign" -> {
+                        // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_sign
+                        // todo: throw InvalidJsonRpcParamsException?
+                        val params: List<String> = gson.fromJson(sessionRequest.request.params, Array<String>::class.java).toList()
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        currentEthMessage = WCEthereumSignMessage(type = MESSAGE, raw = params)
+                        // todo: isMobileWalletConnect?
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
+                        session?.let {
+                            status.onNext(OnEthSignV2(currentEthMessage.data.hexToUtf8.getFormattedMessage, it))
+                        }
+                    }
+                    "eth_signTypedData" -> {
+                        // https://docs.walletconnect.com/2.0/advanced/rpc-reference/ethereum-rpc#eth_signtypeddata
+                        // todo: refactor? this section is weird because it tries to use WC 1.0 structures
+                        // todo: throw InvalidJsonRpcParamsException?
+                        val params: List<String> = JsonParser.parseString(sessionRequest.request.params).asJsonArray
+                            .map { value ->
+                                if (value.toString().startsWith(BACKSLASH_ZERO_X)) {
+                                    return@map value.asString
+                                }
+                                val stringBuilder = StringBuilder()
+                                stringBuilder.append(ZERO_X)
+                                for (char in value.toString()) {
+                                    val hexChar = Integer.toHexString(char.code)
+                                    stringBuilder.append(hexChar)
+                                }
+                                stringBuilder.toString().hexToUtf8
+                            }
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        currentEthMessage = WCEthereumSignMessage(type = TYPED_MESSAGE, raw = params)
+                        // todo: isMobileWalletConnect?
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, currentEthMessage.address, chainId)
+                        session?.let {
+                            status.onNext(OnEthSignV2(currentEthMessage.data.getFormattedMessage, it))
+                        }
+                    }
+                    "eth_sendTransaction" -> {
+                        // It seems like eth_sendTransaction allows for multiple Transactions
+                        val listType = object : TypeToken<List<WCEthereumTransaction>>() {}.type
+                        val transaction =
+                            gson.fromJson<List<WCEthereumTransaction>>(sessionRequest.request.params, listType)
+                                .firstOrNull() ?: throw InvalidJsonRpcParamsException(sessionRequest.request.id)
+                        currentRequestId = sessionRequest.request.id // todo: or should we pass it along?
+                        Timber.i("${LoggerMessages.ON_ETH_SEND_TX_2} ${sessionRequest.topic}; $transaction")
+                        // todo: isMobileWalletConnect?
+                        // todo: accountName needs to come from somewhere else..
+                        val session = getDappSessionByTopic(sessionRequest.topic, transaction.from, chainId)
+                        session?.let {
+                            status.onNext(
+                                OnEthSendTransactionV2(
+                                    WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
+                                    session
+                                )
+                            )
+                        }
+                    }
+                    "eth_signTransaction" -> {
+                        // todo: but not that common or important. wasn't implemented for wc 1.0
+                    }
+                    "eth_sendRawTransaction" -> {
+                        // todo: but not that common or important. wasn't implemented for wc 1.0
+                    }
+                }
+            }
+
+            override fun onSessionDelete(deletedSession: Sign.Model.DeletedSession) {
+                // Triggered when the session is deleted by the peer
+                Timber.i(ON_SESSION_DELETE_2)
+                when (deletedSession) {
+                    is Sign.Model.DeletedSession.Success -> {
+                        val session = SignClient.getActiveSessionByTopic(deletedSession.topic)
+                        val name = session?.metaData?.name
+                        // todo: fetching the name of the session doesn't seem to work.
+                        // todo: also we could give a reason for the session end here.
+                        status.onNext(OnDisconnect(name ?: String.Empty))
+                    }
+                    is Sign.Model.DeletedSession.Error -> {
+                        status.onNext(OnDisconnect(String.Empty))
+                    }
+                }
+            }
+
+            override fun onSessionSettleResponse(settleSessionResponse: Sign.Model.SettledSessionResponse) {
+                // Triggered when wallet receives the session settlement response from Dapp
+                Timber.i(ON_SESSION_SETTLE_RESPONSE_2)
+                // todo
+            }
+
+            override fun onSessionUpdateResponse(sessionUpdateResponse: Sign.Model.SessionUpdateResponse) {
+                // Triggered when wallet receives the session update response from Dapp
+                Timber.i(ON_SESSION_UPDATE_RESPONSE_2)
+                // todo
+            }
+
+            override fun onConnectionStateChange(state: Sign.Model.ConnectionState) {
+                //Triggered whenever the connection state is changed
+                Timber.i(ON_CONNECTION_STATE_CHANGE_2)
+                // todo
+            }
+
+            override fun onError(error: Sign.Model.Error) {
+                // Triggered whenever there is an issue inside the SDK
+                Timber.e("$ON_ERROR_2$error")
+                // todo
+            }
+        }
+        try {
+            SignClient.setWalletDelegate(walletDelegate)
+        } catch (e: IllegalStateException) {
+            Timber.e(e.toString())
+        }
+
+        return true
+    }
 
     @SuppressLint("CheckResult")
     override fun connect(
         session: WalletConnectSession,
         peerId: String,
         remotePeerId: String?,
-        dapps: List<DappSession>
+        dapps: List<DappSessionV1>
     ) {
+        if (session.version == WCSession.VERSION_2) {
+            Timber.i("$CONNECT_PAIRING_2${session.toUri()}")
+            val pairingParams = Core.Params.Pair(session.toUri())
+            CoreClient.Pairing.pair(pairingParams) { error ->
+                Timber.e(error.toString())
+            }
+            return
+        }
+
         wcClient = WCClient()
         with(wcClient) {
 
@@ -119,10 +337,10 @@ class WalletConnectRepositoryImpl(
             }
             onFailure = { error, peerId, isForceTermination ->
                 if (isForceTermination) {
-                    logger.logToFirebase("${LoggerMessages.CONNECTION_TERMINATION} $error, peerId: $peerId")
+                    logger.logToFirebase("${LoggerMessages.CONNECTION_TERMINATION} $error, $peerId")
                     terminateConnection(peerId, error)
                 } else {
-                    logger.logToFirebase("${LoggerMessages.RECONNECTING_CONNECTION} $error, peerId: $peerId")
+                    logger.logToFirebase("${LoggerMessages.RECONNECTING_CONNECTION} $error, $peerId")
                     reconnect(peerId, error, remotePeerId)
                 }
             }
@@ -154,10 +372,10 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSendTransaction = { id, transaction, peerId ->
-                logger.logToFirebase("${LoggerMessages.ON_ETH_SEND_TX} peerId: $peerId; transaction: $transaction")
+                logger.logToFirebase("${LoggerMessages.ON_ETH_SEND_TX} $peerId; $transaction")
                 currentRequestId = id
                 status.onNext(
-                    OnEthSendTransaction(
+                    OnEthSendTransactionV1(
                         WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
                         peerId
                     )
@@ -207,8 +425,8 @@ class WalletConnectRepositoryImpl(
                             WalletConnectSession(
                                 topic,
                                 version,
-                                bridge,
-                                key
+                                key,
+                                bridge
                             )
                         ),
                         peerMeta = WCPeerMeta(),
@@ -225,7 +443,7 @@ class WalletConnectRepositoryImpl(
 
     private fun removeDappSession(
         peerId: String,
-        onSuccess: (session: DappSession) -> Unit,
+        onSuccess: (session: DappSessionV1) -> Unit,
         onError: () -> Unit
     ) {
         checkDisposable()
@@ -273,7 +491,7 @@ class WalletConnectRepositoryImpl(
         }
     }
 
-    override fun saveDappSession(dappSession: DappSession): Completable =
+    override fun saveDappSession(dappSession: DappSessionV1): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
 
     override fun updateDappSession(peerId: String, address: String, chainId: Int, accountName: String, networkName: String): Completable =
@@ -282,15 +500,139 @@ class WalletConnectRepositoryImpl(
     override fun deleteDappSession(peerId: String): Completable =
         dappDao.delete(peerId)
 
+    override fun getV2Pairings(): List<Pairing> =
+        CoreClient.Pairing.getPairings()
+            // todo: create some mapper instead
+            .map { pairing ->
+                Pairing(
+                    String.Empty,
+                    pairing.topic,
+                    pairing.peerAppMetaData?.name ?: String.Empty,
+                    // todo: check which icon is good
+                    pairing.peerAppMetaData?.icons?.getOrNull(0) ?: String.Empty,
+                    String.Empty,
+                    String.Empty,
+                    Int.InvalidValue,
+                    pairing.peerAppMetaData
+                )
+            }
+
+    override fun getV2PairingsWithoutActiveSession(): List<Pairing> {
+        try {
+            val sessions = SignClient.getListOfActiveSessions()
+            return CoreClient.Pairing.getPairings()
+                .filter { pairing -> !sessions.any { session -> session.pairingTopic == pairing.topic} }
+                // todo: create some mapper instead
+                .map { pairing ->
+                    Pairing(
+                        String.Empty,
+                        pairing.topic,
+                        pairing.peerAppMetaData?.name ?: String.Empty,
+                        // todo: check which icon is good
+                        pairing.peerAppMetaData?.icons?.getOrNull(0) ?: String.Empty,
+                        String.Empty,
+                        String.Empty,
+                        Int.InvalidValue,
+                        pairing.peerAppMetaData
+                    )
+                }
+        } catch (e: IllegalStateException) {
+            Timber.e(e.toString())
+            return emptyList<Pairing>()
+        }
+    }
+
+    override fun getV2Sessions(): List<DappSessionV2> =
+        try {
+            SignClient.getListOfActiveSessions()
+                // todo: create some mapper instead
+                .map { session -> DappSessionV2(
+                    String.Empty,
+                    session.topic,
+                    WCSession.VERSION_2,
+                    session.metaData?.name ?: String.Empty,
+                    // todo: check which icon is good
+                    session.metaData?.icons?.getOrNull(0) ?: String.Empty,
+                    String.Empty,
+                    String.Empty,
+                    String.Empty,
+                    Int.InvalidValue,
+                    false, // todo: how do we know this here.
+                    session.metaData,
+                    session.namespaces
+                ) }
+        } catch (e: IllegalStateException) {
+            Timber.e(e.toString())
+            emptyList<DappSessionV2>()
+        }
+
+    override fun getV1Sessions(): Single<List<DappSessionV1>> =
+        dappDao.getAll().firstOrError()
+            .map { EntitiesToDappSessionsMapper.map(it) }
+
+    override fun getV1SessionsFlowable(): Flowable<List<DappSessionV1>> =
+        dappDao.getAll()
+            .map { EntitiesToDappSessionsMapper.map(it) }
+
+    // only returns pairings without active sessions
+    override fun getSessionsAndPairings(): Single<List<MinervaPrimitive>> =
+        dappDao.getAll().firstOrError()
+            .map {
+                EntitiesToDappSessionsMapper
+                    .map(it)
+                    .mergeWithoutDuplicates(getV2Sessions())
+                    .mergeWithoutDuplicates(getV2PairingsWithoutActiveSession())
+            }
+
+    // only returns pairings without active sessions
+    override fun getSessionsAndPairingsFlowable(): Flowable<List<MinervaPrimitive>> =
+        dappDao.getAll()
+            .map {
+                EntitiesToDappSessionsMapper
+                    .map(it)
+                    .mergeWithoutDuplicates(getV2Sessions())
+                    .mergeWithoutDuplicates(getV2PairingsWithoutActiveSession())
+            }
+
     override fun getSessions(): Single<List<DappSession>> =
-        dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
+        dappDao.getAll().firstOrError()
+            .map {
+                EntitiesToDappSessionsMapper
+                    .map(it)
+                    .mergeWithoutDuplicates(getV2Sessions())
+            }
 
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
         dappDao.getAll()
-            .map { sessionEntities -> EntitiesToDappSessionsMapper.map(sessionEntities) }
+            .map {
+                EntitiesToDappSessionsMapper
+                    .map(it)
+                    .mergeWithoutDuplicates(getV2Sessions())
+            }
 
-    override fun getDappSessionById(peerId: String): Single<DappSession> =
+    override fun getDappSessionById(peerId: String): Single<DappSessionV1> =
         dappDao.getDappSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
+
+    fun getDappSessionByTopic(topic: String, address: String = String.Empty, chainId: Int = Int.InvalidValue): DappSessionV2? {
+        val session = SignClient.getActiveSessionByTopic(topic) ?: return null
+        val networkName = getNetworkNameOrNull(chainId) ?: String.Empty
+        // todo: create some mapper instead
+        return DappSessionV2(
+            address,
+            session.topic,
+            WCSession.VERSION_2,
+            session.metaData?.name ?: String.Empty,
+            // todo: check which icon is good
+            session.metaData?.icons?.getOrNull(0) ?: String.Empty,
+            String.Empty,
+            networkName,
+            String.Empty,
+            chainId,
+            false, // todo: how do we know this here.
+            session.metaData,
+            session.namespaces
+        )
+    }
 
     private fun getUserReadableData(message: WCEthereumSignMessage) =
         when (message.type) {
@@ -305,14 +647,49 @@ class WalletConnectRepositoryImpl(
         addresses: List<String>,
         chainId: Int,
         peerId: String,
-        dapp: DappSession
+        dapp: DappSessionV1
     ): Completable =
         if (clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true) {
             logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} $peerId")
             saveDappSession(dapp)
         } else {
-            Completable.error(Throwable("Session not approved"))
+            Completable.error(Throwable(SESSION_NOT_APPROVED))
         }
+
+    override fun approveSessionV2(
+        proposerPublicKey: String,
+        namespace: WalletConnectSessionNamespace
+        // todo: pass relayProtocol here?
+    ): Completable {
+        val namespaces: Map<String, Sign.Model.Namespace.Session> =
+            mapOf(
+                Pair(
+                    EIP155,
+                    Sign.Model.Namespace.Session(
+                        chains = namespace.chains,
+                        accounts = namespace.accounts,
+                        methods = namespace.methods,
+                        events = namespace.events)
+                )
+            )
+        val relayProtocol = null
+        val approveParams: Sign.Params.Approve = Sign.Params.Approve(proposerPublicKey, namespaces, relayProtocol)
+
+        return Completable.create { emitter ->
+            SignClient.approveSession(approveParams) { error ->
+                Timber.e(error.toString())
+                emitter.onError(Throwable(error.toString()))
+            }
+            emitter.onComplete()
+        }
+    }
+
+    override fun rejectSessionV2(proposerPublicKey: String, reason: String) {
+        SignClient.rejectSession(Sign.Params.Reject(proposerPublicKey, reason)) {
+            error ->
+            Timber.e(error.toString())
+        }
+    }
 
     override fun updateSession(
         connectionPeerId: String,
@@ -323,21 +700,21 @@ class WalletConnectRepositoryImpl(
         handshakeId: Long
     ): Completable =
         if (clientMap[connectionPeerId]?.approveSession(listOf(accountAddress), accountChainId, connectionPeerId, handshakeId) == true) {
-            logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} ${connectionPeerId}")
+            logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} $connectionPeerId")
             //update specified dapp session db record by specified parameters
             updateDappSession(connectionPeerId, accountAddress, accountChainId, accountName, networkName)
         } else {
-            Completable.error(Throwable("Update of Session not approved"))
+            Completable.error(Throwable(NOT_APPROVED_ERROR))
         }
 
-    private fun startPing(dapps: List<DappSession>) {
+    private fun startPing(dapps: List<DappSessionV1>) {
         pingDisposable = Observable.interval(0, PING_TIMEOUT, TimeUnit.SECONDS)
             .doOnNext { ping(dapps) }
             .subscribeOn(Schedulers.io())
             .subscribeBy(onError = { Timber.e("Error while ping: $it") })
     }
 
-    private fun ping(dapps: List<DappSession>) {
+    private fun ping(dapps: List<DappSessionV1>) {
         if (clientMap.isNotEmpty()) {
             clientMap.forEach { entry ->
                 val currentDapp = dapps.find { dapp -> dapp.peerId == entry.key }
@@ -370,9 +747,36 @@ class WalletConnectRepositoryImpl(
         clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
     }
 
+    override fun approveRequestV2(topic: String, privateKey: String) {
+        logger.logToFirebase("${LoggerMessages.APPROVE_REQUEST_2} $topic")
+        Timber.i("${LoggerMessages.APPROVE_REQUEST_2} $topic")
+        val jsonRpcResponse = Sign.Model.JsonRpcResponse.JsonRpcResult(
+            id = currentRequestId,
+            result = signData(privateKey)
+        )
+        Timber.i("${LoggerMessages.APPROVE_REQUEST_2} $topic $jsonRpcResponse")
+        val result = Sign.Params.Response(sessionTopic = topic, jsonRpcResponse = jsonRpcResponse)
+        SignClient.respond(result) { error ->
+            Timber.e(error.toString())
+        }
+    }
+
     override fun approveTransactionRequest(peerId: String, message: String) {
         logger.logToFirebase("${LoggerMessages.APPROVE_TX_REQUEST} $peerId")
         clientMap[peerId]?.approveRequest(currentRequestId, message)
+    }
+
+    override fun approveTransactionRequestV2(topic: String, message: String) {
+        logger.logToFirebase("${LoggerMessages.APPROVE_TX_REQUEST_2} $topic")
+        val jsonRpcResponse = Sign.Model.JsonRpcResponse.JsonRpcResult(
+            id = currentRequestId,
+            result = message
+        )
+        Timber.i("${LoggerMessages.APPROVE_TX_REQUEST_2} $topic $jsonRpcResponse")
+        val result = Sign.Params.Response(sessionTopic = topic, jsonRpcResponse = jsonRpcResponse)
+        SignClient.respond(result) {error ->
+            Timber.e(error.toString())
+        }
     }
 
     private fun signData(privateKey: String) = if (currentEthMessage.type == TYPED_MESSAGE) {
@@ -384,6 +788,19 @@ class WalletConnectRepositoryImpl(
     override fun rejectRequest(peerId: String) {
         logger.logToFirebase("${LoggerMessages.REJECT_REQUEST} $peerId")
         clientMap[peerId]?.rejectRequest(currentRequestId)
+    }
+
+    override fun rejectRequestV2(topic: String) {
+        logger.logToFirebase("${LoggerMessages.REJECT_REQUEST_2} $topic")
+        val jsonRpcResponseError = Sign.Model.JsonRpcResponse.JsonRpcError(
+            id = currentRequestId,
+            code = -32000,
+            message = REJECTED_BY_USER
+        )
+        val result = Sign.Params.Response(sessionTopic = topic, jsonRpcResponse = jsonRpcResponseError)
+        SignClient.respond(result) { error ->
+            Timber.e(error.toString())
+        }
     }
 
     override fun killAllAccountSessions(address: String, chainId: Int): Completable =
@@ -405,7 +822,7 @@ class WalletConnectRepositoryImpl(
                 dappDao.deleteAllDappsForAccount(address)
             }
 
-    override fun killSession(peerId: String): Completable {
+    override fun killSessionByPeerId(peerId: String): Completable {
         logger.logToFirebase("${LoggerMessages.KILL_SESSION} $peerId")
         return deleteDappSession(peerId)
             .andThen {
@@ -418,6 +835,36 @@ class WalletConnectRepositoryImpl(
             }
     }
 
+    override fun killSessionByTopic(topic: String) {
+        val disconnectParams = Sign.Params.Disconnect(topic)
+
+        // todo: return this error to be subscribed to, like in killSessionByPeerId(peerId)
+        SignClient.disconnect(disconnectParams) { error ->
+            Timber.e(error.toString())
+        }
+    }
+
+    // only the pairing is killed and not the session
+    override fun killPairingByTopic(topic: String) {
+        val disconnectParams = Core.Params.Disconnect(topic)
+
+        // todo: return this error to be subscribed to, like in killSessionByPeerId(peerId)
+        CoreClient.Pairing.disconnect(disconnectParams) { error ->
+            Timber.e(error.toString())
+        }
+    }
+
+    // only the pairing is killed and not the session
+    override fun killPairingBySessionTopic(sessionTopic: String) {
+        val session = SignClient.getActiveSessionByTopic(sessionTopic) ?: return
+        val disconnectParams = Core.Params.Disconnect(session.pairingTopic)
+
+        // todo: return this error to be subscribed to, like in killSessionByPeerId(peerId)
+        CoreClient.Pairing.disconnect(disconnectParams) { error ->
+            Timber.e(error.toString())
+        }
+    }
+
     override fun dispose() {
         disposable.dispose()
         pingDisposable?.dispose()
@@ -428,10 +875,95 @@ class WalletConnectRepositoryImpl(
     }
 
     companion object {
+        fun namespacesCountNonEip155Chains(namespaces: Map<String, Sign.Model.Namespace.Proposal>): Int {
+            return namespaces.entries
+                .filter { entry -> entry.key != EIP155 }
+                .flatMap { entry -> entry.value.chains ?: emptyList() }
+                .size
+        }
+
+        // todo: move somewhere else?
+        // only works for eip155 namespace
+        fun namespacesToAddresses(namespaces: Map<String, Sign.Model.Namespace.Session>): List<String> {
+            val accounts = namespaces[EIP155]?.accounts ?: emptyList()
+            return accounts
+                .mapNotNull { account -> account.split(EIP155_DELIMITER).getOrNull(2) }
+                // todo: check for valid address?
+                .distinct()
+        }
+
+        // todo: move somewhere else?
+        // only works for eip155 namespace and known chains
+        fun sessionNamespacesToChainNames(namespaces: Map<String, Sign.Model.Namespace.Session>): List<String> {
+            val accounts = namespaces[EIP155]?.accounts ?: emptyList()
+            return accounts
+                .mapNotNull { account -> account.split(EIP155_DELIMITER).getOrNull(1)?.toIntOrNull() }
+                .distinct()
+                .mapNotNull { chainId -> getNetworkNameOrNull(chainId) }
+        }
+
+        // todo: move somewhere else?
+        // only works for eip155 namespace
+        fun proposalNamespacesToChainNames(namespace: WalletConnectProposalNamespace,
+                                           unsupportedNetworkRepository: UnsupportedNetworkRepository
+        ): Single<List<String>> {
+            val chainIds = namespace.chains
+                .mapNotNull { chain -> chain.split(EIP155_DELIMITER).getOrNull(1)?.toIntOrNull() }
+                .distinct()
+            return Observable.fromIterable(chainIds)
+                .flatMapSingle { chainId ->
+                    getNetworkNameOrNull(chainId)?.let { name ->
+                        Single.just(name)
+                    } ?: unsupportedNetworkRepository.getNetworkName(chainId)
+                }
+                .toList()
+        }
+
+        fun initializeWalletConnect2(application: Application) {
+            val projectId = BuildConfig.WALLETCONNECT_PROJECT_ID
+            val relayUrl = BuildConfig.WALLETCONNECT_RELAY_URL
+
+            val serverUrl = "wss://$relayUrl?projectId=${projectId}"
+            val connectionType = ConnectionType.AUTOMATIC
+
+            // todo: move to localization
+            val appMetaData = Core.Model.AppMetaData(
+                name = "Minerva Wallet",
+                description = APP_DESCRIPTION,
+                url = "https://minerva.digital/",
+                icons = listOf("https://minerva.digital/i/minerva-owl.svg"),
+                redirect = "minerva://wc"
+            )
+
+            CoreClient.initialize(
+                metaData = appMetaData,
+                relayServerUrl = serverUrl,
+                connectionType = connectionType,
+                application = application,
+                // no relay
+                onError = { error ->
+                    Timber.e(error.toString())
+                }
+            )
+
+            val init = Sign.Params.Init(core = CoreClient)
+            SignClient.initialize(init) { error ->
+                Timber.e(error.toString())
+            }
+        }
+
         const val PING_TIMEOUT: Long = 60
         const val RETRY_DELAY: Long = 5
         const val MAX_RECONNECTION_ATTEMPTS: Int = 3
         const val INIT_ATTEMPT: Int = 0
         const val ONE_ATTEMPT: Int = 1
+        const val EIP155: String = "eip155"
+        const val EIP155_DELIMITER: String = ":"
+        const val APP_DESCRIPTION = "Minerva is like your physical wallet and it simplifies everything around your identities and moneys, while you always stay in control over your assets."
+        const val NOT_APPROVED_ERROR = "Update of Session not approved"
+        const val SESSION_NOT_APPROVED = "Session not approved"
+        const val BACKSLASH_ZERO_X = "\"0x"
+        const val ZERO_X = "0x"
+        const val REJECTED_BY_USER = "Rejected by the user"
     }
 }

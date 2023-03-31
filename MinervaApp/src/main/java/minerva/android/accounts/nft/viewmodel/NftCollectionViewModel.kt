@@ -75,7 +75,7 @@ class NftCollectionViewModel(
     //nft item which will be updated
     private val _updatedNftItem = MutableLiveData<NftItem>(NftItem())
     val updatedNftItem: LiveData<NftItem> get() = _updatedNftItem
-    //value for showing popap with specified error
+    //value for showing popup with specified error
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> = _errorLiveData
 
@@ -423,7 +423,7 @@ class NftCollectionViewModel(
                     },
                     onError = {
                         Timber.e(it)
-                        //update error state for showing popap with current error
+                        //update error state for showing popup with current error
                         _errorLiveData.value = Event(it)
                     }
                 )

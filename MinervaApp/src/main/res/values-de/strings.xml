@@ -228,8 +228,10 @@
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
     <string name="connected">Verbunden</string>
     <string name="disconnect">Trennen</string>
+    <string name="end_session">End session</string>
     <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
-    <string name="connect_to_website">Mit Website verbinden</string>
+    <string name="Connect">Connect</string>
+    <string name="connect_to_website">Mit DApp verbinden</string>
     <string name="change_network">change network</string>
     <string name="all_my_assets">All my Assets</string>
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
@@ -338,7 +340,7 @@
     <string name="nft_graphic_error_message">Dieses NFT kann nicht angezeigt werden.</string>
     <string name="cd_dapp_icon">Dapp icon</string>
     <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
-    <string name="sponsored_label">Gesponsort</string>
+    <string name="sponsored_label">Gesponsert</string>
     <string name="open_dapp_label">Öffnen</string>
     <string name="favorite_label">Favorit</string>
     <string name="token_reset_message">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
@@ -376,7 +378,14 @@
     <string name="unknown_type">Unknown Type</string>
     <string name="paste_button_text">Paste from clipboard</string>
     <string name="switch_network">You need to switch to %s networks in the Settings first</string>
-
+    <string name="non_evm_chain">Non EVM Chain</string>
+    <string name="non_evm_chains">Non EVM Chains</string>
+    <string name="no_active_session">No active session</string>
+    <string name="requested_networks">Requested: %s</string>
+    <string name="fully_supported">Fully supported (%d networks)</string>
+    <string name="request_not_supported">The request is not supported.</string>
+    <string name="website_networks_not_supported">If you would like to get this website supported, please engage with the Minerva team.</string>
+    <string name="events_methods_not_supported">This website requests events or methods that are not supported. Please engage with the Minerva team.</string>
 
     <!-- Disabled features  -->
     <string name="quick_login_success_message">Allow Charging Station Dashboard to send you push\nnotifications and proceed with painless login request?</string>
@@ -391,9 +400,7 @@
     <string name="safe_accounts_count_format">+%d Safe Accounts</string>
     <string name="funds_at_risk_message">The use of main networks like Gnosis Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your Secret Recovery Phrase.</string>
     <string name="fund_at_risk_warning">Act Carefully!</string>
-
-
-
+    <string name="select_address">Select address</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

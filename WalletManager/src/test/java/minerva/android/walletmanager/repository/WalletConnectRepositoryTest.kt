@@ -18,7 +18,7 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.utils.logger.Logger
@@ -57,6 +57,7 @@ class WalletConnectRepositoryTest {
 
         clientMap = ConcurrentHashMap()
         clientMap["peerId"] = client
+        // to test WalletConnect 2.0  WalletConnectRepositoryImpl.initializeWalletConnect2(application) would need to be called here.
         repository = WalletConnectRepositoryImpl(signatureRepository, database, logger, client, clientMap).also {
             it.currentEthMessage =
                 WCEthereumSignMessage(type = WCEthereumSignMessage.WCSignType.MESSAGE, raw = listOf("test1", "test2"))
@@ -80,7 +81,7 @@ class WalletConnectRepositoryTest {
     fun `kill session test`() {
         whenever(clientMap["peerId"]?.killSession()).thenReturn(true)
         whenever(dappSessionDao.delete(any())).thenReturn(Completable.complete())
-        repository.killSession("peerId")
+        repository.killSessionByPeerId("peerId")
         assertEquals(clientMap.size, 1)
     }
 
@@ -123,7 +124,7 @@ class WalletConnectRepositoryTest {
     @Test
     fun `save dapps success test`() {
         whenever(dappSessionDao.insert(any())).thenReturn(Completable.complete())
-        repository.saveDappSession(DappSession(address = "address"))
+        repository.saveDappSession(DappSessionV1(address = "address"))
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -133,7 +134,7 @@ class WalletConnectRepositoryTest {
     fun `save connected dapps error test`() {
         val error = Throwable()
         whenever(dappSessionDao.insert(any())).thenReturn(Completable.error(error))
-        repository.saveDappSession(DappSession(address = "address"))
+        repository.saveDappSession(DappSessionV1(address = "address"))
             .test()
             .assertError(error)
     }

@@ -67,6 +67,7 @@ class ServicesScannerFragment : BaseWalletConnectScannerFragment() {
                         shouldScan = false
                     }
                     is WalletConnectSessionRequestResult -> showConnectionDialog(state.meta, state.network, state.dialogType)
+                    is WalletConnectSessionRequestResultV2 -> showConnectionDialogV2(state.meta, state.numberOfNonEip155Chains, state.eip155ProposalNamespace)
                     is WalletConnectUpdateDataState -> updateConnectionDialog(state.network, state.dialogType)
                     is WalletConnectDisconnectResult -> handleWalletConnectDisconnectState(state.sessionName)
                     is WalletConnectConnectionError -> handleWalletConnectError(state.sessionName)

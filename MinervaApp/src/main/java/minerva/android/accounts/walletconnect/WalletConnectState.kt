@@ -2,10 +2,9 @@ package minerva.android.accounts.walletconnect
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
+import minerva.android.walletmanager.model.walletconnect.*
+
+// todo: why is this duplicate with ServicesScannerViewState?
 
 sealed class WalletConnectState
 object CloseScannerState : WalletConnectState()
@@ -22,11 +21,16 @@ data class OnSessionRequest(
     val network: BaseNetworkData,
     val dialogType: WalletConnectAlertType
 ) : WalletConnectState()
+data class OnSessionRequestV2(
+    val meta: WalletConnectPeerMeta,
+    val numberOfNonEip155Chains: Int,
+    val eip155ProposalNamespace: WalletConnectProposalNamespace
+) : WalletConnectState()
 
 data class OnDisconnected(val sessionName: String = String.Empty) : WalletConnectState()
 data class ProgressBarState(val show: Boolean) : WalletConnectState()
-object HideDappsState : WalletConnectState()
-data class OnEthSignRequest(val message: String, val session: DappSession) : WalletConnectState()
+data class OnEthSignRequest(val message: String, val session: DappSessionV1) : WalletConnectState()
+data class OnEthSignRequestV2(val message: String, val session: DappSessionV2) : WalletConnectState()
 data class OnEthSendTransactionRequest(
     val transaction: WalletConnectTransaction,
     val session: DappSession,

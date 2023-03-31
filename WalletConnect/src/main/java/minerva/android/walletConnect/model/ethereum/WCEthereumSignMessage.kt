@@ -8,6 +8,13 @@ data class WCEthereumSignMessage(
         MESSAGE, PERSONAL_MESSAGE, TYPED_MESSAGE
     }
 
+    val address
+        get() = when (type) {
+            WCSignType.MESSAGE -> raw[FIRST]
+            WCSignType.TYPED_MESSAGE -> raw[FIRST]
+            WCSignType.PERSONAL_MESSAGE -> raw[SECOND]
+        }
+
     val data
         get() = when (type) {
             WCSignType.MESSAGE -> raw[SECOND]
