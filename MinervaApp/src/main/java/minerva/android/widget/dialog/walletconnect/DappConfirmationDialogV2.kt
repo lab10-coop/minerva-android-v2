@@ -3,6 +3,7 @@ package minerva.android.widget.dialog.walletconnect
 import android.content.Context
 import android.view.View
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.core.view.isGone
 import minerva.android.R
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.FIRST_ICON
@@ -15,6 +16,8 @@ import minerva.android.kotlinUtils.EmptyResource
 import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.utils.AddressConverter
+import minerva.android.walletmanager.utils.AddressType
 import minerva.android.widget.DynamicWidthSpinner
 import minerva.android.widget.dialog.models.ViewDetailsV2
 
@@ -57,6 +60,38 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
             connectionName.text = viewDetails.connectionName
         }
         numberOfProvidedNetworks = _numberOfProvidedNetworks
+    }
+
+    //temporary realization
+    fun setupAddressSpinnerV2(availableAddresses: List<AddressWrapper>, onAddressSelected: (String) -> Unit) {
+        networkHeader.apply {
+            accountSpinner.visibility = View.GONE//! hide old code realization
+            addressSpinner.visibility = View.GONE//! hide old code realization
+
+            if (isAddressSpinnerVisible(availableAddresses.size)) {
+                //create list with appropriate address appearance (index + short address)
+                val listOfAddresses: List<String> = availableAddresses.map { addressWrapper ->
+                    "#${addressWrapper.index.inc()}: ${AddressConverter.getShortAddress(AddressType.NORMAL_ADDRESS, addressWrapper.address)}"
+                }
+                val adapter = ArrayAdapter(context, R.layout.dropdown_list_item, listOfAddresses)//create adapter and filling it with help of addresses
+                dropdownMenuContainer.visibility = View.VISIBLE//show dropdown container
+                dropdownMenuItemsContainer.apply {
+                    var bgChanged: Boolean = false//for prevent multiple updating menu of background state
+                    setAdapter(adapter)
+                    setOnClickListener {//set custom background appearance
+                        if (!bgChanged) {
+                            dropdownMenuItemWrapper.setBoxCornerRadii(24F, 24F, 0F, 0F)
+                            bgChanged = true
+                        }
+                        setOnItemClickListener { _, _, position, _ ->//paste selected address to callback
+                            onAddressSelected(availableAddresses[position].address)
+                        }
+                    }
+                }
+            } else {
+                dropdownMenuContainer.visibility = View.GONE
+            }
+        }
     }
 
     fun setupAddressSpinner(availableAddresses: List<AddressWrapper>, onAddressSelected: (String) -> Unit) {
