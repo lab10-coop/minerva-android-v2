@@ -20,6 +20,14 @@ object WCSessionToWalletConnectSessionMapper : Mapper<WCSession, WalletConnectSe
 
 object WCPeerToWalletConnectPeerMetaMapper : Mapper<WCPeerMeta, WalletConnectPeerMeta> {
     override fun map(input: WCPeerMeta): WalletConnectPeerMeta = with(input) {
-        WalletConnectPeerMeta(name, url, description, icons, chainId = input.chainId, peerId = input.peerId, isMobileWalletConnect = input.isMobileWalletConnect)
+        WalletConnectPeerMeta(
+            name,
+            url,
+            description,
+            icons,
+            chainId = input.chainId,
+            peerId = input.peerId,
+            isMobileWalletConnect = input.isMobileWalletConnect,
+            handshakeId = input.handshakeId)
     }
 }

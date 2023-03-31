@@ -537,8 +537,10 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    override fun rejectSession(isMobileWalletConnect: Boolean) {
-        walletConnectRepository.rejectSession(topic.peerId)
+    override fun rejectSession(isMobileWalletConnect: Boolean, dialogType: WalletConnectAlertType) {
+        if (WalletConnectAlertType.CHANGE_NETWORK != dialogType) {//when on "CHANGE_NETWORK" case - skip "reject" and just close dialog
+            walletConnectRepository.rejectSession(topic.peerId)
+        }
         closeScanner(isMobileWalletConnect)
     }
 

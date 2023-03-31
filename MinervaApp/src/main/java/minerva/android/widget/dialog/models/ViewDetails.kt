@@ -1,7 +1,7 @@
 package minerva.android.widget.dialog.models
 
 /**
- * View Details - data class which stores values for view details
+ * View Details - data class which stores values for popap details
  */
 data class ViewDetails(
     val networkName: String,

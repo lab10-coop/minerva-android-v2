@@ -156,7 +156,7 @@ abstract class BaseWalletConnectScannerViewModel(
         address = newAddress
     }
 
-    fun approveSession(meta: WalletConnectPeerMeta, isMobileWalletConnect: Boolean) {
+    fun approveSession(meta: WalletConnectPeerMeta) {
         if (account.id == Int.InvalidId) {
             return
         }
@@ -165,7 +165,7 @@ abstract class BaseWalletConnectScannerViewModel(
                 listOf(account.address),
                 account.chainId,
                 topic.peerId,
-                getDapp(meta, account.chainId, account, isMobileWalletConnect)
+                getDapp(meta, account.chainId, account, meta.isMobileWalletConnect)
             )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -173,7 +173,7 @@ abstract class BaseWalletConnectScannerViewModel(
                     onComplete = {
                         //set default value for showing empty list of network in future
                         requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
-                        closeScanner(isMobileWalletConnect)
+                        closeScanner(meta.isMobileWalletConnect)
                     },
                     onError = { setLiveDataError(it) }
                 )
@@ -189,7 +189,7 @@ abstract class BaseWalletConnectScannerViewModel(
                     onComplete = {
                         //set default value for showing empty list of network in future
                         requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
-                        closeScanner(isMobileWalletConnect)
+                        closeScanner(isMobileWalletConnect)//if true - close phone to background
                     },
                     onError = { setLiveDataError(it) }
                 )
@@ -197,19 +197,19 @@ abstract class BaseWalletConnectScannerViewModel(
     }
 
     /**
-     * Update Session - update account for current wallet api connection
-     * @param connectionPeerId - id of socket client connection
-     * @param chainId - id of chain which we need to change
+     * Update Session - method for updating specified dappSession (db record)
+     * @param meta - new data for updating db
      */
-    fun updateSession(connectionPeerId: String, chainId: Int? = null) {
+    fun updateSession(meta: WalletConnectPeerMeta, newChainId: Int): Unit {
         if (account.id != Int.InvalidId) {
             launchDisposable {
                 walletConnectRepository.updateSession(
-                    connectionPeerId = connectionPeerId,
+                    connectionPeerId = meta.peerId,
                     accountAddress = account.address,
-                    accountChainId = if (null == chainId) account.chainId else chainId,
+                    accountChainId = if (Int.InvalidId == newChainId) account.chainId else newChainId,
                     accountName = account.name,
-                    networkName = account.network.name
+                    networkName = account.network.name,
+                    handshakeId = meta.handshakeId
                 )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -217,6 +217,7 @@ abstract class BaseWalletConnectScannerViewModel(
                         onComplete = {
                             //set default value for showing empty list of network in future
                             requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                            closeScanner(meta.isMobileWalletConnect)//if true - close phone to background
                         },
                         onError = { setLiveDataError(it) }
                     )
@@ -247,7 +248,12 @@ abstract class BaseWalletConnectScannerViewModel(
         else icons[Int.FirstIndex]
 
 
-    open fun rejectSession(isMobileWalletConnect: Boolean = false) {
+    /**
+     * Reject Session - method for rejection(close) connection with api
+     * @param isMobileWalletConnect - specified which type of work(connection) with api we using(mobile/desktop)
+     * @param dialogType - in some cases we need to (just) skip just close dialog and don't "reject" session/connection
+     */
+    open fun rejectSession(isMobileWalletConnect: Boolean = false, dialogType: WalletConnectAlertType = WalletConnectAlertType.NO_ALERT) {
         walletConnectRepository.rejectSession(topic.peerId)
     }
 

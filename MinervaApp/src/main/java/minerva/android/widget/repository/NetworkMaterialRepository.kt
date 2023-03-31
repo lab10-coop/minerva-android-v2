@@ -43,7 +43,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ALPHA
 fun getNetworkIcon(context: Context, chainId: Int, isSafeAccount: Boolean = false): Drawable? =
     prepareSafeAccountBadge(context, getMainIcon(chainId), isSafeAccount)
 
-private fun getMainIcon(chainId: Int): Int =
+fun getMainIcon(chainId: Int): Int =
     when (chainId) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma
         ETH_MAIN -> R.drawable.ic_ethereum

@@ -194,9 +194,39 @@ class AccountManagerImpl(
         }
     }
 
+    override fun connectAccountsToNetworks(networksListWithIdexes: List<Pair<Int, Network>>): Single<List<String>> {
+        val networksList: MutableList<Pair<Account, Network>> = mutableListOf()
+        networksListWithIdexes.forEach { pair ->
+            val index = pair.first
+            val network = pair.second
+            val existedAccount: Account? =
+                walletManager.getWalletConfig().accounts.filter { account -> account.id == index && account.isTestNetwork == network.testNet }
+                    .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId && account.isHide) }
+
+            if (null != existedAccount) {
+                networksList.add(Pair(existedAccount, network))
+            }
+        }
+        return if (networksList.isEmpty()) {
+            Single.just(listOf(EMPTY_LIST))
+        } else {
+            updateAccounts(networksList)
+        }
+    }
+
     override fun createOrUnhideAccount(network: Network): Single<String> {
         val index = getNextAvailableIndexForNetwork(network)
         return connectAccountToNetwork(index, network)
+    }
+
+    override fun createAccounts(networks: List<Network>): Single<List<String>> {
+        //networks and them index(if exists) on main wallet accounts list
+        var networksListWithIndexes: MutableList<Pair<Int, Network>> = mutableListOf()
+        networks.forEach { network ->
+            val index = getNextAvailableIndexForNetwork(network)
+            networksListWithIndexes.add(Pair(index, network))
+        }
+        return connectAccountsToNetworks(networksListWithIndexes)
     }
 
     override fun insertCoinBalance(coinBalance: CoinBalance): Completable =
@@ -250,6 +280,45 @@ class AccountManagerImpl(
                     CoinBalance(chainId, address, Balance(cryptoBalance, fiatBalance), rate)
                 }
             }
+
+    /**
+     * Update Accounts - updated/added main wallet accounts
+     * @param networksList - networks which accounts have to be created
+     * @return RXJava.Single - list with names of created accounts
+     */
+    private fun updateAccounts(networksList: MutableList<Pair<Account, Network>>): Single<List<String>> {
+        var preparedAccountsList: List<Account> = mutableListOf()//list for main wallet accounts which will be updated
+        val addedAccountsNames: MutableList<String> = mutableListOf()//list for accounts names which will be added
+        walletManager.getWalletConfig().run {
+            networksList.forEach { pair ->
+                val existedAccount: Account = pair.first.copy()
+                val network: Network = pair.second.copy()
+                val accountName: String = CryptoUtils.prepareName( network.name, existedAccount.id )//create account name
+                preparedAccountsList = if (existedAccount.chainId == Int.InvalidValue) {
+                    if (preparedAccountsList.isEmpty()) {//add empty account to main wallet accounts
+                        changeAccountIndexToLast(accounts.toMutableList(), existedAccount)//first iteration
+                    } else {
+                        changeAccountIndexToLast(preparedAccountsList.toMutableList(), existedAccount)
+                    }
+                } else accounts
+                val existAccountIndex = preparedAccountsList.indexOf(existedAccount)//get index of added account
+                preparedAccountsList[existAccountIndex].apply {//set specified network data to added account
+                    name = accountName
+                    chainId = network.chainId
+                    isHide = false
+                }
+                addedAccountsNames.add(accountName)//add name of added account
+            }
+
+            return walletManager.updateWalletConfig(//update main wallet accounts
+                copy(
+                    version = updateVersion,
+                    accounts = preparedAccountsList
+                )
+            )
+                .toSingleDefault(addedAccountsNames)//return list names of added accounts
+        }
+    }
 
     private fun updateAccount(existedAccount: Account, network: Network): Single<String> {
         val accountName =
@@ -619,5 +688,6 @@ class AccountManagerImpl(
     companion object {
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private const val NO_SAFE_ACCOUNTS = 0
+        private const val EMPTY_LIST = "empty_list"
     }
 }

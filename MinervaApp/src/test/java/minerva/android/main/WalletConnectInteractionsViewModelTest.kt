@@ -925,7 +925,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 any(), any(), any(), any()
             )
         ).thenReturn(Completable.complete())
-        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = true)
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url", isMobileWalletConnect = true))
         verify(walletConnectRepository).approveSession(
             any(), any(), any(), any()
         )
@@ -947,7 +947,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 any(), any(), any(), any()
             )
         ).thenReturn(Completable.complete())
-        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = false)
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url", isMobileWalletConnect = false))
         verify(walletConnectRepository).approveSession(
             any(), any(), any(), any()
         )

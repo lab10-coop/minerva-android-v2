@@ -11,10 +11,12 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import minerva.android.R
 import minerva.android.accounts.walletconnect.*
+import minerva.android.accounts.walletconnect.WalletConnectAlertType.*
 import minerva.android.extension.empty
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.utils.AlertDialogHandler
@@ -273,29 +275,34 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         //set view details for alert dialog
-        val viewDetails: ViewDetails = if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType) { //change connection case
-            ViewDetails(network.name, getString(R.string.change_account_dialog), getString(R.string.change))
-        } else if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
-            ViewDetails(network.name, getString(R.string.change_network), getString(R.string.change))
-        } else { // connect connection case
-            ViewDetails(network.name, getString(R.string.connect_to_website), getString(R.string.connect))
-        }
-        confirmationDialogDialog = DappConfirmationDialogV1(this,
-            {
-                if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType) {
-                    viewModel.updateSession(meta.peerId)
-                } else if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
-                    viewModel.updateSession(meta.peerId, network.chainId)
+        val viewDetails: ViewDetails = if (CHANGE_ACCOUNT == dialogType) { //change connection case
+                ViewDetails(network.name, getString(R.string.change_account_dialog), getString(R.string.change))
+            } else if (CHANGE_NETWORK == dialogType) {
+                ViewDetails(network.name, getString(R.string.change_network), getString(R.string.change))
+            } else { // connect connection case
+                ViewDetails(network.name, getString(R.string.connect_to_website), getString(R.string.connect))
+            }
+
+        confirmationDialogDialog = DappConfirmationDialogV1(
+            context = this,
+            approve = {
+                if (CHANGE_ACCOUNT == dialogType) {
+                    viewModel.updateSession(
+                        meta = meta.copy(chainId = Int.InvalidId, handshakeId = Long.InvalidValue),
+                        newChainId = Int.InvalidId)//method gets chainId from account.chainId
+                } else if (CHANGE_NETWORK == dialogType) {
+                    viewModel.updateSession(meta, network.chainId)
                 } else {
-                    viewModel.approveSession(meta, true)
+                    viewModel.approveSession(
+                        meta.copy(isMobileWalletConnect = true))
                 }
                 clearAllDialogs()
             },
-            {
-                viewModel.rejectSession()
+            deny = {
+                viewModel.rejectSession(meta.isMobileWalletConnect, dialogType)
                 clearAllDialogs()
             },
-            { chainId ->
+            onAddAccountClick = { chainId ->
                 viewModel.addAccount(chainId, dialogType)
             }
         ).apply {
@@ -407,7 +414,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     // todo: for walletconnect 2.0 set a list of addresses instead of accounts
     private fun DappConfirmationDialogV1.updateAccountSpinner(dialogType: WalletConnectAlertType) {
-        if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+        if (CHANGE_NETWORK == dialogType) {
             setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts, dialogType, {})
         } else {
             setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts, dialogType) { account ->
@@ -433,11 +440,11 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         meta: WalletConnectPeerMeta = WalletConnectPeerMeta())
     {
         when (dialogType) {
-            WalletConnectAlertType.NO_ALERT -> setNoAlert()
-            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING,
-            WalletConnectAlertType.CHANGE_ACCOUNT,
-            WalletConnectAlertType.CHANGE_NETWORK -> {
-                if (WalletConnectAlertType.CHANGE_NETWORK == dialogType) {
+            NO_ALERT -> setNoAlert()
+            UNDEFINED_NETWORK_WARNING,
+            CHANGE_ACCOUNT,
+            CHANGE_NETWORK -> {
+                if (CHANGE_NETWORK == dialogType) {
                     //select only current network (for showing only (not for choosing)) which would be change
                     viewModel.availableNetworks
                         .find { it.chainId == meta.chainId }?.let { availableNetwork ->
@@ -448,7 +455,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                         viewModel.setAccountForSelectedNetwork(chainId)
                         updateAccountSpinner(dialogType)
                     }
-                    if (WalletConnectAlertType.CHANGE_ACCOUNT == dialogType) {
+                    if (CHANGE_ACCOUNT == dialogType) {
                         //set default network for equal state in "networkAdapter" and "accountAdapter"
                         if (Int.InvalidId == meta.chainId) {
                             viewModel.setAccountForSelectedNetwork(viewModel.availableNetworks.first().chainId )
@@ -463,9 +470,9 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                     }
                 }
             }
-            WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
-            WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
-            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING ->
+            CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
+            NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
+            UNSUPPORTED_NETWORK_WARNING ->
                 setUnsupportedNetworkMessage(network, viewModel.account.chainId, viewModel.areMainNetworksEnabled)
         }
     }
