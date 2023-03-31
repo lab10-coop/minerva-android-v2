@@ -229,7 +229,7 @@ abstract class BaseWalletConnectScannerViewModel(
         account.address,
         currentSession.topic,
         currentSession.version,
-        currentSession.bridge ?: EMPTY_STRING,
+        currentSession.bridge ?: String.Empty,
         currentSession.key,
         meta.name,
         getIcon(meta.icons),
@@ -309,9 +309,5 @@ abstract class BaseWalletConnectScannerViewModel(
      */
     private fun toCloseState() {
         _closeState.value = true
-    }
-
-    companion object {
-        const val EMPTY_STRING = ""
     }
 }

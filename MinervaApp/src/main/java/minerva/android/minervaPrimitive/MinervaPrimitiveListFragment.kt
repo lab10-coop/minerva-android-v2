@@ -68,7 +68,7 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
         val state = OnSessionRequest(
             WalletConnectPeerMeta(
                 name = minervaPrimitive.name,
-                icons = listOf(minervaPrimitive.iconUrl ?: EMPTY_STRING),
+                icons = listOf(minervaPrimitive.iconUrl ?: String.Empty),
                 peerId = minervaPrimitive.peerId,
                 address = minervaPrimitive.address,
                 chainId = minervaPrimitive.chainId),
@@ -89,8 +89,4 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
             is Credential -> getLoggedIdentityName(minervaPrimitive.loggedInIdentityDid)
             else -> String.Empty
         }
-
-    companion object {
-        const val EMPTY_STRING = ""
-    }
 }
