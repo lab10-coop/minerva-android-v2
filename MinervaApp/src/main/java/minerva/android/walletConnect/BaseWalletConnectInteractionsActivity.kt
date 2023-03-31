@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.google.firebase.iid.FirebaseInstanceId
 import com.hitanshudhawan.spannablestringparser.spannify
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import minerva.android.R
 import minerva.android.accounts.walletconnect.*
 import minerva.android.extension.empty
@@ -20,6 +22,7 @@ import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSessionNamespace
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155_DELIMITER
@@ -29,16 +32,23 @@ import minerva.android.widget.dialog.models.ViewDetails
 import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.*
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 import java.math.BigDecimal
 
 abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository by inject()
+    private val compositeDisposable = CompositeDisposable()
     private val viewModel: WalletConnectInteractionsViewModel by inject()
 
     private var dappDialog: DappDialog? = null
     private var loadingDialog: MinervaLoadingDialog? = null
     private var confirmationDialogDialog: DappDialog?  = null // todo: is DappDialog too broad?
     private var errorDialog: AlertDialog? = null
+
+    fun launchDisposable(job: () -> Disposable) {
+        compositeDisposable.add(job())
+    }
 
     abstract fun isProtectTransactionEnabled(): Boolean
 
@@ -69,6 +79,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        compositeDisposable.clear()
         super.onDestroy()
         clearAllDialogs()
     }
@@ -356,31 +367,41 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             }
         ).apply {
             // todo: and enable/disable connect button?
-            var networkNames = WalletConnectRepositoryImpl.proposalNamespacesToChainNames(eip155ProposalNamespace)
-            when {
-                numberOfNonEip155Chains == 1 -> networkNames = networkNames + getString(R.string.non_evm_chain)
-                numberOfNonEip155Chains > 1 -> networkNames = networkNames + getString(R.string.non_evm_chains)
-            }
-            setView(
-                meta,
-                ViewDetailsV2(
-                    networkNames,
-                    getString(R.string.connect_to_website),
-                    getString(R.string.connect)
-                ),
-                viewModel.networks.size
-            )
-            var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
-            if (!networksSupported) {
-                walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
-            } else if (!methodOrEventSupported) {
-                walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
-            }
-            setWarnings(walletConnectV2AlertType)
 
-            // set addresses in spinner instead of accounts
-            updateAddressSpinner()
-            show()
+            launchDisposable {
+                WalletConnectRepositoryImpl
+                    .proposalNamespacesToChainNames(eip155ProposalNamespace, unsupportedNetworkRepository)
+                    .subscribe({ _networkNames ->
+                        var networkNames = _networkNames
+                        when {
+                            numberOfNonEip155Chains == 1 -> networkNames = networkNames + getString(R.string.non_evm_chain)
+                            numberOfNonEip155Chains > 1 -> networkNames = networkNames + getString(R.string.non_evm_chains)
+                        }
+                        setView(
+                            meta,
+                            ViewDetailsV2(
+                                networkNames,
+                                getString(R.string.connect_to_website),
+                                getString(R.string.connect)
+                            ),
+                            viewModel.networks.size
+                        )
+                        var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
+                        if (!networksSupported) {
+                            walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
+                        } else if (!methodOrEventSupported) {
+                            walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
+                        }
+                        setWarnings(walletConnectV2AlertType)
+
+                        // set addresses in spinner instead of accounts
+                        updateAddressSpinner()
+                        show()
+                    }, { error ->
+                        // Handle errors
+                        Timber.e(error)
+                    })
+            }
         }
     }
 

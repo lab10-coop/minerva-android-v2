@@ -10,6 +10,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.budiyev.android.codescanner.*
 import com.google.zxing.BarcodeFormat
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import minerva.android.R
 import minerva.android.databinding.FragmentScannerBinding
 import minerva.android.extension.invisible
@@ -19,6 +21,7 @@ import minerva.android.widget.getStringFromClipboard
 
 abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
 
+    private val compositeDisposable = CompositeDisposable()
     lateinit var binding: FragmentScannerBinding
     private var isPermissionGranted = false
     var shouldScan = true
@@ -36,6 +39,10 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
         setupCallbackActions()
     }
 
+    fun launchDisposable(job: () -> Disposable) {
+        compositeDisposable.add(job())
+    }
+
     override fun onResume() {
         super.onResume()
         shouldScan = true
@@ -45,6 +52,11 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
     override fun onPause() {
         codeScanner.releaseResources()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        compositeDisposable.clear()
+        super.onDestroy()
     }
 
     private fun setupCallbackActions() {

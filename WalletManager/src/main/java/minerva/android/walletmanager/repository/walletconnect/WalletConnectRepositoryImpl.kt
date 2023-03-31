@@ -47,6 +47,7 @@ import minerva.android.walletmanager.model.mappers.WCSessionToWalletConnectSessi
 import minerva.android.walletmanager.model.mappers.WalletConnectSessionMapper
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.CONNECT_PAIRING_2
 import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_CONNECTION_STATE_CHANGE_2
 import minerva.android.walletmanager.repository.walletconnect.LoggerMessages.ON_ERROR_2
@@ -873,12 +874,19 @@ class WalletConnectRepositoryImpl(
 
         // todo: move somewhere else?
         // only works for eip155 namespace
-        // todo: show names of non supported evm namespaces, see: fetchUnsupportedNetworkName
-        fun proposalNamespacesToChainNames(namespace: WalletConnectProposalNamespace): List<String> {
-            return namespace.chains
+        fun proposalNamespacesToChainNames(namespace: WalletConnectProposalNamespace,
+                                           unsupportedNetworkRepository: UnsupportedNetworkRepository
+        ): Single<List<String>> {
+            val chainIds = namespace.chains
                 .mapNotNull { chain -> chain.split(EIP155_DELIMITER).getOrNull(1)?.toIntOrNull() }
                 .distinct()
-                .map { chainId -> getNetworkNameOrNull(chainId) ?: "unknown evm chain" }
+            return Observable.fromIterable(chainIds)
+                .flatMapSingle { chainId ->
+                    getNetworkNameOrNull(chainId)?.let { name ->
+                        Single.just(name)
+                    } ?: unsupportedNetworkRepository.getNetworkName(chainId)
+                }
+                .toList()
         }
 
         fun initializeWalletConnect2(application: Application) {
