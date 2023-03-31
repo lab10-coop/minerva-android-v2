@@ -84,11 +84,9 @@ class ServicesViewModel(
             is DappSessionV2 -> {
                 walletConnectRepository.killSessionByTopic(dapp.topic)
                 // Update servicesLiveData
-                // todo: this seems to be a bit hacky, fix this.
-                val updatedServices = serviceManager.walletConfigLiveData.value?.peekContent()?.services?.apply {
-                    setDappSessionsFlowable(this)
-                } ?: emptyList()
-                updatedServices.let { _servicesLiveData.postValue(it) }
+                _servicesLiveData.value?.let {
+                    setDappSessionsFlowable(it)
+                }
             }
         }
 
@@ -104,11 +102,9 @@ class ServicesViewModel(
             }
         }
         // Update servicesLiveData
-        // todo: this seems to be a bit hacky, fix this.
-        val updatedServices = serviceManager.walletConfigLiveData.value?.peekContent()?.services?.apply {
-            setDappSessionsFlowable(this)
-        } ?: emptyList()
-        updatedServices.let { _servicesLiveData.postValue(it) }
+        _servicesLiveData.value?.let {
+            setDappSessionsFlowable(it)
+        }
     }
 
     private fun getWalletAction(name: String): WalletAction =
