@@ -18,6 +18,9 @@ import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
+import minerva.android.walletmanager.model.walletconnect.DappSessionV2
+import minerva.android.walletmanager.model.walletconnect.Pairing
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -28,12 +31,13 @@ class ServicesViewModel(
     private val walletConnectRepository: WalletConnectRepository
 ) : BaseViewModel() {
 
-    val servicesLiveData: LiveData<List<Service>> =
+    private val _servicesLiveData: MutableLiveData<List<Service>> =
         Transformations.map(serviceManager.walletConfigLiveData) {
             it.peekContent().services.apply {
                 setDappSessionsFlowable(this)
             }
-        }
+        } as MutableLiveData<List<Service>>
+    val servicesLiveData: LiveData<List<Service>> = _servicesLiveData
 
     private val _serviceRemovedLiveData = MutableLiveData<Event<Unit>>()
     val serviceRemovedLiveData: LiveData<Event<Unit>> get() = _serviceRemovedLiveData
@@ -59,7 +63,7 @@ class ServicesViewModel(
 
     internal fun setDappSessionsFlowable(services: List<MinervaPrimitive>) {
         launchDisposable {
-            walletConnectRepository.getSessionsFlowable()
+            walletConnectRepository.getSessionsAndPairingsFlowable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -70,11 +74,36 @@ class ServicesViewModel(
     }
 
     fun removeSession(dapp: DappSession) {
-        launchDisposable {
-            walletConnectRepository.killSession(dapp.peerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { Timber.e(it) })
+        when (dapp) {
+            is DappSessionV1 -> launchDisposable {
+                walletConnectRepository.killSessionByPeerId(dapp.peerId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(onError = { Timber.e(it) })
+            }
+            is DappSessionV2 -> {
+                walletConnectRepository.killSessionByTopic(dapp.topic)
+                // Update servicesLiveData
+                _servicesLiveData.value?.let {
+                    setDappSessionsFlowable(it)
+                }
+            }
+        }
+
+    }
+
+    fun removePairing(dapp: MinervaPrimitive) {
+        when (dapp) {
+            is Pairing -> walletConnectRepository.killPairingByTopic(dapp.topic)
+            is DappSessionV2 -> {
+                // the order of these two must be like this.
+                walletConnectRepository.killPairingBySessionTopic(dapp.topic)
+                walletConnectRepository.killSessionByTopic(dapp.topic)
+            }
+        }
+        // Update servicesLiveData
+        _servicesLiveData.value?.let {
+            setDappSessionsFlowable(it)
         }
     }
 

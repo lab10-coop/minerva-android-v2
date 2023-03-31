@@ -8,7 +8,7 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSessionV1
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
@@ -28,9 +28,6 @@ class ServicesViewModelTest : BaseViewModelTest() {
 
     private val dappSessionObserver: Observer<List<MinervaPrimitive>> = mock()
     private val dappSessionCaptor: KArgumentCaptor<List<MinervaPrimitive>> = argumentCaptor()
-
-    private val removeDappObserver: Observer<Event<Unit>> = mock()
-    private val removeDappCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     @Before
     fun setup() {
@@ -59,7 +56,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `set dapp session flowable`() {
-        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession(name = ""))))
+        whenever(walletConnectRepository.getSessionsAndPairingsFlowable()).thenReturn(Flowable.just(listOf(DappSessionV1(name = ""))))
         viewModel.setDappSessionsFlowable(listOf(Service(name = "name")))
         viewModel.dappSessionsLiveData.observeForever(dappSessionObserver)
         dappSessionCaptor.run {
@@ -70,7 +67,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
     @Test
     fun `set dapp session flowable and error occurs`() {
         val error = Throwable()
-        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.error(error))
+        whenever(walletConnectRepository.getSessionsAndPairingsFlowable()).thenReturn(Flowable.error(error))
         viewModel.setDappSessionsFlowable(listOf(Service(name = "name")))
         viewModel.errorLiveData.observeForever(errorObserver)
         errorCaptor.run {
@@ -80,8 +77,8 @@ class ServicesViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `remove session test`() {
-        whenever(walletConnectRepository.killSession(any())).thenReturn(Completable.complete())
-        viewModel.removeSession(DappSession(peerId = "peerId"))
-        verify(walletConnectRepository).killSession("peerId")
+        whenever(walletConnectRepository.killSessionByPeerId(any())).thenReturn(Completable.complete())
+        viewModel.removeSession(DappSessionV1(peerId = "peerId"))
+        verify(walletConnectRepository).killSessionByPeerId("peerId")
     }
 }

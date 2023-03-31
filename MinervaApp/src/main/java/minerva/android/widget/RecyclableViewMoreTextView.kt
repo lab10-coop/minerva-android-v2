@@ -45,7 +45,6 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
     private var ellipsizeTextColor: Int? = null
 
     private val visibleText: String get() = visibleText()
-    fun isAllTextVisible() = initialValue?.isAllTextVisible() ?: false
 
     init {
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.RecyclableViewMoreTextView)
@@ -102,14 +101,14 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
                 maxDuration.toLong()
             )
             addListener(object : Animator.AnimatorListener {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     if (!isExpanded)
                         setEllipsizedText(isExpanded)
                 }
 
-                override fun onAnimationRepeat(animation: Animator?) {}
-                override fun onAnimationCancel(animation: Animator?) {}
-                override fun onAnimationStart(animation: Animator?) {
+                override fun onAnimationRepeat(animation: Animator) {}
+                override fun onAnimationCancel(animation: Animator) {}
+                override fun onAnimationStart(animation: Animator) {
                     if (isExpanded)
                         listener?.onExpandAnimationStarted()
                 }
@@ -148,8 +147,9 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
         var end = 0
 
         for (i in 0 until visibleLines!!) {
-            if (layout?.getLineEnd(i) ?: 0 != 0)
+            if ((layout?.getLineEnd(i) ?: 0) != 0) {
                 end = layout.getLineEnd(i)
+            }
         }
 
         return initialValue?.let {
@@ -202,8 +202,6 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
         }
     }
 
-    private fun String.isAllTextVisible(): Boolean = this == text
-
     private fun String.span(): SpannableString =
         SpannableString(this).apply {
             setSpan(
@@ -228,7 +226,7 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
         fun onExpandAnimationStarted()
 
         companion object {
-            val Inactive = object : RecyclableViewMoreTextView.Listener {
+            val Inactive = object : Listener {
                 override fun afterSetEllipsizedText() {}
                 override val nextAnimation: Animation = object : Animation() {}
                 override fun onExpandAnimationStarted() {}

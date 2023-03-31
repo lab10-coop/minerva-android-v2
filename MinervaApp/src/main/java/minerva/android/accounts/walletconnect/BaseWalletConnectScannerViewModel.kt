@@ -10,20 +10,21 @@ import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.AddressStatus
+import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.walletconnect.Topic
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequestV2
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -36,11 +37,13 @@ abstract class BaseWalletConnectScannerViewModel(
     private val unsupportedNetworkRepository: UnsupportedNetworkRepository
 ) : BaseViewModel() {
     abstract var account: Account
+    abstract var address: String
     abstract fun hideProgress()
     abstract fun setLiveDataOnDisconnected(sessionName: String)
     abstract fun setLiveDataOnConnectionError(error: Throwable, sessionName: String)
     abstract fun setLiveDataError(error: Throwable)
     abstract fun handleSessionRequest(sessionRequest: OnSessionRequest)
+    abstract fun handleSessionRequestV2(sessionRequest: OnSessionRequestV2)
     abstract fun closeScanner(isMobileWalletConnect: Boolean = false)
     abstract fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType)
     //property which specified that application must be closed (to background)
@@ -66,7 +69,17 @@ abstract class BaseWalletConnectScannerViewModel(
 
     val availableNetworks: List<NetworkDataSpinnerItem> get() = prepareAvailableNetworks()
 
+    val networks: List<Network> = NetworkManager.networks
+        .filter { it.isActive }
+        .filter { !it.testNet == accountManager.areMainNetworksEnabled }
+
     val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(selectedChainId)
+
+    // using AddressWrapper because id and address are needed, AddressStatus doesn't matter here.
+    val availableAddresses: List<AddressWrapper> get() = accountManager.getAllAccountsForSelectedNetworksType()
+        .filter { account -> account.shouldShow }
+        .map { account -> AddressWrapper(account.id, account.address, AddressStatus.ALREADY_IN_USE) }
+        .distinct()
 
     private fun prepareAvailableNetworks(): List<NetworkDataSpinnerItem> =
         mutableListOf<NetworkDataSpinnerItem>().apply {
@@ -108,6 +121,10 @@ abstract class BaseWalletConnectScannerViewModel(
                                     }
                                 }
                             }
+                            is OnSessionRequestV2 -> {
+                                // topic and handshakeId only need to be set for WC 1.0
+                                handleSessionRequestV2(status)
+                            }
                             is OnDisconnect -> setLiveDataOnDisconnected(status.sessionName)
                             is OnFailure -> {
                                 logger.logToFirebase("OnWalletConnectConnectionError: ${status.error}")
@@ -134,26 +151,48 @@ abstract class BaseWalletConnectScannerViewModel(
         account = newAccount
     }
 
+    // for walletconnect 2.0
+    fun setNewAddress(newAddress: String) {
+        address = newAddress
+    }
+
     fun approveSession(meta: WalletConnectPeerMeta) {
-        if (account.id != Int.InvalidId) {
-            launchDisposable {
-                walletConnectRepository.approveSession(
-                    listOf(account.address),
-                    account.chainId,
-                    topic.peerId,
-                    getDapp(meta, account.chainId, account, meta.isMobileWalletConnect)
+        if (account.id == Int.InvalidId) {
+            return
+        }
+        launchDisposable {
+            walletConnectRepository.approveSession(
+                listOf(account.address),
+                account.chainId,
+                topic.peerId,
+                getDapp(meta, account.chainId, account, meta.isMobileWalletConnect)
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = {
+                        //set default value for showing empty list of network in future
+                        requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                        closeScanner(meta.isMobileWalletConnect)
+                    },
+                    onError = { setLiveDataError(it) }
                 )
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onComplete = {
-                            //set default value for showing empty list of network in future
-                            requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
-                            closeScanner(meta.isMobileWalletConnect)//if true - close phone to background
-                        },
-                        onError = { setLiveDataError(it) }
-                    )
-            }
+        }
+    }
+
+    fun approveSessionV2(proposerPublicKey: String, namespace: WalletConnectSessionNamespace, isMobileWalletConnect: Boolean) {
+        launchDisposable {
+            walletConnectRepository.approveSessionV2(proposerPublicKey, namespace)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = {
+                        //set default value for showing empty list of network in future
+                        requestedNetwork = BaseNetworkData(Int.InvalidId, String.Empty)
+                        closeScanner(isMobileWalletConnect)//if true - close phone to background
+                    },
+                    onError = { setLiveDataError(it) }
+                )
         }
     }
 
@@ -186,11 +225,12 @@ abstract class BaseWalletConnectScannerViewModel(
         }
     }
 
-    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int, account: Account, isMobileWalletConnect: Boolean) = DappSession(
+    // todo: only use this for WC 1.0, this need to be verified
+    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int, account: Account, isMobileWalletConnect: Boolean) = DappSessionV1(
         account.address,
         currentSession.topic,
         currentSession.version,
-        currentSession.bridge,
+        currentSession.bridge ?: String.Empty,
         currentSession.key,
         meta.name,
         getIcon(meta.icons),
@@ -215,6 +255,10 @@ abstract class BaseWalletConnectScannerViewModel(
      */
     open fun rejectSession(isMobileWalletConnect: Boolean = false, dialogType: WalletConnectAlertType = WalletConnectAlertType.NO_ALERT) {
         walletConnectRepository.rejectSession(topic.peerId)
+    }
+
+    open fun rejectSessionV2(proposerPublicKey: String, reason: String, isMobileWalletConnect: Boolean = false) {
+        walletConnectRepository.rejectSessionV2(proposerPublicKey, reason)
     }
 
     fun addAccount(chainId: Int, dialogType: WalletConnectAlertType) {

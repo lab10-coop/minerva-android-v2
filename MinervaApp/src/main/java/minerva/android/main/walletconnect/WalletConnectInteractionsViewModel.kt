@@ -7,7 +7,6 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidBigDecimal
@@ -33,15 +32,18 @@ import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest as OnSessionRequestData
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequestV2 as OnSessionRequestDataV2
+// todo: these includes are super confusing, fix it.
+import minerva.android.accounts.walletconnect.OnSessionRequest as OnSessionRequestResult
+import minerva.android.accounts.walletconnect.OnSessionRequestV2 as OnSessionRequestResultV2
 import minerva.android.walletmanager.utils.BalanceUtils
-import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
+import minerva.android.walletmanager.utils.TokenUtils
 import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import minerva.android.accounts.walletconnect.OnSessionRequest as OnSessionRequestResult
-import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest as OnSessionRequestData
 
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
@@ -50,7 +52,8 @@ class WalletConnectInteractionsViewModel(
     private val tokenManager: TokenManager,
     private val accountManager: AccountManager,
     walletActionsRepository: WalletActionsRepository,
-    unsupportedNetworkRepository: UnsupportedNetworkRepository
+    unsupportedNetworkRepository: UnsupportedNetworkRepository,
+    override var address: String
 ) : BaseWalletConnectScannerViewModel(
     accountManager,
     walletConnectRepository,
@@ -86,10 +89,15 @@ class WalletConnectInteractionsViewModel(
         onCleared()
     }
 
+    // todo: check if V2 are wrongly getting lost here somewhere.
     fun getWalletConnectSessions() {
         launchDisposable {
             walletConnectRepository.getSessions()
-                .map { dappSessions -> reconnect(dappSessions) }
+                .map { dappSessions ->
+                    reconnect(
+                        dappSessions.filterIsInstance<DappSessionV1>()
+                    )
+                }
                 .toFlowable()
                 .switchMap { walletConnectRepository.getSessionsFlowable() }
                 .filter { dappSessions -> dappSessions.isNotEmpty() }
@@ -112,11 +120,11 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    private fun reconnect(dapps: List<DappSession>) {
+    private fun reconnect(dapps: List<DappSessionV1>) {
         dapps.forEach { session ->
             with(session) {
                 walletConnectRepository.connect(
-                    WalletConnectSession(topic, version, bridge, key, isMobileWalletConnect),
+                    WalletConnectSession(topic, version, key, bridge, isMobileWalletConnect = isMobileWalletConnect),
                     peerId,
                     remotePeerId,
                     dapps
@@ -133,10 +141,14 @@ class WalletConnectInteractionsViewModel(
                         currentDappSession = session
                         OnEthSignRequest(status.message, session)
                     }
+            is OnEthSignV2 -> Single.just(OnEthSignRequestV2(status.message, status.session))
             is OnDisconnect -> Single.just(OnDisconnected(sessionName = status.sessionName))
-            is OnEthSendTransaction -> {
+            is OnEthSendTransactionV1 -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
+            }
+            is OnEthSendTransactionV2 -> {
+                getTransactionCosts(status.session, status)
             }
             is OnFailure -> Single.just(if (status.sessionName.isNotEmpty()) OnGeneralError(status.error) else DefaultRequest)
             else -> Single.just(DefaultRequest)
@@ -210,7 +222,7 @@ class WalletConnectInteractionsViewModel(
     private fun getTokenHash(chainId: Int, status: OnEthSendTransaction): String =
         currentAccount.accountTokens
             .find { it.token.symbol == status.transaction.tokenTransaction.tokenSymbol }?.token?.address
-            .let { tokenAddress -> generateTokenHash(chainId, tokenAddress ?: String.Empty) }
+            .let { tokenAddress -> TokenUtils.generateTokenHash(chainId, tokenAddress ?: String.Empty) }
 
     private fun isTokenTransaction(transferType: TransferType) =
         (transferType == TransferType.TOKEN_SWAP || transferType == TransferType.TOKEN_TRANSFER)
@@ -331,7 +343,12 @@ class WalletConnectInteractionsViewModel(
                     logToFirebase("Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt")
                     weiCoinTransactionValue = NO_COIN_TX_VALUE
                     currentDappSession?.let { session ->
-                        walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
+                        when {
+                            session is DappSessionV1 ->
+                                walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
+                            session is DappSessionV2 ->
+                                walletConnectRepository.approveTransactionRequestV2(session.topic, txReceipt)
+                        }
                     }
                     txReceipt
                 }
@@ -388,12 +405,30 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
+    fun acceptRequestV2(session: DappSessionV2) {
+        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
+            walletConnectRepository.approveRequestV2(session.topic, it.privateKey)
+            successWalletConnectInteraction(session.isMobileWalletConnect)
+        }
+    }
+
     fun rejectRequest(isMobileWalletConnect: Boolean) {
         weiCoinTransactionValue = NO_COIN_TX_VALUE
         currentDappSession?.let { session ->
-            walletConnectRepository.rejectRequest(session.peerId)
+            when {
+                session is DappSessionV1 ->
+                    walletConnectRepository.rejectRequest(session.peerId)
+                session is DappSessionV2 ->
+                    walletConnectRepository.rejectRequestV2(session.topic)
+            }
             successWalletConnectInteraction(isMobileWalletConnect)
         }
+    }
+
+    fun rejectRequestV2(session: DappSessionV2) {
+        weiCoinTransactionValue = NO_COIN_TX_VALUE
+        walletConnectRepository.rejectRequestV2(session.topic)
+        successWalletConnectInteraction(session.isMobileWalletConnect)
     }
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
@@ -427,6 +462,7 @@ class WalletConnectInteractionsViewModel(
         _errorLiveData.value = Event(error)
     }
 
+    // todo: why is this duplicate with ServicesScannerViewModel??
     override fun handleSessionRequest(sessionRequest: OnSessionRequestData) {
         //if ethereum was chosen set unknown id for showing all networks
         val id: Int? = if (ChainId.ETH_MAIN == sessionRequest.chainId && null == sessionRequest.type) null else sessionRequest.chainId
@@ -450,6 +486,16 @@ class WalletConnectInteractionsViewModel(
             }
             else -> _walletConnectStatus.value = getWalletConnectStateForRequestedNetwork(sessionRequest, id)
         }
+    }
+
+    // todo: why is this duplicate with ServicesScannerViewModel??
+    // todo: implement
+    override fun handleSessionRequestV2(sessionRequest: OnSessionRequestDataV2) {
+        _walletConnectStatus.value = OnSessionRequestResultV2(
+            sessionRequest.meta,
+            sessionRequest.numberOfNonEip155Chains,
+            sessionRequest.eip155ProposalNamespace
+        )
     }
 
     private fun getWalletConnectStateForRequestedNetwork(
@@ -482,7 +528,7 @@ class WalletConnectInteractionsViewModel(
     }
 
     fun handleDeepLink(deepLink: String) {
-        if (AddressParser.parse(deepLink) != AddressParser.WALLET_CONNECT || !AddressParser.containsKeyAndBridge(deepLink)) {
+        if (!WalletConnectUriUtils.isValidWalletConnectUri(deepLink)) {
             _walletConnectStatus.value = WrongWalletConnectCodeState
         } else {
             _walletConnectStatus.value = CorrectWalletConnectCodeState
@@ -495,6 +541,11 @@ class WalletConnectInteractionsViewModel(
         if (WalletConnectAlertType.CHANGE_NETWORK != dialogType) {//when on "CHANGE_NETWORK" case - skip "reject" and just close dialog
             walletConnectRepository.rejectSession(topic.peerId)
         }
+        closeScanner(isMobileWalletConnect)
+    }
+
+    override fun rejectSessionV2(proposerPublicKey: String, reason: String, isMobileWalletConnect: Boolean) {
+        walletConnectRepository.rejectSessionV2(proposerPublicKey, reason)
         closeScanner(isMobileWalletConnect)
     }
 }

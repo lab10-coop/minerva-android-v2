@@ -39,6 +39,8 @@ android {
         buildConfigField "String", "ETHERSCAN_KEY", System.env.ETHERSCAN_KEY ?: localProperty("etherscan.key")
         buildConfigField "String", "INFURA_API_KEY", System.env.INFURA_API_KEY ?: localProperty("infura.key")
         buildConfigField "String", "BSCSCAN_KEY", System.env.BSCSCAN_KEY ?: localProperty("bscscan.key")
+        buildConfigField "String", "WALLETCONNECT_PROJECT_ID", System.env.WALLETCONNECT_PROJECT_ID ?: localProperty("walletconnect.project.id")
+        buildConfigField "String", "WALLETCONNECT_RELAY_URL", System.env.WALLETCONNECT_RELAY_URL ?: localProperty("walletconnect.relay.url")
     }
 
     buildTypes {
@@ -73,6 +75,9 @@ dependencies {
     implementation project(':ApiProvider')
     implementation project(':BlockchainProvider')
     implementation project(':WalletConnect')
+    implementation(platform("com.walletconnect:android-bom:1.6.1"))
+    implementation("com.walletconnect:android-core")
+    implementation("com.walletconnect:sign")
 
     implementation('com.google.firebase:firebase-crashlytics') {
         transitive = true
@@ -88,7 +93,7 @@ dependencies {
     implementation room.values()
     implementation okhttp.values()
     kapt "org.xerial:sqlite-jdbc:3.36.0"
-    kapt "androidx.room:room-compiler:2.2.6"
+    kapt "androidx.room:room-compiler:2.5.0"
 }
 
 Object localProperty(String propertyName) {

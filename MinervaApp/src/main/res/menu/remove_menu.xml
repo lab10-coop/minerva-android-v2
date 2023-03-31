@@ -15,6 +15,13 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/end_session"
+        android:enabled="true"
+        android:icon="@drawable/ic_disconnect"
+        android:title="@string/end_session"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/change_account"
         android:enabled="true"
         android:icon="@drawable/ic_change_account"

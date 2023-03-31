@@ -4,19 +4,15 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 
-data class DappSession(
+open class DappSession(
     override val address: String = String.Empty,
-    val topic: String = String.Empty,
-    val version: String = String.Empty,
-    val bridge: String = String.Empty,
-    val key: String = String.Empty,
+    open val topic: String = String.Empty,
+    open val version: String = String.Empty,
     override var name: String = String.Empty,
     override val iconUrl: String = String.Empty,
     override val peerId: String = String.Empty,
-    val remotePeerId: String? = String.Empty,
-    val networkName: String = String.Empty,
+    open val networkName: String = String.Empty,
     override val accountName: String = String.Empty,
     override val chainId: Int = Int.InvalidValue,
-    val handshakeId: Long = Long.InvalidValue,
-    val isMobileWalletConnect: Boolean = false
+    open val isMobileWalletConnect: Boolean = false
 ) : MinervaPrimitive(address = address, name = name, iconUrl = iconUrl)

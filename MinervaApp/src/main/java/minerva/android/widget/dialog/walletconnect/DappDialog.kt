@@ -13,6 +13,7 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import minerva.android.R
 import minerva.android.databinding.DappDialogButtonsBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
+import minerva.android.extension.gone
 
 abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val deny: () -> Unit = {}) :
     BottomSheetDialog(context) {
@@ -43,8 +44,11 @@ abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val de
         }
     }
 
-    fun setupHeader(dapppName: String, networkName: String, icon: Any) = with(networkHeader) {
+    fun setupHeader(dapppName: String, networkName: String?, icon: Any) = with(networkHeader) {
         name.text = dapppName
+        if (networkName == null || networkName.isEmpty()) {
+            network.gone()
+        }
         network.text = networkName
         Glide.with(context)
             .load(icon)

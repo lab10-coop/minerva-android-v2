@@ -13,11 +13,9 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.services.ServicesFragment
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
-import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
-import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.*
 
 abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_view_layout), MinervaPrimitiveClickListener {
 
@@ -27,7 +25,9 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
 
     open fun onRemoveCredential(credential: Credential) {}
     open fun onRemoveService(service: Service) {}
-    open fun onRemoveDappSession(dapp: DappSession) {}
+    open fun onRemoveDappSession(dapp: DappSessionV1) {}
+    open fun onEndDappSession(dapp: DappSessionV2) {}
+    open fun onRemovePairing(dapp: MinervaPrimitive) {}
     open fun onCredentialContainerClick(credential: Credential) {}
     open fun getLoggedIdentityName(loggedInIdentityDid: String): String = String.Empty
 
@@ -50,7 +50,14 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
         when (minervaPrimitive) {
             is Service -> onRemoveService(minervaPrimitive)
             is Credential -> onRemoveCredential(minervaPrimitive)
-            is DappSession -> onRemoveDappSession(minervaPrimitive)
+            is DappSessionV1 -> onRemoveDappSession(minervaPrimitive)
+            is DappSessionV2, is Pairing -> onRemovePairing(minervaPrimitive)
+        }
+    }
+
+    override fun onEndSession(minervaPrimitive: MinervaPrimitive) {
+        when (minervaPrimitive) {
+            is DappSessionV2 -> onEndDappSession(minervaPrimitive)
         }
     }
 
@@ -61,11 +68,11 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
         val state = OnSessionRequest(
             WalletConnectPeerMeta(
                 name = minervaPrimitive.name,
-                icons = listOf(minervaPrimitive.iconUrl ?: ""),
+                icons = listOf(minervaPrimitive.iconUrl ?: String.Empty),
                 peerId = minervaPrimitive.peerId,
                 address = minervaPrimitive.address,
                 chainId = minervaPrimitive.chainId),
-            BaseNetworkData(chainId = Int.InvalidValue, name = String.Empty), //put empties values for get popap with all available networks
+            BaseNetworkData(chainId = Int.InvalidValue, name = String.Empty), //put empties values for get popup with all available networks
             WalletConnectAlertType.CHANGE_ACCOUNT) //put value for calling wallet connection change action
         //calling LiveModel changing through pulling new state (of WalletConnectInteractionsViewModel::_walletConnectStatus)
         mainActivityFromContext.onChangeAccount(state)

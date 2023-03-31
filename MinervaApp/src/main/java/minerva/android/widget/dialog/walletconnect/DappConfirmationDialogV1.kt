@@ -12,8 +12,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import minerva.android.R
 import minerva.android.accounts.walletconnect.*
-import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
-import minerva.android.databinding.DappConfirmationDialogBinding
+import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.FIRST_ICON
+import minerva.android.databinding.DappConfirmationDialogV1Binding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.*
@@ -28,10 +28,10 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.DynamicWidthSpinner
 import minerva.android.widget.dialog.models.ViewDetails
 
-class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit, private val onAddAccountClick: (Int) -> Unit) :
+class DappConfirmationDialogV1(context: Context, approve: () -> Unit, deny: () -> Unit, private val onAddAccountClick: (Int) -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
 
-    private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
+    private val binding: DappConfirmationDialogV1Binding = DappConfirmationDialogV1Binding.inflate(layoutInflater)
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
     //current DApp session wallet connection
     var dAppSessionMeta: WalletConnectPeerMeta? = null
@@ -59,9 +59,9 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     }
 
     /**
-     * Set View - prepare global variables and set some state for popap dialog
+     * Set View - prepare global variables and set some state for popup dialog
      * @param meta - set current wallet connection DApp session (from db)
-     * @param viewDetails - popap dialog view details
+     * @param viewDetails - popup dialog view details
      */
     fun setView(
         meta: WalletConnectPeerMeta,
@@ -76,7 +76,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-    private fun DappConfirmationDialogBinding.getIcon(meta: WalletConnectPeerMeta): Any =
+    private fun DappConfirmationDialogV1Binding.getIcon(meta: WalletConnectPeerMeta): Any =
         if (meta.icons.isEmpty()) {
             confirmationView.setDefaultIcon()
             R.drawable.ic_services
@@ -282,10 +282,10 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
         KindOfNetwork.MAIN -> context
             .getString(R.string.switch_network,
-                *arrayOf(KindOfNetwork.TEST.name.toLowerCase()))
+                *arrayOf(KindOfNetwork.TEST.name.lowercase()))
         KindOfNetwork.TEST -> context
             .getString(R.string.switch_network,
-                *arrayOf(KindOfNetwork.MAIN.name.toLowerCase()))
+                *arrayOf(KindOfNetwork.MAIN.name.lowercase()))
     }
 
     /**
@@ -378,7 +378,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                 val wordForLinkStartFrom: Int = message.indexOf(wordForLink)//number of first letter
                 val clickableSpan = object : ClickableSpan() {//create callback for link
                     override fun onClick(v: View) {
-                        this@DappConfirmationDialog.cancel()//close dialog button
+                        this@DappConfirmationDialogV1.cancel()//close dialog button
                         //get instance of MainActivity from cache
                         val mainActivityInstance = ((context as ContextThemeWrapper).baseContext as MainActivity)
                         //set "settings" tab (in bottom menu) to chosen state

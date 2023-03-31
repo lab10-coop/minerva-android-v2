@@ -12,4 +12,6 @@ interface MinervaPrimitiveClickListener {
      * @param minervaPrimitive - info about existing connection
      */
     fun onChangeAccount(minervaPrimitive: MinervaPrimitive)
+
+    fun onEndSession(minervaPrimitive: MinervaPrimitive)
 }
