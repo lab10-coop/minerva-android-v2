@@ -897,7 +897,7 @@ class WalletConnectRepositoryImpl(
         fun sessionNamespacesToChainNames(namespaces: Map<String, Sign.Model.Namespace.Session>): List<String> {
             val accounts = namespaces[EIP155]?.accounts ?: emptyList()
             return accounts
-                .mapNotNull { account -> account.split(EIP155_DELIMITER).getOrNull(1)?.toIntOrNull() }
+                .mapNotNull { account -> account.split(EIP155_DELIMITER).getOrNull(Int.ONE)?.toIntOrNull() }
                 .distinct()
                 .mapNotNull { chainId -> getNetworkNameOrNull(chainId) }
         }

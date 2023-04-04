@@ -17,6 +17,7 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.ZERO
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.utils.AlertDialogHandler
@@ -379,15 +380,10 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 WalletConnectRepositoryImpl
                     .proposalNamespacesToChainNames(eip155ProposalNamespace, unsupportedNetworkRepository)
                     .subscribe({ _networkNames ->
-                        var networkNames = _networkNames
-                        when {
-                            numberOfNonEip155Chains == 1 -> networkNames = networkNames + getString(R.string.non_evm_chain)
-                            numberOfNonEip155Chains > 1 -> networkNames = networkNames + getString(R.string.non_evm_chains)
-                        }
                         setView(
                             meta,
                             ViewDetailsV2(
-                                networkNames,
+                                if (numberOfNonEip155Chains > Int.ZERO) { _networkNames + BaseWalletConnectScannerFragment.UNSUPPORTED_NETWORKS } else { _networkNames },
                                 getString(R.string.connect_to_website),
                                 getString(R.string.connect)
                             ),

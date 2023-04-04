@@ -1,19 +1,26 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
+import android.graphics.Typeface.BOLD
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.content.ContextCompat
+import androidx.core.text.color
 import androidx.core.view.isGone
 import minerva.android.R
+import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.FIRST_ICON
+import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.UNSUPPORTED_NETWORKS
 import minerva.android.accounts.walletconnect.DappAddressSpinnerAdapter
 import minerva.android.accounts.walletconnect.WalletConnectV2AlertType
 import minerva.android.databinding.DappConfirmationDialogV2Binding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
-import minerva.android.kotlinUtils.EmptyResource
-import minerva.android.kotlinUtils.FirstIndex
+import minerva.android.kotlinUtils.*
 import minerva.android.walletmanager.model.AddressWrapper
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.utils.AddressConverter
@@ -49,11 +56,31 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     = with(binding) {
         //set current wallet connection dapp session
         dAppSessionMeta = meta
+        //preparing network name TextView
+        val networkNamesList: MutableList<String> = viewDetails.networkNames.toMutableList()
+        val prefixForNetworkNames: String = "${REQUESTED_TEXT.replaceFirstChar { it.uppercase() }}${AddressParser.META_ADDRESS_SEPARATOR}"
+        networkNamesList.add(Int.ZERO, prefixForNetworkNames)//add prefix to network name list
+        val ssb: SpannableStringBuilder? = SpannableStringBuilder().apply {
+            networkNamesList.forEachIndexed { index, name ->
+                if (prefixForNetworkNames == name) {
+                    color(ContextCompat.getColor(context, R.color.gray11)) { append("$name${String.Space}") }
+                    setSpan(StyleSpan(BOLD), Int.ZERO, prefixForNetworkNames.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                } else if (UNSUPPORTED_NETWORKS == name) {
+                    color(ContextCompat.getColor(context, R.color.errorRed)) { append(name) }
+                } else {
+                    append(name)
+                    //set delimiter between names (if isn't prefix and isn't last name in list)
+                    if (networkNamesList.size != index + Int.ONE) {
+                        append(ACCOUNT_DELIMITER)
+                    }
+                }
+            }
+        }
         setupHeader(
             meta.name,
-            context.getString(R.string.requested_networks, viewDetails.networkNames.joinToString(
-                ACCOUNT_DELIMITER)),
-            getIcon(meta)
+            null,
+            getIcon(meta),
+            ssb
         )
         binding.apply {
             confirmationButtons.confirm.text = viewDetails.confirmButtonName
@@ -142,8 +169,13 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         manual.visible()
         confirmationButtons.confirm.isEnabled = true
         networkHeader.apply {
-            networkWarning.visible()
-            networkWarning.text = context.getString(R.string.fully_supported, numberOfProvidedNetworks)
+            networkWarningCountContainer.apply {
+                visibility = View.VISIBLE
+                networkWarningCheckedIc.visibility = View.VISIBLE
+                networkWarning.apply {
+                    text = context.getString(R.string.fully_supported, numberOfProvidedNetworks)
+                }
+            }
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
@@ -153,12 +185,20 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
 
     private fun setUnsupportedNetworkWarning() = with(binding) {
         networkHeader.apply {
-            networkWarning.visible()
-            networkWarning.text = context.getString(R.string.request_not_supported)
+            networkWarningCountContainer.apply {
+                visibility = View.VISIBLE
+                networkWarningCheckedIc.visibility = View.GONE
+                setBackgroundResource(R.drawable.network_warning_count_error_bg)
+                networkWarning.apply {
+                    text = context.getString(R.string.request_not_supported)
+                    setTextColor(ContextCompat.getColor(context, R.color.errorRed))
+                }
+            }
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
             addressSpinner.visible()
+            dropdownMenuContainer.gone()
         }
         confirmationButtons.confirm.isEnabled = false
         manual.text = context.getString(R.string.website_networks_not_supported)
@@ -166,8 +206,13 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
 
     private fun setOtherUnsupportedWarning() = with(binding) {
         networkHeader.apply {
-            networkWarning.visible()
-            networkWarning.text = context.getString(R.string.fully_supported, numberOfProvidedNetworks)
+            networkWarningCountContainer.apply {
+                visibility = View.VISIBLE
+                networkWarningCheckedIc.visibility = View.VISIBLE
+                networkWarning.apply {
+                    text = context.getString(R.string.fully_supported, numberOfProvidedNetworks)
+                }
+            }
             addAccount.gone()
             accountSpinner.gone()
             networkSpinner.gone()
@@ -197,5 +242,6 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     companion object {
         const val INITIAL_PROVIDED_NETWORKS = 0
         const val ACCOUNT_DELIMITER = " • "
+        const val REQUESTED_TEXT = "Requested"
     }
 }

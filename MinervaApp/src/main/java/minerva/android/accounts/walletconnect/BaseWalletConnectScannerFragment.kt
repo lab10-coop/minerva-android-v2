@@ -6,6 +6,7 @@ import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
 import minerva.android.extension.margin
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.ZERO
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
@@ -176,15 +177,10 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                 WalletConnectRepositoryImpl
                     .proposalNamespacesToChainNames(eip155ProposalNamespace, unsupportedNetworkRepository)
                     .subscribe({ _networkNames ->
-                        var networkNames = _networkNames
-                        when {
-                            numberOfNonEip155Chains == 1 -> networkNames = networkNames + getString(R.string.non_evm_chain)
-                            numberOfNonEip155Chains > 1 -> networkNames = networkNames + getString(R.string.non_evm_chains)
-                        }
                         setView(
                             meta,
                             ViewDetailsV2(
-                                networkNames,
+                                if (numberOfNonEip155Chains > Int.ZERO) { _networkNames + UNSUPPORTED_NETWORKS } else { _networkNames },
                                 getString(R.string.connect_to_website),
                                 getString(R.string.connect)
                             ),
@@ -271,5 +267,6 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         const val USER_REJECTION_REASON = "User rejection"
         const val NETWORK_NOT_SUPPORTED_REASON = "Network(s) not supported"
         const val METHOD_EVENT_NOT_SUPPORTED_REASON = "Method(s) or Event(s) not supported"
+        const val UNSUPPORTED_NETWORKS = "Unsupported Network(s)"
     }
 }

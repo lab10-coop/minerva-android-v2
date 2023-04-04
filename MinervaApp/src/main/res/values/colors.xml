@@ -83,4 +83,8 @@
     <color name="warningOrangeLight">#FFE4B9</color>
     <color name="saturatedGreen">#129C6B</color>
     <color name="lightGreen">#A1C0B4</color>
+    <color name="grayBlue">#E7E7FF</color>
+    <color name="errorPink">#FDEAE6</color>
+    <color name="lightGrayTwo">#F2F3F8</color>
+    <color name="gray11">#7E8088</color>
 </resources>
