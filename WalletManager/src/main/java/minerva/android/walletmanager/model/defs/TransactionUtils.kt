@@ -1,8 +1,5 @@
 package minerva.android.walletmanager.model.defs
 
-import androidx.constraintlayout.solver.state.State
-
-
 fun getTransactionType(chainId: Int): TxType =
     when (chainId) {
         ChainId.ATS_TAU -> TxType.ARTIS_TAU
@@ -18,7 +15,7 @@ fun getTransactionType(chainId: Int): TxType =
         ChainId.POA_CORE -> TxType.POA_CORE
         ChainId.ARB_ONE, ChainId.ARB_RIN, ChainId.ARB_GOR -> TxType.ARB
         ChainId.OPT, ChainId.OPT_KOV, ChainId.OPT_GOR, ChainId.OPT_BED -> TxType.OPT
-        ChainId.ZKS_ALPHA -> TxType.ZKS
+        ChainId.ZKS_ERA, ChainId.ZKS_ALPHA -> TxType.ZKS
         ChainId.CELO, ChainId.CELO_ALF, ChainId.CELO_BAK -> TxType.CELO
         ChainId.AVA_C, ChainId.AVA_FUJ -> TxType.AVA
         else -> TxType.STANDARD

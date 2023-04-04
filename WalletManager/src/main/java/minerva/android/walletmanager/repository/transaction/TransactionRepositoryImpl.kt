@@ -33,13 +33,16 @@ import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Fiat
-import minerva.android.walletmanager.model.defs.ChainId
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
-import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
-import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
-import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
-import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ERA
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.ERCToken
@@ -143,7 +146,7 @@ class TransactionRepositoryImpl(
         accounts.map { account -> account.network.chainId to account.address }
 
     override fun getSuperTokenStreamInitBalance(): Flowable<Asset> {
-        accountsForTokenBalanceRefresh.let { _ ->
+        accountsForTokenBalanceRefresh.let {
             val accountsWithActiveStreams: List<Account> = getActiveAccountsWithSuperfluidSupport()
             return Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams))
                 .flatMap { asset -> handleSuperTokens(asset) }
@@ -152,7 +155,7 @@ class TransactionRepositoryImpl(
 
     @Throws(ConnectException::class)
     override fun startSuperTokenStreaming(chainId: Int): Flowable<Asset> {
-        accountsForTokenBalanceRefresh.let { _ ->
+        accountsForTokenBalanceRefresh.let {
             val accountsWithActiveStreams: List<Account> = getActiveAccountsWithSuperfluidSupport()
                     .filter { account -> account.chainId == chainId }
             return Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams))
@@ -357,15 +360,16 @@ class TransactionRepositoryImpl(
     override fun getCoinFiatRate(chainId: Int): Single<Double> =
         currentFiatCurrency.let { currentFiat ->
             when (chainId) {
-                ChainId.ETH_MAIN -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
-                ChainId.ARB_ONE -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
-                ChainId.OPT -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
-                ChainId.POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
-                ChainId.GNO -> fetchCoinRate(MarketIds.GNO).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
-                ChainId.MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
-                ChainId.BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
-                ChainId.CELO -> fetchCoinRate(MarketIds.CELO).map { markets -> markets.celoFiatPrice?.getRate(currentFiat) }
-                ChainId.AVA_C -> fetchCoinRate(MarketIds.AVAX).map { markets -> markets.avaxFiatPrice?.getRate(currentFiat) }
+                ETH_MAIN -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
+                ARB_ONE -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
+                OPT -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
+                POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
+                GNO -> fetchCoinRate(MarketIds.GNO).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
+                MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
+                BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
+                CELO -> fetchCoinRate(MarketIds.CELO).map { markets -> markets.celoFiatPrice?.getRate(currentFiat) }
+                AVA_C -> fetchCoinRate(MarketIds.AVAX).map { markets -> markets.avaxFiatPrice?.getRate(currentFiat) }
+                ZKS_ERA -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 else -> Single.just(ZERO_FIAT_VALUE)
             }
         }
@@ -472,10 +476,6 @@ class TransactionRepositoryImpl(
     override fun isProtectTransactionEnabled(): Boolean = localStorage.isProtectTransactionsEnabled
     private fun shouldGetGasPriceFromApi(chainId: Int) =
         NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
-
-    private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
-    private fun isBscNetwork(chainId: Int) = chainId == BSC || chainId == BSC_TESTNET
-    private fun isRskNetwork(chainId: Int) = chainId == RSK_MAIN || chainId == RSK_TEST
 
     private fun getTxCosts(
         payload: TxCostPayload,
