@@ -39,6 +39,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_BAK
 import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
 import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_FUJ
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ALPHA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ERA
 
 fun getNetworkIcon(context: Context, chainId: Int, isSafeAccount: Boolean = false): Drawable? =
     prepareSafeAccountBadge(context, getMainIcon(chainId), isSafeAccount)
@@ -61,7 +62,7 @@ fun getMainIcon(chainId: Int): Int =
         RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk
         ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_arbitrum
         OPT, OPT_KOV, OPT_GOR, OPT_BED -> R.drawable.ic_optimism
-        ZKS_ALPHA -> R.drawable.ic_zksync
+        ZKS_ERA, ZKS_ALPHA -> R.drawable.ic_zksync
         CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo
         AVA_C, AVA_FUJ -> R.drawable.ic_avalanche
         else -> R.drawable.ic_default_token
@@ -83,7 +84,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
         RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk_token
         ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_ethereum_l2
         OPT, OPT_KOV, OPT_GOR, OPT_BED -> R.drawable.ic_ethereum_l2
-        ZKS_ALPHA -> R.drawable.ic_ethereum_l2
+        ZKS_ERA, ZKS_ALPHA -> R.drawable.ic_ethereum_l2
         CELO, CELO_ALF, CELO_BAK -> R.drawable.ic_celo_coin
         AVA_C, AVA_FUJ -> R.drawable.ic_avalanche
         else -> R.drawable.ic_default_token

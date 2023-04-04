@@ -15,6 +15,7 @@ annotation class MarketIds {
         const val ARB_ONE = "arbitrum-one"
         const val OPT = "optimistic-ethereum"
         const val AVA_C = "avalanche"
+        const val ZKS_ERA = "zksync"
 
         // both: coin and asset_platform
         const val ETHEREUM = "ethereum"
