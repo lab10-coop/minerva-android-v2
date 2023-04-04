@@ -13,7 +13,6 @@ import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSessionNamespace
-import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155_DELIMITER
@@ -22,12 +21,9 @@ import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV1
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV2
 import minerva.android.widget.dialog.walletconnect.DappDialog
-import org.koin.android.ext.android.inject
-import timber.log.Timber
 
 abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
-    private val unsupportedNetworkRepository: UnsupportedNetworkRepository by inject()
     abstract val viewModel: BaseWalletConnectScannerViewModel
     private var confirmationDialogDialog: DappDialog?  = null // todo: is DappDialog to broad?
     private var errorDialog: AlertDialog? = null
@@ -75,7 +71,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         showToast(
             getString(
                 R.string.dapp_disconnected,
-                if (sessionName.isNotEmpty()) sessionName else getString(R.string.dapp_unnamed)
+                sessionName.ifEmpty { getString(R.string.dapp_unnamed) }
             )
         )
     }
@@ -172,35 +168,27 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             }
         ).apply {
             // todo: and enable/disable connect button?
-
-            launchDisposable {
-                WalletConnectRepositoryImpl
-                    .proposalNamespacesToChainNames(eip155ProposalNamespace, unsupportedNetworkRepository)
-                    .subscribe({ _networkNames ->
-                        setView(
-                            meta,
-                            ViewDetailsV2(
-                                if (numberOfNonEip155Chains > Int.ZERO) { _networkNames + getString(R.string.unsupported_network_s) } else { _networkNames },
-                                getString(R.string.connect_to_website),
-                                getString(R.string.connect)
-                            ),
-                            viewModel.networks.size
-                        )
-                        var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
-                        if (!networksSupported) {
-                            walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
-                        } else if (!methodOrEventSupported) {
-                            walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
-                        }
-                        setWarnings(walletConnectV2AlertType)
-
-                        updateConfirmationDialog()//set addresses in dropdown instead of accounts
-                        show()
-                    }, { error ->
-                        // Handle errors
-                        Timber.e(error)
-                    })
+            val networkNames = WalletConnectRepositoryImpl
+                .proposalNamespacesToChainNames(eip155ProposalNamespace)
+            setView(
+                meta,
+                ViewDetailsV2(
+                    if (networksSupported) { networkNames } else { networkNames + getString(R.string.unsupported_network_s) },
+                    getString(R.string.connect_to_website),
+                    getString(R.string.connect)
+                ),
+                viewModel.networks.size
+            )
+            var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
+            if (!networksSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
+            } else if (!methodOrEventSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
             }
+            setWarnings(walletConnectV2AlertType)
+
+            updateConfirmationDialog()//set addresses in dropdown instead of accounts
+            show()
         }
     }
 
