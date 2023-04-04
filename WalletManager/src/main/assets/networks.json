@@ -80,6 +80,22 @@
     }
   },
   {
+    "name": "zkSync Era",
+    "isActive": true,
+    "token": "ETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://zksync.rpc.minerva.digital",
+    "wsRpc": "",
+    "gasPriceOracle": "https://zksync.rpc.minerva.digital",
+    "gasPrice": "20000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#8c8dfc",
+    "testNet": false,
+    "chainId": 324,
+    "explore": "https://explorer.zksync.io/"
+  },
+  {
     "name": "Arbitrum One",
     "isActive": true,
     "token": "ETH",
@@ -332,7 +348,7 @@
     "explore": "https://blockscout.com/optimism/bedrock-alpha/"
   },
   {
-    "name": "zkSync alpha testnet",
+    "name": "zkSync Era Testnet",
     "isActive": true,
     "token": "ETH",
     "isSafeAccountAvailable": "false",
