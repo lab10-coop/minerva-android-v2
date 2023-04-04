@@ -1,6 +1,7 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
+import android.text.SpannableStringBuilder
 import android.view.KeyEvent
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -44,12 +45,25 @@ abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val de
         }
     }
 
-    fun setupHeader(dapppName: String, networkName: String?, icon: Any) = with(networkHeader) {
-        name.text = dapppName
+    /**
+     * Setup Header
+     * @param dappName
+     * @param networkName
+     * @param icon
+     * @param ssb - coolest(!) string with mixed (colors, fonts, size) part of it
+     */
+    fun setupHeader(dappName: String, networkName: String?, icon: Any, ssb: SpannableStringBuilder? = null) = with(networkHeader) {
+        name.text = dappName
         if (networkName == null || networkName.isEmpty()) {
-            network.gone()
+            if (null == ssb) {
+                network.gone()
+            } else {
+                network.text = ssb
+            }
+        } else {
+            network.text = networkName
         }
-        network.text = networkName
+
         Glide.with(context)
             .load(icon)
             .error(R.drawable.ic_services)

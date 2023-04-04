@@ -17,6 +17,7 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.ZERO
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.utils.AlertDialogHandler
@@ -379,15 +380,10 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 WalletConnectRepositoryImpl
                     .proposalNamespacesToChainNames(eip155ProposalNamespace, unsupportedNetworkRepository)
                     .subscribe({ _networkNames ->
-                        var networkNames = _networkNames
-                        when {
-                            numberOfNonEip155Chains == 1 -> networkNames = networkNames + getString(R.string.non_evm_chain)
-                            numberOfNonEip155Chains > 1 -> networkNames = networkNames + getString(R.string.non_evm_chains)
-                        }
                         setView(
                             meta,
                             ViewDetailsV2(
-                                networkNames,
+                                if (numberOfNonEip155Chains > Int.ZERO) { _networkNames + getString(R.string.unsupported_network_s) } else { _networkNames },
                                 getString(R.string.connect_to_website),
                                 getString(R.string.connect)
                             ),
@@ -401,8 +397,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                         }
                         setWarnings(walletConnectV2AlertType)
 
-                        // set addresses in spinner instead of accounts
-                        updateAddressSpinner()
+                        updateConfirmationDialog()//set addresses in dropdown instead of accounts
                         show()
                     }, { error ->
                         // Handle errors
@@ -425,10 +420,12 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
         }
     }
 
-    // walletconnect 2.0
-    private fun DappConfirmationDialogV2.updateAddressSpinner() {
-        viewModel.setNewAddress(viewModel.availableAddresses[0].address)
-        setupAddressSpinner(viewModel.availableAddresses) { address ->
+    /**
+     * Update Confirmation Dialog - method which set necessary details for dialog window
+     */
+    private fun DappConfirmationDialogV2.updateConfirmationDialog() {
+        viewModel.setNewAddress(viewModel.availableAddresses[Int.ZERO].address)
+        setupDropdown(viewModel.availableAddresses) { address ->
             viewModel.setNewAddress(address)
         }
     }

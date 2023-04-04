@@ -379,9 +379,7 @@
     <string name="unknown_type">Unknown Type</string>
     <string name="paste_button_text">Paste from clipboard</string>
     <string name="switch_network">You need to switch to %s networks in the Settings first</string>
-    <string name="non_evm_chain">Non EVM Chain</string>
-    <string name="non_evm_chains">Non EVM Chains</string>
-    <string name="no_active_session">No active session</string>
+    <string name="no_active_session">Unsupported Network(s)</string>
     <string name="requested_networks">Requested: %s</string>
     <string name="fully_supported">Fully supported (%d networks)</string>
     <string name="request_not_supported">The request is not supported.</string>
@@ -402,6 +400,8 @@
     <string name="funds_at_risk_message">The use of main networks like Gnosis Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your Secret Recovery Phrase.</string>
     <string name="fund_at_risk_warning">Act Carefully!</string>
     <string name="select_address">Select address</string>
+    <string name="unsupported_network_s">Unsupported Network(s)</string>
+    <string name="requested_text">Requested</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
