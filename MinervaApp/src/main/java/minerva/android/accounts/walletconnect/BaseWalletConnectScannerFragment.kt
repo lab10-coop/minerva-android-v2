@@ -180,7 +180,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                         setView(
                             meta,
                             ViewDetailsV2(
-                                if (numberOfNonEip155Chains > Int.ZERO) { _networkNames + UNSUPPORTED_NETWORKS } else { _networkNames },
+                                if (numberOfNonEip155Chains > Int.ZERO) { _networkNames + getString(R.string.unsupported_network_s) } else { _networkNames },
                                 getString(R.string.connect_to_website),
                                 getString(R.string.connect)
                             ),
@@ -194,8 +194,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
                         }
                         setWarnings(walletConnectV2AlertType)
 
-                        // set addresses in spinner instead of accounts
-                        updateAddressSpinner()
+                        updateConfirmationDialog()//set addresses in dropdown instead of accounts
                         show()
                     }, { error ->
                         // Handle errors
@@ -211,23 +210,14 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    // walletconnect 2.0
-    /*TODO we must specified cases when use setupAddressSpinner (for every cases except first connection)
-            and when use setupAddressSpinnerV2 (for first connection (dropdown));
-             maybe we have to rename setupAddressSpinnerV2 to "setupAddressDropdown" (for avoiding misunderstandings in the future)
-     */
-    private fun DappConfirmationDialogV2.updateAddressSpinner() {
-        viewModel.setNewAddress(viewModel.availableAddresses[0].address)
-        //for first connection
-        setupAddressSpinnerV2(viewModel.availableAddresses) { address ->
+    /**
+    * Update Confirmation Dialog - method which set necessary details for dialog window
+    */
+    private fun DappConfirmationDialogV2.updateConfirmationDialog() {
+        viewModel.setNewAddress(viewModel.availableAddresses[Int.ZERO].address)
+        setupDropdown(viewModel.availableAddresses) { address ->
             viewModel.setNewAddress(address)
         }
-        //I don't know by which arguments I have to create dropdown(first connection) instead of usually popap
-        //  that's why I just create dropdown in anyways
-//        old/current variant
-//        setupAddressSpinner(viewModel.availableAddresses) { address ->
-//            viewModel.setNewAddress(address)
-//        }
     }
 
     private fun DappConfirmationDialogV1.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
@@ -267,6 +257,5 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         const val USER_REJECTION_REASON = "User rejection"
         const val NETWORK_NOT_SUPPORTED_REASON = "Network(s) not supported"
         const val METHOD_EVENT_NOT_SUPPORTED_REASON = "Method(s) or Event(s) not supported"
-        const val UNSUPPORTED_NETWORKS = "Unsupported Network(s)"
     }
 }

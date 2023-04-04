@@ -399,6 +399,8 @@
     <string name="funds_at_risk_message">The use of main networks like Gnosis Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your Secret Recovery Phrase.</string>
     <string name="fund_at_risk_warning">Act Carefully!</string>
     <string name="select_address">Select address</string>
+    <string name="unsupported_network_s">Unsupported Network(s)</string>
+    <string name="requested_text">Requested</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

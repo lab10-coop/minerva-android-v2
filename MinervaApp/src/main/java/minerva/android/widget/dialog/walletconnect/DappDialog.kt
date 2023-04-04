@@ -45,8 +45,15 @@ abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val de
         }
     }
 
-    fun setupHeader(dapppName: String, networkName: String?, icon: Any, ssb: SpannableStringBuilder? = null) = with(networkHeader) {
-        name.text = dapppName
+    /**
+     * Setup Header
+     * @param dappName
+     * @param networkName
+     * @param icon
+     * @param ssb - coolest(!) string with mixed (colors, fonts, size) part of it
+     */
+    fun setupHeader(dappName: String, networkName: String?, icon: Any, ssb: SpannableStringBuilder? = null) = with(networkHeader) {
+        name.text = dappName
         if (networkName == null || networkName.isEmpty()) {
             if (null == ssb) {
                 network.gone()

@@ -14,7 +14,6 @@ import androidx.core.view.isGone
 import minerva.android.R
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.FIRST_ICON
-import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment.Companion.UNSUPPORTED_NETWORKS
 import minerva.android.accounts.walletconnect.DappAddressSpinnerAdapter
 import minerva.android.accounts.walletconnect.WalletConnectV2AlertType
 import minerva.android.databinding.DappConfirmationDialogV2Binding
@@ -45,7 +44,7 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
 
     /**
      * Set View - prepare global variables and set some state for popup dialog
-     * @param meta - set current wallet connection DApp session (from db)
+     * @param meta - set current wallet connection DApp session (from db)te
      * @param viewDetails - popup dialog view details
      */
     fun setView(
@@ -58,19 +57,18 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         dAppSessionMeta = meta
         //preparing network name TextView
         val networkNamesList: MutableList<String> = viewDetails.networkNames.toMutableList()
-        val prefixForNetworkNames: String = "${REQUESTED_TEXT.replaceFirstChar { it.uppercase() }}${AddressParser.META_ADDRESS_SEPARATOR}"
+        val prefixForNetworkNames: String = "${context.getString(R.string.requested_text)}${AddressParser.META_ADDRESS_SEPARATOR}"
         networkNamesList.add(Int.ZERO, prefixForNetworkNames)//add prefix to network name list
         val ssb: SpannableStringBuilder? = SpannableStringBuilder().apply {
             networkNamesList.forEachIndexed { index, name ->
                 if (prefixForNetworkNames == name) {
-                    color(ContextCompat.getColor(context, R.color.gray11)) { append("$name${String.Space}") }
-                    setSpan(StyleSpan(BOLD), Int.ZERO, prefixForNetworkNames.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                } else if (UNSUPPORTED_NETWORKS == name) {
-                    color(ContextCompat.getColor(context, R.color.errorRed)) { append(name) }
+                    color(ContextCompat.getColor(context, R.color.gray11)) { append("$name${String.Space}") }//set string with color
+                    setSpan(StyleSpan(BOLD), Int.ZERO, prefixForNetworkNames.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE) //set font weight in specified range
+                } else if (context.getString(R.string.unsupported_network_s) == name) {
+                    color(ContextCompat.getColor(context, R.color.errorRed)) { append(name) }//set string with color
                 } else {
                     append(name)
-                    //set delimiter between names (if isn't prefix and isn't last name in list)
-                    if (networkNamesList.size != index + Int.ONE) {
+                    if (networkNamesList.size != index + Int.ONE) {//set delimiter between names (if isn't prefix and isn't last name in list)
                         append(ACCOUNT_DELIMITER)
                     }
                 }
@@ -89,11 +87,15 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
         numberOfProvidedNetworks = _numberOfProvidedNetworks
     }
 
-    //temporary realization
-    fun setupAddressSpinnerV2(availableAddresses: List<AddressWrapper>, onAddressSelected: (String) -> Unit) {
+    /**
+    * Setup Dropdown - method for setting dropdown widget for network addresses
+    * @param availableAddresses - list with details of addresses
+    * @param onAddressSelected - callback for chosen address
+    */
+    fun setupDropdown(availableAddresses: List<AddressWrapper>, onAddressSelected: (String) -> Unit) {
         networkHeader.apply {
-            accountSpinner.visibility = View.GONE//! hide old code realization
-            addressSpinner.visibility = View.GONE//! hide old code realization
+            accountSpinner.visibility = View.GONE//hide old code realization
+            addressSpinner.visibility = View.GONE//hide old code realization
 
             if (isAddressSpinnerVisible(availableAddresses.size)) {
                 //create list with appropriate address appearance (index + short address)
@@ -242,6 +244,5 @@ class DappConfirmationDialogV2(context: Context, approve: () -> Unit, deny: () -
     companion object {
         const val INITIAL_PROVIDED_NETWORKS = 0
         const val ACCOUNT_DELIMITER = " • "
-        const val REQUESTED_TEXT = "Requested"
     }
 }
