@@ -2,7 +2,7 @@
     android:shape="rectangle">
     <solid android:color="@color/errorPink" />
     <stroke
-        android:width="1dip"
-        android:color="#eaeaee" />
-    <corners android:radius="8dp" />
+        android:width="@dimen/margin_xxxxsmall"
+        android:color="@color/separatorColor" />
+    <corners android:radius="@dimen/margin_xsmall" />
 </shape>
