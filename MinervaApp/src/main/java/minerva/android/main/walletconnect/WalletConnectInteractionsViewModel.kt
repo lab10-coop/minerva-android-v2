@@ -20,6 +20,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.ChainId
@@ -155,32 +156,42 @@ class WalletConnectInteractionsViewModel(
         }
 
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
+        Timber.e("getTransactionCosts")
         currentDappSession = session
-        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)
-            ?.let { account -> currentAccount = account }
-        val txValue: BigDecimal = getTransactionValue(status.transaction.value)
-        if (txValue == WRONG_TX_VALUE) {
-            rejectRequest(session.isMobileWalletConnect)
-            return Single.just(WrongTransactionValueState(status.transaction))
-        }
-        val transferType: TransferType = getTransferType(status, txValue)
-        status.transaction.value = txValue.toPlainString()
-        val txCostPayload = getTxCostPayload(session.chainId, status, txValue, transferType)
-        return transactionRepository.getTransactionCosts(txCostPayload)
-            .flatMap { transactionCost ->
-                getFiatRate(session.chainId, transferType, status)
-                    .onErrorResumeNext { Single.just(Double.InvalidValue) }
-                    .map { rate ->
-                        currentRate = rate.toBigDecimal()
-                        currentTransaction = status.transaction.copy(
-                            value = BalanceUtils.getCryptoBalance(txValue),
-                            fiatValue = getFiatTransactionValue(transferType, status),
-                            txCost = transactionCost.copy(fiatCost = getFiatTransactionCost(transactionCost)),
-                            transactionType = transferType
-                        )
-                        OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
+        // await account creation here.
+        val index = accountManager.getAllAccounts()
+            .find { it.address.equals(session.address, true) }?.id
+            ?: Int.InvalidValue
+        Timber.e("getTransactionCosts index")
+        return accountManager.createHiddenAccount(index, NetworkManager.getNetwork(session.chainId))
+            .flatMap {
+                transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)
+                    ?.let { account -> currentAccount = account }
+                val txValue: BigDecimal = getTransactionValue(status.transaction.value)
+                if (txValue == WRONG_TX_VALUE) {
+                    rejectRequest(session.isMobileWalletConnect)
+                    return@flatMap Single.just(WrongTransactionValueState(status.transaction))
+                }
+                val transferType: TransferType = getTransferType(status, txValue)
+                status.transaction.value = txValue.toPlainString()
+                val txCostPayload = getTxCostPayload(session.chainId, status, txValue, transferType)
+                return@flatMap transactionRepository.getTransactionCosts(txCostPayload)
+                    .flatMap { transactionCost ->
+                        getFiatRate(session.chainId, transferType, status)
+                            .onErrorResumeNext { Single.just(Double.InvalidValue) }
+                            .map { rate ->
+                                currentRate = rate.toBigDecimal()
+                                currentTransaction = status.transaction.copy(
+                                    value = BalanceUtils.getCryptoBalance(txValue),
+                                    fiatValue = getFiatTransactionValue(transferType, status),
+                                    txCost = transactionCost.copy(fiatCost = getFiatTransactionCost(transactionCost)),
+                                    transactionType = transferType
+                                )
+                                OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
+                            }
                     }
             }
+
     }
 
     private fun getTransactionValue(txValue: String?): BigDecimal =
@@ -343,11 +354,11 @@ class WalletConnectInteractionsViewModel(
                     logToFirebase("Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt")
                     weiCoinTransactionValue = NO_COIN_TX_VALUE
                     currentDappSession?.let { session ->
-                        when {
-                            session is DappSessionV1 ->
-                                walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
-                            session is DappSessionV2 ->
-                                walletConnectRepository.approveTransactionRequestV2(session.topic, txReceipt)
+                        when (session) {
+                            is DappSessionV1 -> walletConnectRepository
+                                .approveTransactionRequest(session.peerId, txReceipt)
+                            is DappSessionV2 -> walletConnectRepository
+                                .approveTransactionRequestV2(session.topic, txReceipt)
                         }
                     }
                     txReceipt
@@ -361,7 +372,11 @@ class WalletConnectInteractionsViewModel(
                 }
                 .doAfterTerminate { weiCoinTransactionValue = NO_COIN_TX_VALUE }
                 .subscribeBy(
-                    onSuccess = { successWalletConnectInteraction(isMobileWalletConnect) },
+                    onSuccess = {
+                        Timber.e("sendTransaction: $currentAccount")
+                        accountManager.connectAccountToNetwork(currentAccount.id, currentAccount.network)
+                        successWalletConnectInteraction(isMobileWalletConnect)
+                    },
                     onError = { error ->
                         logToFirebase("WalletConnect transaction error: $error; $currentTransaction")
                         Timber.e(error)
@@ -406,20 +421,28 @@ class WalletConnectInteractionsViewModel(
     }
 
     fun acceptRequestV2(session: DappSessionV2) {
-        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
-            walletConnectRepository.approveRequestV2(session.topic, it.privateKey)
-            successWalletConnectInteraction(session.isMobileWalletConnect)
-        }
+        Timber.e("acceptRequestV2")
+        val index = accountManager.getAllAccounts()
+            .find { it.address.equals(session.address, true) }?.id
+            ?: Int.InvalidValue
+        Timber.e("acceptRequestV2 $index")
+        accountManager.connectAccountToNetwork(index, NetworkManager.getNetwork(session.chainId))
+            .map { _ ->
+                transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
+                    Timber.e("acceptRequestV2: $it")
+                    walletConnectRepository.approveRequestV2(session.topic, it.privateKey)
+                    successWalletConnectInteraction(session.isMobileWalletConnect)
+                }
+                // todo: otherwise throw some error
+            }
     }
 
     fun rejectRequest(isMobileWalletConnect: Boolean) {
         weiCoinTransactionValue = NO_COIN_TX_VALUE
         currentDappSession?.let { session ->
-            when {
-                session is DappSessionV1 ->
-                    walletConnectRepository.rejectRequest(session.peerId)
-                session is DappSessionV2 ->
-                    walletConnectRepository.rejectRequestV2(session.topic)
+            when (session) {
+                is DappSessionV1 -> walletConnectRepository.rejectRequest(session.peerId)
+                is DappSessionV2 -> walletConnectRepository.rejectRequestV2(session.topic)
             }
             successWalletConnectInteraction(isMobileWalletConnect)
         }
