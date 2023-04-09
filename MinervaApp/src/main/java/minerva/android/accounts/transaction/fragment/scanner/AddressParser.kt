@@ -10,6 +10,6 @@ object AddressParser {
         }
     }
 
-    private const val META_ADDRESS_SEPARATOR = ":"
+    const val META_ADDRESS_SEPARATOR = ":"
     private const val TWO_ELEMENT_SIZE = 2
 }

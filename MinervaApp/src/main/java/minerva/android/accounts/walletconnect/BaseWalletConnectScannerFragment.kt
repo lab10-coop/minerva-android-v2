@@ -6,13 +6,13 @@ import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
 import minerva.android.extension.margin
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.ZERO
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectProposalNamespace
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSessionNamespace
-import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl.Companion.EIP155_DELIMITER
@@ -21,12 +21,9 @@ import minerva.android.widget.dialog.models.ViewDetailsV2
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV1
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialogV2
 import minerva.android.widget.dialog.walletconnect.DappDialog
-import org.koin.android.ext.android.inject
-import timber.log.Timber
 
 abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
 
-    private val unsupportedNetworkRepository: UnsupportedNetworkRepository by inject()
     abstract val viewModel: BaseWalletConnectScannerViewModel
     private var confirmationDialogDialog: DappDialog?  = null // todo: is DappDialog to broad?
     private var errorDialog: AlertDialog? = null
@@ -74,7 +71,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         showToast(
             getString(
                 R.string.dapp_disconnected,
-                if (sessionName.isNotEmpty()) sessionName else getString(R.string.dapp_unnamed)
+                sessionName.ifEmpty { getString(R.string.dapp_unnamed) }
             )
         )
     }
@@ -171,41 +168,27 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             }
         ).apply {
             // todo: and enable/disable connect button?
-
-            launchDisposable {
-                WalletConnectRepositoryImpl
-                    .proposalNamespacesToChainNames(eip155ProposalNamespace, unsupportedNetworkRepository)
-                    .subscribe({ _networkNames ->
-                        var networkNames = _networkNames
-                        when {
-                            numberOfNonEip155Chains == 1 -> networkNames = networkNames + getString(R.string.non_evm_chain)
-                            numberOfNonEip155Chains > 1 -> networkNames = networkNames + getString(R.string.non_evm_chains)
-                        }
-                        setView(
-                            meta,
-                            ViewDetailsV2(
-                                networkNames,
-                                getString(R.string.connect_to_website),
-                                getString(R.string.connect)
-                            ),
-                            viewModel.networks.size
-                        )
-                        var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
-                        if (!networksSupported) {
-                            walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
-                        } else if (!methodOrEventSupported) {
-                            walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
-                        }
-                        setWarnings(walletConnectV2AlertType)
-
-                        // set addresses in spinner instead of accounts
-                        updateAddressSpinner()
-                        show()
-                    }, { error ->
-                        // Handle errors
-                        Timber.e(error)
-                    })
+            val networkNames = WalletConnectRepositoryImpl
+                .proposalNamespacesToChainNames(eip155ProposalNamespace)
+            setView(
+                meta,
+                ViewDetailsV2(
+                    if (networksSupported) { networkNames } else { networkNames + getString(R.string.unsupported_network_s) },
+                    getString(R.string.connect_to_website),
+                    getString(R.string.connect)
+                ),
+                viewModel.networks.size
+            )
+            var walletConnectV2AlertType = WalletConnectV2AlertType.NO_ALERT
+            if (!networksSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.UNSUPPORTED_NETWORK_WARNING
+            } else if (!methodOrEventSupported) {
+                walletConnectV2AlertType = WalletConnectV2AlertType.OTHER_UNSUPPORTED
             }
+            setWarnings(walletConnectV2AlertType)
+
+            updateConfirmationDialog()//set addresses in dropdown instead of accounts
+            show()
         }
     }
 
@@ -215,23 +198,14 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    // walletconnect 2.0
-    /*TODO we must specified cases when use setupAddressSpinner (for every cases except first connection)
-            and when use setupAddressSpinnerV2 (for first connection (dropdown));
-             maybe we have to rename setupAddressSpinnerV2 to "setupAddressDropdown" (for avoiding misunderstandings in the future)
-     */
-    private fun DappConfirmationDialogV2.updateAddressSpinner() {
-        viewModel.setNewAddress(viewModel.availableAddresses[0].address)
-        //for first connection
-        setupAddressSpinnerV2(viewModel.availableAddresses) { address ->
+    /**
+    * Update Confirmation Dialog - method which set necessary details for dialog window
+    */
+    private fun DappConfirmationDialogV2.updateConfirmationDialog() {
+        viewModel.setNewAddress(viewModel.availableAddresses[Int.ZERO].address)
+        setupDropdown(viewModel.availableAddresses) { address ->
             viewModel.setNewAddress(address)
         }
-        //I don't know by which arguments I have to create dropdown(first connection) instead of usually popap
-        //  that's why I just create dropdown in anyways
-//        old/current variant
-//        setupAddressSpinner(viewModel.availableAddresses) { address ->
-//            viewModel.setNewAddress(address)
-//        }
     }
 
     private fun DappConfirmationDialogV1.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {

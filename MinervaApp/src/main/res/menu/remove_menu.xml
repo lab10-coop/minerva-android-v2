@@ -17,7 +17,7 @@
     <item
         android:id="@+id/end_session"
         android:enabled="true"
-        android:icon="@drawable/ic_disconnect"
+        android:icon="@drawable/ic_end_session"
         android:title="@string/end_session"
         app:showAsAction="ifRoom" />
 
