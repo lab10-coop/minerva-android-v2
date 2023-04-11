@@ -58,12 +58,12 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO_CHAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ERA
 import minerva.android.walletmanager.model.mappers.TokenDataToERCToken
 import minerva.android.walletmanager.model.mappers.TokenToAssetBalanceErrorMapper
 import minerva.android.walletmanager.model.mappers.TokensOwnedToERCToken
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.*
-import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
@@ -410,7 +410,7 @@ class TokenManagerImpl(
         when (account.chainId) {
             ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, GNO_CHAI, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI, LUKSO_16, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, OPT_GOR, OPT_BED, ZKS_ALPHA, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
-            GNO, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C, ZKS_ALPHA -> getTokensOwned(account)
+            GNO, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C, ZKS_ERA -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
@@ -712,7 +712,7 @@ class TokenManagerImpl(
         OPT -> String.format(TOKENSOWNED_BASE_API_ADDRESS, OPT_SHORT_NAME)
         CELO -> String.format(TOKENSOWNED_BASE_API_ADDRESS, CELO_SHORT_NAME)
         AVA_C -> String.format(TOKENSOWNED_BASE_API_ADDRESS, AVA_C_SHORT_NAME)
-        ZKS_ALPHA -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ZKS_ALPHA_SHORT_NAME)
+        ZKS_ERA -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ZKS_ERA_SHORT_NAME)
         else -> if (menuCase) { "" } else { throw NetworkNotFoundThrowable() }
     }
 
@@ -1128,6 +1128,6 @@ class TokenManagerImpl(
         private const val OPT_SHORT_NAME = "optimism"
         private const val CELO_SHORT_NAME = "celo"
         private const val AVA_C_SHORT_NAME = "avalanche"
-        private const val ZKS_ALPHA_SHORT_NAME = "zksync"
+        private const val ZKS_ERA_SHORT_NAME = "zksync"
     }
 }
