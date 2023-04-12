@@ -35,6 +35,7 @@ import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
+import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -48,9 +49,26 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     private val logger: Logger = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val accountManager: AccountManager = mock()
-    private val unsupportedNetworkRepository: UnsupportedNetworkRepository =mock()
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository = mock()
 
-    private val viewModel: WalletConnectInteractionsViewModel =
+    private lateinit var viewModel: WalletConnectInteractionsViewModel
+
+    private val requestObserver: Observer<WalletConnectState> = mock()
+    private val requestCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
+
+    private val errorObserver: Observer<Event<Throwable>> = org.amshove.kluent.mock()
+    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
+
+    private val meta = WalletConnectPeerMeta(name = "token", url = "test.xdai.com", description = "dsc")
+
+    @Before
+    fun setUp() {
+        val networks = listOf(
+            Network(chainId = ETH_MAIN, httpRpc = "url")
+        )
+        NetworkManager.initialize(networks)
+
+        this.viewModel =
         WalletConnectInteractionsViewModel(
             transactionRepository,
             walletConnectRepository,
@@ -61,15 +79,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             unsupportedNetworkRepository,
             address = ""
         )
-
-    private val requestObserver: Observer<WalletConnectState> = mock()
-    private val requestCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
-
-    private val errorObserver: Observer<Event<Throwable>> = org.amshove.kluent.mock()
-    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
-
-
-    private val meta = WalletConnectPeerMeta(name = "token", url = "test.xdai.com", description = "dsc")
+    }
 
     @Test
     fun `reconnect to saved sessions and handle on eth sign test`() {
