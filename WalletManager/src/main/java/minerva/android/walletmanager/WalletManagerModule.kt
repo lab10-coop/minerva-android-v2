@@ -74,7 +74,7 @@ fun createWalletModules() = module {
     factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
-    factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get(), get(), get()) }
+    factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }

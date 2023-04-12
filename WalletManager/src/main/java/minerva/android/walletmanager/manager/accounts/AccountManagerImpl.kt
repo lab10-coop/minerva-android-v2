@@ -6,12 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
+import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
@@ -42,6 +42,7 @@ import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.TokenUtils
+import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -54,7 +55,8 @@ class AccountManagerImpl(
     private val unitConverter: UnitConverter,
     private val timeProvider: CurrentTimeProvider, //TODO make one class with DateUtils
     database: MinervaDatabase,
-    private val validationRepository: ValidationRepository
+    private val validationRepository: ValidationRepository,
+    private val logger: Logger
 ) : AccountManager {
     override var hasAvailableAccounts: Boolean = false
     override var activeAccounts: List<Account> = emptyList()
@@ -147,45 +149,49 @@ class AccountManagerImpl(
             walletManager.updateWalletConfig(getWalletConfigWithNewAccounts(newAccounts, this))
         }
 
+    private fun generateKeys(index: Int, derivationPath: String, testNet: Boolean): DerivedKeys {
+        return cryptographyRepository.calculateDerivedKeys(
+            walletManager.masterSeed.seed,
+            walletManager.masterSeed.password,
+            index,
+            derivationPath,
+            testNet
+        )
+    }
+
+    private fun createAccount(index: Int, network: Network, keys: DerivedKeys, isHide: Boolean): Account {
+        val accountName = CryptoUtils.prepareName(network.name, index)
+        return Account(
+            index,
+            name = accountName,
+            chainId = network.chainId,
+            publicKey = keys.publicKey,
+            privateKey = keys.privateKey,
+            address = keys.address,
+            isHide = isHide
+        )
+    }
+
+    /**
+     * Creates a regular account with the given index, network, and optional isHide parameter.
+     * @param index The index of the account.
+     * @param network The network the account belongs to.
+     * @param isHide Optional flag to hide the account (default: false).
+     * @return A Single that emits the created account name.
+     */
     private fun createRegularAccountWithGivenIndex(index: Int, network: Network, isHide: Boolean = false): Single<String> {
-        Timber.e("createRegularAccountWithGivenIndex $index $network $isHide")
         return walletManager.getWalletConfig().run {
             val derivationPath =
                 if (network.testNet) DerivationPath.TEST_NET_PATH else DerivationPath.MAIN_NET_PATH
-            val accountName = CryptoUtils.prepareName(network.name, index)
-            Timber.e("createRegularAccountWithGivenIndex $accountName")
-            val keys = cryptographyRepository.calculateDerivedKeys(
-                walletManager.masterSeed.seed,
-                walletManager.masterSeed.password,
-                index,
-                derivationPath,
-                network.testNet
-            )
-            val newAccount = Account(
-                index,
-                name = accountName,
-                chainId = network.chainId,
-                publicKey = keys.publicKey,
-                privateKey = keys.privateKey,
-                address = keys.address,
-                isHide = isHide
-            )
-            Timber.e("createRegularAccountWithGivenIndex $newAccount")
-            Timber.e("createRegularAccountWithGivenIndex $this")
+            val keys = generateKeys(index, derivationPath, network.testNet)
+            val newAccount = createAccount(index, network, keys, isHide)
             val config = addAccount(newAccount, this)
-            Timber.e("createRegularAccountWithGivenIndex $config")
-            val completable = walletManager.updateWalletConfig(config)
-            completable
-                .subscribeBy(
-                    onComplete = {
-                        Timber.e("createRegularAccountWithGivenIndex onComplete")
-                    },
-                    onError = { error ->
-                        Timber.e("createRegularAccountWithGivenIndex onError $error")
-                    }
-                )
-            completable
-                .toSingleDefault(accountName)
+            walletManager.updateWalletConfig(config)
+                .doOnError { error ->
+                    Timber.e(error)
+                    logger.logToFirebase(error.toString())
+                }
+                .toSingleDefault(newAccount.name)
         }
     }
 
@@ -203,16 +209,11 @@ class AccountManagerImpl(
         return config.copy(version = config.updateVersion, accounts = newAccounts)
     }
 
-    /**
-     * index starts counting at 1?
-     */
     override fun connectAccountToNetwork(index: Int, network: Network): Single<String> {
-        Timber.e("connectAccountToNetwork $index $network")
         val existedAccount =
             walletManager.getWalletConfig().accounts
                 .filter { account -> account.id == index && account.isTestNetwork == network.testNet }
-                .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId && account.isHide) }
-        Timber.e("connectAccountToNetwork $existedAccount")
+                .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId) }
         return when {
             existedAccount != null -> updateAccount(existedAccount, network)
             else -> createRegularAccountWithGivenIndex(index, network)
@@ -225,7 +226,8 @@ class AccountManagerImpl(
             val index = pair.first
             val network = pair.second
             val existedAccount: Account? =
-                walletManager.getWalletConfig().accounts.filter { account -> account.id == index && account.isTestNetwork == network.testNet }
+                walletManager.getWalletConfig().accounts
+                    .filter { account -> account.id == index && account.isTestNetwork == network.testNet }
                     .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId && account.isHide) }
 
             if (null != existedAccount) {
@@ -245,13 +247,11 @@ class AccountManagerImpl(
     }
 
     override fun createHiddenAccount(index: Int, network: Network): Single<String> {
-        Timber.e("createHiddenAccount $index $network")
         val existedAccount =
             walletManager.getWalletConfig().accounts
                 .filter { account -> account.id == index && account.isTestNetwork == network.testNet }
                 .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId && account.isHide) }
                 ?: return createRegularAccountWithGivenIndex(index, network, true)
-        Timber.e("createHiddenAccount $existedAccount")
         return Single.just(existedAccount.accountName)
     }
 
@@ -451,7 +451,9 @@ class AccountManagerImpl(
             return cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
                 walletManager.masterSeed.password,
-                index, derivationPath, account.network.testNet
+                index,
+                derivationPath,
+                account.network.testNet
             ).map { keys ->
                 val ownerAddress = account.address
                 val newAccount = Account(

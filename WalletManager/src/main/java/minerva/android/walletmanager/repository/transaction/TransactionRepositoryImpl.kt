@@ -100,6 +100,15 @@ class TransactionRepositoryImpl(
                     }
             }
 
+    override fun getCoinBalanceByAccount(account: Account): Flowable<Coin> =
+        blockchainRepository.getCoinBalances(listOf(account.network.chainId to account.address))
+            .flatMapSingle { token ->
+                when (token) {
+                    is TokenWithBalance -> getCoinRates(TokenToCoinCryptoBalanceMapper.map(token))
+                    else -> Single.just(TokenToCoinBalanceErrorMapper.map(token as TokenWithError))
+                }
+            }
+
     private fun getCoinRates(cryptoBalance: CoinCryptoBalance): Single<CoinBalance> = with(cryptoBalance) {
         val marketId = MarketUtils.getCoinGeckoMarketId(chainId)
         return if (marketId != String.Empty && balance > BigDecimal.ZERO) {
