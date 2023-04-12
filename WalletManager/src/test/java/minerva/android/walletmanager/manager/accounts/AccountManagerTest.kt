@@ -3,7 +3,6 @@ package minerva.android.walletmanager.manager.accounts
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
@@ -36,6 +35,7 @@ import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
 import kotlin.test.assertEquals
+import minerva.android.walletmanager.utils.logger.Logger
 
 class AccountManagerTest : RxTest() {
 
@@ -43,11 +43,11 @@ class AccountManagerTest : RxTest() {
     private val cryptographyRepository: CryptographyRepository = mock()
     private val localStorage: LocalStorage = mock()
     private val timeProvider: CurrentTimeProvider = mock()
-    private val ensRepository: ENSRepository = mock()
     private val unitConverter: UnitConverter = mock()
     private val tokenDao: TokenBalanceDao = mock()
     private var database: MinervaDatabase = mock { whenever(mock.tokenBalanceDao()).thenReturn(tokenDao) }
     private val validationRepository: ValidationRepository = mock()
+    private val logger: Logger = mock()
 
     private val manager = AccountManagerImpl(
         walletConfigManager,
@@ -56,7 +56,8 @@ class AccountManagerTest : RxTest() {
         unitConverter,
         timeProvider,
         database,
-        validationRepository
+        validationRepository,
+        logger
     )
 
     @Before

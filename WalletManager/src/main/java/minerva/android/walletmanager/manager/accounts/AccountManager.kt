@@ -56,6 +56,7 @@ interface AccountManager : Manager {
     fun getFirstActiveAccountOrNull(chainId: Int): Account?
     fun getFirstActiveAccountForAllNetworks(): List<Account>
     fun createOrUnhideAccount(network: Network): Single<String>
+    fun createHiddenAccount(index: Int, network: Network): Single<String>
 
     /**
      * Create Accounts - run create accounts procedure
