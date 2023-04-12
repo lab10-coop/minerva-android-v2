@@ -35,6 +35,7 @@ import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
+import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -48,9 +49,26 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     private val logger: Logger = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val accountManager: AccountManager = mock()
-    private val unsupportedNetworkRepository: UnsupportedNetworkRepository =mock()
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository = mock()
 
-    private val viewModel: WalletConnectInteractionsViewModel =
+    private lateinit var viewModel: WalletConnectInteractionsViewModel
+
+    private val requestObserver: Observer<WalletConnectState> = mock()
+    private val requestCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
+
+    private val errorObserver: Observer<Event<Throwable>> = org.amshove.kluent.mock()
+    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
+
+    private val meta = WalletConnectPeerMeta(name = "token", url = "test.xdai.com", description = "dsc")
+
+    @Before
+    fun setUp() {
+        val networks = listOf(
+            Network(chainId = ETH_MAIN, httpRpc = "url")
+        )
+        NetworkManager.initialize(networks)
+
+        this.viewModel =
         WalletConnectInteractionsViewModel(
             transactionRepository,
             walletConnectRepository,
@@ -61,15 +79,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             unsupportedNetworkRepository,
             address = ""
         )
-
-    private val requestObserver: Observer<WalletConnectState> = mock()
-    private val requestCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
-
-    private val errorObserver: Observer<Event<Throwable>> = org.amshove.kluent.mock()
-    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
-
-
-    private val meta = WalletConnectPeerMeta(name = "token", url = "test.xdai.com", description = "dsc")
+    }
 
     @Test
     fun `reconnect to saved sessions and handle on eth sign test`() {
@@ -83,6 +93,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         val account = Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -163,17 +175,19 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     fun `reconnect to saved sessions and handle on eth send transaction test`() {
         val tx = WalletConnectTransaction("from", "to", value = "0x100000000", data = "0x0")
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(tx, "peerId"))
         )
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSessionV1())))
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -228,18 +242,21 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     AccountToken(
                         ERCToken(1, symbol = "WTF", type = TokenType.ERC20)
                     )
-                )
+                ),
+                address = "address1"
             )
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSessionV1())))
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -286,16 +303,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             data = "0x38ed1739000000000000000000000000000000000000000000000000000002ba7def30000000000000000000000000000000000000000000000000000010fc898105daf400000000000000000000000000000000000000000000000000000000000000a000000000000000000000000072f4d6cb761fb9bab743f35f60eb463f3291b4a10000000000000000000000000000000000000000000000000000000060449fa00000000000000000000000000000000000000000000000000000000000000004000000000000000000000000f1738912ae7439475712520797583ac784ea90330000000000000000000000006a023ccd1ff6f2045c3309768ead9e68f978f6e1000000000000000000000000e91d153e0b41518a2ce8dd3d7944fa863463a97d0000000000000000000000008a95ea379e1fa4c749dd0a7a21377162028c479e"
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -341,16 +360,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             data = "0x38ed1739000000000000000000000000000000000000000000000000000002ba7def30000000000000000000000000000000000000000000000000000010fc898105daf400000000000000000000000000000000000000000000000000000000000000a000000000000000000000000072f4d6cb761fb9bab743f35f60eb463f3291b4a10000000000000000000000000000000000000000000000000000000060449fa00000000000000000000000000000000000000000000000000000000000000004000000000000000000000000f1738912ae7439475712520797583ac784ea90330000000000000000000000006a023ccd1ff6f2045c3309768ead9e68f978f6e1000000000000000000000000e91d153e0b41518a2ce8dd3d7944fa863463a97d0000000000000000000000008a95ea379e1fa4c749dd0a7a21377162028c479e"
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -396,16 +417,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             data = "0xa9059cbb000000000000000000000000e602118e3658a433b60e6f7ced1186fde6df6f5d000000000000000000000000000000000000000000000000000009184e72a000"
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -445,16 +468,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             data = "0xa93333602118e3658a433b60e6f7ced1186fde6df6f5d000000000000000000000000000000000000000000000000000009184e72a000"
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -489,16 +514,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     fun `parse error data contract transaction test`() {
         val transition = WalletConnectTransaction("from", "to", value = null, data = "203DASCS3UE   DBDJHF DFSDFD")
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -538,16 +565,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat
@@ -668,6 +697,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `approve request test`() {
+        val account = Account(1)
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic(), 1))
         )
@@ -677,7 +707,9 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
-        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(Account(1))
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf(account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         viewModel.getWalletConnectSessions()
         viewModel.currentDappSession = DappSessionV1(address = "address1", peerId = "id")
         viewModel.acceptRequest(isMobileWalletConnect = false)
@@ -710,16 +742,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
-        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1")))
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSessionV1(address = "address1", chainId = ETH_MAIN)))
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
+        whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(
             transactionRepository.toUserReadableFormat

@@ -21,6 +21,7 @@ interface TransactionRepository {
     val assetBalances: MutableList<AssetBalance>
     val masterSeed: MasterSeed
     fun getCoinBalance(): Flowable<Coin>
+    fun getCoinBalanceByAccount(account: Account): Flowable<Coin>
     fun getTokenBalance(): Flowable<Asset>
     fun discoverNewTokens(): Single<Boolean>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
