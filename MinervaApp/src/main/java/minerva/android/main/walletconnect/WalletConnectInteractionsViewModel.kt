@@ -376,16 +376,15 @@ class WalletConnectInteractionsViewModel(
                 .doAfterTerminate { weiCoinTransactionValue = NO_COIN_TX_VALUE }
                 .subscribeBy(
                     onSuccess = {
-                        Timber.e("sendTransaction: $currentAccount")
                         launchDisposable {
                             accountManager.connectAccountToNetwork(currentAccount.id, currentAccount.network)
                                 .subscribeBy(
                                     onSuccess = { name ->
-                                        Timber.e("connectAccountToNetwork completed $name")
+                                        Timber.i(name)
                                     },
                                     onError = { error ->
-                                        Timber.e("connectAccountToNetwork failed", error)
-                                        logger.logToFirebase("connectAccountToNetwork failed: ${error.message}")
+                                        Timber.e(error)
+                                        logger.logToFirebase(error.toString())
                                     }
                                 )
                         }
@@ -449,11 +448,11 @@ class WalletConnectInteractionsViewModel(
             accountManager.connectAccountToNetwork(index, NetworkManager.getNetwork(session.chainId))
                 .subscribeBy(
                     onSuccess = { name ->
-                        Timber.e("connectAccountToNetwork completed $name")
+                        Timber.i(name)
                     },
                     onError = { error ->
-                        Timber.e("connectAccountToNetwork failed", error)
-                        logger.logToFirebase("connectAccountToNetwork failed: ${error.message}")
+                        Timber.e(error)
+                        logger.logToFirebase(error.toString())
                     }
                 )
         }

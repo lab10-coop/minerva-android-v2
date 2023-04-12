@@ -264,7 +264,7 @@ class WalletConfigManagerImpl(
                 .map { localStorage.isSynced = true }
                 .ignoreElement()
                 .handleAutomaticBackupFailedError(localStorage) {
-                    Timber.e("handleAutomaticBackupFailedError")
+                    Timber.e(walletConfig.version.toString())
                     logVersionToFirebase(walletConfig.version)
                 }
         } else Completable.error(AutomaticBackupFailedThrowable())
