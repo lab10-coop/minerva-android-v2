@@ -165,7 +165,7 @@ class MainViewModel(
         }
     }
 
-    fun getTokensRate() {
+    fun getTokensRates() {
         launchDisposable {
             transactionRepository.getTokensRates()
                 .subscribeOn(Schedulers.io())
@@ -186,6 +186,7 @@ class MainViewModel(
                 .subscribeBy(
                     onSuccess = {
                         fetchNFTData()
+                        getTokensRates()
                     },
                     onError = { error -> Timber.e("Error while token auto-discovery: $error") }
                 )

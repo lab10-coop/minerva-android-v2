@@ -66,7 +66,6 @@ import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
-import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import minerva.android.walletmanager.utils.parseIPFSContentUrl
 import java.math.BigDecimal
@@ -426,23 +425,20 @@ class TokenManagerImpl(
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
             with(localStorage.loadCurrentFiat()) {
                 tokens.forEach { (chainId, tokens) ->
-                    val marketId = MarketUtils.getTokenGeckoMarketId(chainId)
-                    if (marketId != String.Empty) {
-                        tokens.distinctBy { it.address }
-                            .filter { shouldUpdateRate(it) }
-                            .chunked(TOKEN_LIMIT_PER_CALL)
-                            .forEach { chunkedTokens ->
-                                observables.add(
-                                    updateAccountTokensRate(
-                                        marketId,
-                                        chainId,
-                                        prepareContractAddresses(chunkedTokens),
-                                        chunkedTokens.map { it.address.lowercase(Locale.ROOT) }
-                                            .toMutableList()
-                                    )
+                    tokens.distinctBy { it.address }
+                        .filter { it.type.isERC20() }
+                        .filter { shouldUpdateRate(it) }
+                        .chunked(TOKEN_LIMIT_PER_CALL)
+                        .forEach { chunkedTokens ->
+                            observables.add(
+                                updateAccountTokensRate(
+                                    chainId,
+                                    prepareContractAddresses(chunkedTokens),
+                                    chunkedTokens.map { it.address.lowercase(Locale.ROOT) }
+                                        .toMutableList()
                                 )
-                            }
-                    }
+                            )
+                        }
                 }
                 Observable.merge(observables)
                     .doOnNext { rates ->
@@ -459,13 +455,12 @@ class TokenManagerImpl(
         }
 
     private fun updateAccountTokensRate(
-        marketId: String,
         chainId: Int,
         contractAddresses: String,
         contractAddressesList: MutableList<String>
     ): Observable<List<Pair<String, Double>>> =
         localStorage.loadCurrentFiat().let { currentFiat ->
-            cryptoApi.getTokensRate(marketId, contractAddresses, currentFiat)
+            cryptoApi.getTokensRate(chainId.toString(), contractAddresses, currentFiat)
                 .map { tokenRateResponse ->
                     mutableListOf<Pair<String, Double>>().apply {
                         tokenRateResponse.forEach { (contractAddress, rate) ->
@@ -1108,7 +1103,6 @@ class TokenManagerImpl(
 
 
     companion object {
-        private const val LAST_UPDATE_INDEX = 0
         private const val TOKENS_OWNED_REQUEST = "%stokensowned/%s?fetchTokenJson=all"
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
         private const val TOKEN_TX_REQUEST = "%sapi?module=account&action=tokentx&address=%s"
