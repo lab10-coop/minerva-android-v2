@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.utils
 
+import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.Markets
 import minerva.android.kotlinUtils.InvalidValue
