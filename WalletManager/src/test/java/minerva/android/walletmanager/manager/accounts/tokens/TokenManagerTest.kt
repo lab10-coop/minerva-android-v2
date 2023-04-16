@@ -60,20 +60,12 @@ class TokenManagerTest : RxTest() {
     private lateinit var database: MinervaDatabase
     private lateinit var tokenManager: TokenManagerImpl
 
-    private val commitData: List<CommitElement>
-        get() = listOf(CommitElement(Commit(Committer("2021-01-29T19:56:02Z")))) //1611950162000 in mills
-
     private val firstToken = ERCToken(ATS_TAU, "CookieToken", "COOKiE", "0xC00k1e", "1", type = TokenType.ERC20)
     private val secondToken = ERCToken(ATS_TAU, "CookieTokenII", "COOKiE", "0xC00k1eII", "2", type = TokenType.ERC20)
     private val map = mapOf(Pair(1, listOf(firstToken, secondToken)))
 
     private val firstTokenII = ERCToken(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1", type = TokenType.ERC20)
     private val secondTokenII = ERCToken(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2", type = TokenType.ERC20)
-
-    private val tokenRawData = listOf(
-        TokenDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),
-        TokenDetails(ATS_TAU, "0xC00k1eII", "someIconAddressII")
-    )
 
     @Before
     fun initializeMocks() {
@@ -478,7 +470,6 @@ class TokenManagerTest : RxTest() {
         val tauTokenResponse05 = Flowable.just(TokenWithBalance(ATS_TAU, "0xC00k14", BigDecimal.ONE, "1") as Token)
         val tauTokenResponse06 = Flowable.just(TokenWithBalance(ATS_TAU, "0xC00k14", BigDecimal.TEN, "1") as Token)
 
-        val atsSigmaAccount = Account(246529, chainId = ATS_SIGMA, address = "0xADDRESSxTWO")
         val sigmaTokenResponse01 = Flowable.just(TokenWithBalance(ATS_SIGMA, "0xC00k1e", 10000.toBigDecimal()) as Token)
         val sigmaTokenResponse02 = Flowable.just(TokenWithBalance(ATS_SIGMA, "0x0th3r22", 10000.toBigDecimal()) as Token)
         val sigmaTokenResponse03 = Flowable.just(TokenWithBalance(ATS_SIGMA, "0x0th3r", 10000.toBigDecimal()) as Token)
@@ -535,10 +526,10 @@ class TokenManagerTest : RxTest() {
         doNothing().whenever(rateStorage).saveRate(any(), any())
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(spy(TokenVisibilitySettings()))
         whenever(rateStorage.getRates()).thenReturn(rates)
-        tokens.forEach { (chainId, tokens) ->
+        tokens.forEach { (_, tokens) ->
             tokens.forEach { token ->
                 whenever(rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address)))
-                    .thenReturn(true, false, false, false)
+                    .thenReturn(true, true, true, true)
                 whenever(tokenManager.getTokenVisibility(token.accountAddress, token.address)).thenReturn(true)
             }
         }
@@ -558,9 +549,9 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
 
-        verify(rateStorage, times(3)).saveRate(any(), any())
-        verify(rateStorage, times(4)).shouldUpdateRate(any())
-        verify(cryptoApi, times(1)).getTokensRate(any(), any(), any())
+        verify(rateStorage, times(12)).saveRate(any(), any())
+        verify(rateStorage, times(8)).shouldUpdateRate(any())
+        verify(cryptoApi, times(4)).getTokensRate(any(), any(), any())
     }
 
     @Test
@@ -748,7 +739,6 @@ class TokenManagerTest : RxTest() {
                 } ?: false
             }
             .assertValue{result ->
-                val asd = result.tokensPerChainIdMap[ATS_TAU]?.last()
                 result.tokensPerChainIdMap[ATS_TAU]?.last()?.let{updatedToken ->
                     updatedToken.logoURI == "logoUri2"
                             && updatedToken.symbol == "NFT2"
