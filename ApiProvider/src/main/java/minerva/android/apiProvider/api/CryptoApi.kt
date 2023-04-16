@@ -20,7 +20,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Url
 
@@ -29,9 +28,9 @@ interface CryptoApi {
     @GET("simple/price")
     fun getMarkets(@Query(IDS) coinIds: String, @Query(VS_CURRENCIES) currency: String): Single<Markets>
 
-    @GET("simple/token_price/{$ID}")
+    @GET(TOKENPRICE_API_URL)
     fun getTokensRate(
-        @Path(ID) chainId: String,
+        @Query(CHAIN_ID) chainId: String,
         @Query(CONTRACT_ADDRESSES) contractAddress: String,
         @Query(VS_CURRENCIES) currency: String
     ): Single<Map<String, Map<String, String>>>
@@ -48,9 +47,6 @@ interface CryptoApi {
 
     @GET(NFT_COLLECTION_DETAILS_URL)
     fun getNftCollectionDetails(): Single<List<NftCollectionDetails>>
-
-    @GET
-    fun getLastCommitFromTokenList(@Url url: String): Single<List<CommitElement>>
 
     @GET
     fun getConnectedTokens(@Url url: String): Single<TokenBalanceResponse>
@@ -77,12 +73,13 @@ interface CryptoApi {
     fun getLastCommitFromDappsDetails(): Single<List<CommitElement>>
 
     companion object {
-        private const val ID = "id"
         private const val IDS = "ids"
-        private const val VS_CURRENCIES = "vs_currencies"
+        private const val CHAIN_ID = "chainId"
         private const val CONTRACT_ADDRESSES = "contract_addresses"
+        private const val VS_CURRENCIES = "vs_currencies"
         private const val CHAIN_DETAILS_URL = "https://chainid.network/chains_mini.json"
         private const val NFT_COLLECTION_DETAILS_URL =
             "https://raw.githubusercontent.com/lab10-coop/minerva-nft-list/main/all.json"
+        private const val TOKENPRICE_API_URL = "https://tokensowned-api.minerva.digital/eth/v1/tokenprice"
     }
 }

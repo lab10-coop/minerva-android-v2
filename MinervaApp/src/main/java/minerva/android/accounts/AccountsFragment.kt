@@ -221,7 +221,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     override fun getTokens(account: Account): List<AccountToken> = viewModel.getTokens(account)
-    fun updateTokensRate() = viewModel.updateTokensRate()
+    fun getTokensRates() = viewModel.getTokensRates()
     fun refreshBalances() = viewModel.refreshCoinBalances()
     fun setPendingAccount(index: Int, chainId: Int, pending: Boolean) {
         accountAdapter.setPending(index, chainId, pending, viewModel.areMainNetsEnabled)
@@ -268,7 +268,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                         refreshCoinBalances()
                         refreshTokensBalances()
                         discoverNewTokens()
-                        updateTokensRate()
+                        getTokensRates()
                     }
                 }
             }

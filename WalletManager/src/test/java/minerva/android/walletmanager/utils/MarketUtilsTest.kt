@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.utils
 
+import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.Markets
 import minerva.android.kotlinUtils.InvalidValue
@@ -67,33 +68,9 @@ class MarketUtilsTest {
         val result2 = MarketUtils.getCoinGeckoMarketId(accounts[1].chainId)
         val result3 = MarketUtils.getCoinGeckoMarketId(accounts[2].chainId)
 
-        result1 shouldBeEqualTo "ethereum"
-        result2 shouldBeEqualTo "poa-network"
-        result3 shouldBeEqualTo "xdai"
-    }
-
-    @Test
-    fun `get token market ids test`() {
-        NetworkManager.initialize(
-            listOf(
-                Network(chainId = 1, httpRpc = "some"),
-                Network(chainId = 42220, httpRpc = "some"),
-                Network(chainId = 100, httpRpc = "some")
-            )
-        )
-        val accounts =
-            listOf(
-                Account(1, chainId = 1),
-                Account(2, chainId = 42220),
-                Account(3, chainId = 137)
-            )
-        val result1 = MarketUtils.getTokenGeckoMarketId(accounts[0].chainId)
-        val result2 = MarketUtils.getTokenGeckoMarketId(accounts[1].chainId)
-        val result3 = MarketUtils.getTokenGeckoMarketId(accounts[2].chainId)
-
-        result1 shouldBeEqualTo "ethereum"
-        result2 shouldBeEqualTo "celo"
-        result3 shouldBeEqualTo "polygon-pos"
+        result1 shouldBeEqualTo MarketIds.ETHEREUM
+        result2 shouldBeEqualTo MarketIds.POA_NETWORK
+        result3 shouldBeEqualTo MarketIds.GNO
     }
 
     @Test

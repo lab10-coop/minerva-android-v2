@@ -122,6 +122,7 @@ class AccountsViewModel(
         refreshCoinBalances()
         refreshTokensBalances()
         discoverNewTokens()
+        getTokensRates()
         getSessions(accountManager.getAllAccounts())
     }
 
@@ -664,7 +665,7 @@ class AccountsViewModel(
         }
     }
 
-    fun updateTokensRate() {
+    fun getTokensRates() {
         launchDisposable {
             transactionRepository.getTokensRates()
                 .subscribeOn(Schedulers.io())
@@ -686,6 +687,7 @@ class AccountsViewModel(
                     onSuccess = {
                         fetchNFTData()
                         refreshTokensBalances(true)
+                        getTokensRates()
                     },
                     onError = { error -> logError("Error while token auto-discovery: $error") }
                 )
