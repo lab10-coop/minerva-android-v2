@@ -277,7 +277,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getTokensRates()).thenReturn(Completable.complete())
         viewModel.run {
             updateTokensRateLiveData.observeForever(updateTokensRateObserver)
-            getTokensRate()
+            getTokensRates()
         }
 
         updateTokensRateCaptor.run {

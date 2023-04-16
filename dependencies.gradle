@@ -55,7 +55,7 @@ ext {
     glideToVector = 'v2.0.0'
     lottieVersion = '4.1.0'
 
-    w3jVersion = '4.6.0-android'
+    w3jVersion = '4.8.8-android'
     rxbindingVersion = '3.1.0'
 
     spannableStringVersion = '1.1.0'

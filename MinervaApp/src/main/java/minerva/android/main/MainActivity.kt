@@ -83,7 +83,7 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
         if (!viewModel.shouldShowSplashScreen()) {
             shouldShowLoadingScreen(false)
             handleExecutedAccounts()
-            viewModel.getTokensRate()
+            viewModel.getTokensRates()
         }
     }
 
@@ -146,7 +146,7 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
                 stopPendingAccounts()
             })
             updateTokensRateLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as? AccountsFragment)?.updateTokensRate()
+                (getCurrentFragment() as? AccountsFragment)?.getTokensRates()
             })
         }
     }

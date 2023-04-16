@@ -73,22 +73,6 @@ object MarketUtils {
             else -> null
         }
 
-    // coingecko asset_platforms
-    fun getTokenGeckoMarketId(chainId: Int): String =
-        when (chainId) {
-            ETH_MAIN -> MarketIds.ETHEREUM
-            GNO -> MarketIds.GNO
-            MATIC -> MarketIds.POLYGON
-            BSC -> MarketIds.BSC_TOKEN
-            RSK_MAIN -> MarketIds.RSK
-            ARB_ONE -> MarketIds.ARB_ONE
-            OPT -> MarketIds.OPT
-            CELO -> MarketIds.CELO
-            AVA_C -> MarketIds.AVA_C
-            ZKS_ERA -> MarketIds.ZKS_ERA
-            else -> String.Empty
-        }
-
     // coingecko coins
     fun getCoinGeckoMarketId(chainId: Int): String =
         when (chainId) {
