@@ -41,6 +41,9 @@ val Int.Companion.TWO: Int
 val Int.Companion.THREE: Int
     get() = 3
 
+val Int.Companion.EIGHT: Int
+    get() = 8
+
 val Int.Companion.OneElement: Int
     get() = 1
 
