@@ -17,6 +17,7 @@ validateBranch:
       - master
       - production
   script:
+    - base64 -d $GOOGLE_SERVICES_JSON_BASE64 > MinervaApp/google-services.json
     - java -version
     - ./gradlew test
 
@@ -27,6 +28,7 @@ validateLint:
       - master
       - production
   script:
+    - base64 -d $GOOGLE_SERVICES_JSON_BASE64 > MinervaApp/google-services.json
     - java -version
     - ./gradlew lint
 
