@@ -37,6 +37,7 @@ distributeStagingBuild:
       - master
 
   script:
+    - base64 -d $GOOGLE_SERVICES_JSON_BASE64 > MinervaApp/google-services.json
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
@@ -63,6 +64,7 @@ alphaGooglePlayStore:
       - production
 
   script:
+    - base64 -d $GOOGLE_SERVICES_JSON_BASE64 > MinervaApp/google-services.json
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
