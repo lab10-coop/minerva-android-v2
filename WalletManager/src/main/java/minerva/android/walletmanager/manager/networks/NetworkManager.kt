@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.networks
 
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
@@ -26,7 +25,7 @@ object NetworkManager {
 
     fun initialize(networks: List<Network>) {
         if (areThereActiveNetworks(networks)) throw NoActiveNetworkThrowable()
-        this.networks = networks.filter { isActiveNetwork(it) } + networks.filter { !isActiveNetwork(it) }
+        this.networks = networks.filter { it.isActive } + networks.filter { !it.isActive }
     }
 
     fun getNetwork(chainId: Int): Network = networkMap.value(chainId)
@@ -37,7 +36,7 @@ object NetworkManager {
     fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_TEST_NETWORK_INDEX]
 
     fun getNetworkByIndex(index: Int): Network =
-        if (networks.size > ONE_ELEMENT && isActiveNetwork(networks[index])) networks[index]
+        if (networks.size > ONE_ELEMENT && networks[index].isActive) networks[index]
         else firstDefaultValueNetwork()
 
     fun getStringColor(network: Network, opacity: Boolean): String {
@@ -55,9 +54,7 @@ object NetworkManager {
             else -> false
         }
 
-    private fun isActiveNetwork(network: Network): Boolean = network.httpRpc != String.Empty
-
-    private fun areThereActiveNetworks(list: List<Network>): Boolean = list.none { isActiveNetwork(it) }
+    private fun areThereActiveNetworks(list: List<Network>): Boolean = list.none { it.isActive }
 }
 
 private const val ONE_ELEMENT = 1

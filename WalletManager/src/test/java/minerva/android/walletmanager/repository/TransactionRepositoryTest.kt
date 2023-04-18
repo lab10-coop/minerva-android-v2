@@ -81,7 +81,7 @@ class TransactionRepositoryTest : RxTest() {
     @Before
     fun initialize() {
         NetworkManager.initialize(MockDataProvider.networks)
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
@@ -153,8 +153,8 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
-    fun `send transaction success with resolved ENS test when there isno  wss uri available`() {
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "httpRpc", wsRpc = "")))
+    fun `send transaction success with resolved ENS test when there isno wss uri available`() {
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         whenever(blockchainTransactionRepository.transferNativeCoin(any(), any(), any()))
             .thenReturn(
                 Single.just(
@@ -192,8 +192,6 @@ class TransactionRepositoryTest : RxTest() {
             listOf(
                 Network(
                     chainId = 1,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri"
                 )
             )
         )
@@ -234,8 +232,6 @@ class TransactionRepositoryTest : RxTest() {
             listOf(
                 Network(
                     chainId = 1,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri"
                 )
             )
         )
@@ -558,10 +554,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    chainId = 1,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri",
-                    gasPriceOracle = ""
+                    chainId = 12345678
                 )
             )
         )
@@ -570,7 +563,7 @@ class TransactionRepositoryTest : RxTest() {
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 12345678))
             .test()
             .assertComplete()
             .assertValue {
@@ -583,10 +576,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    chainId = 56,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri",
-                    gasPriceOracle = "url"
+                    chainId = 56
                 )
             )
         )
@@ -620,14 +610,12 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    chainId = 1,
-                    httpRpc = "httpRpc",
-                    wsRpc = "wssuri"
+                    chainId = 12345
                 )
             )
         )
         whenever(blockchainTransactionRepository.getTransactionCosts(any(), eq(null))).doReturn(Single.error(error))
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 12345))
             .test()
             .assertError(error)
     }
@@ -904,7 +892,7 @@ class TransactionRepositoryTest : RxTest() {
             ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1", type = TokenType.ERC20),
             ERCToken(ChainId.ETH_RIN, tag = "tag2", accountAddress = "address2", type = TokenType.ERC20)
         )
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         repository.updateTokens()
             .test()
@@ -1048,18 +1036,6 @@ class TransactionRepositoryTest : RxTest() {
         val accounts = listOf(
             Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
         )
-        val accountToken =
-            AccountToken(
-                ERCToken(
-                    ChainId.ETH_RIN,
-                    "one",
-                    address = "address",
-                    decimals = "10",
-                    accountAddress = "address",
-                    type = TokenType.SUPER_TOKEN
-                ),
-                rawBalance = BigDecimal.TEN
-            )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
         whenever(tokenManager.getSuperTokenBalance(any())).thenReturn(

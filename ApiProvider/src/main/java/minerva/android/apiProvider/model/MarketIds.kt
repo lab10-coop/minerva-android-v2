@@ -4,7 +4,7 @@ package minerva.android.apiProvider.model
 annotation class MarketIds {
     companion object {
         // native coin: https://www.coingecko.com/api/documentations/v3#/coins/get_coins_list
-        const val MATIC = "matic-network"
+        const val POLYGON = "matic-network"
         const val BSC_COIN = "binancecoin"
         const val POA_NETWORK = "poa-network"
         const val AVAX = "avalanche-2"

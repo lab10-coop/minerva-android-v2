@@ -10,7 +10,6 @@ import androidx.lifecycle.Observer
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.functions.Function3
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.gas_price_selector.view.*
 import minerva.android.R
@@ -215,9 +214,9 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
 
 
     private fun getDefaultTxType() =
-        if (isMaticNetwork(viewModel.account.chainId)) TxType.STANDARD else TxType.FAST
+        if (isPolygonNetwork(viewModel.account.chainId)) TxType.STANDARD else TxType.FAST
 
-    private fun isMaticNetwork(chainId: Int?) = chainId == ChainId.MATIC
+    private fun isPolygonNetwork(chainId: Int?) = chainId == ChainId.POLYGON
 
     private fun setTxCost(txCost: TransactionCost, account: Account?) = with(binding.sendNftForm) {
         transactionCost.text = getString(
@@ -368,7 +367,6 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
         @JvmStatic
         fun newInstance() = SendNftFragment()
         private const val EMPTY_VALUE = "-.--"
-        private const val INVALID_INDEX = -1
         private const val DOT = "."
     }
 }

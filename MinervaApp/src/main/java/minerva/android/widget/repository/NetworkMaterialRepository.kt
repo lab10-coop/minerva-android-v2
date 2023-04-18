@@ -18,7 +18,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_16
-import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POLYGON
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
@@ -57,7 +57,7 @@ fun getMainIcon(chainId: Int): Int =
         ETH_KOV, ETH_RIN, ETH_ROP -> R.drawable.ic_etherium_test
         ETH_GOR -> R.drawable.ic_gorli
         ETH_SEP -> R.drawable.ic_ethereum_l2
-        MATIC, MUMBAI -> R.drawable.ic_polygon_matic
+        POLYGON, MUMBAI -> R.drawable.ic_polygon_matic
         BSC, BSC_TESTNET -> R.drawable.ic_bsc
         RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk
         ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_arbitrum
@@ -79,7 +79,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
         ETH_KOV, ETH_RIN, ETH_ROP, ETH_GOR, ETH_SEP -> R.drawable.ic_ethereum_token_test
         POA_SKL -> R.drawable.ic_skl_token
         LUKSO_14, LUKSO_16 -> R.drawable.ic_lukso
-        MATIC, MUMBAI -> R.drawable.ic_polygon_matic_token
+        POLYGON, MUMBAI -> R.drawable.ic_polygon_matic_token
         BSC, BSC_TESTNET -> R.drawable.ic_bsc_token
         RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk_token
         ARB_ONE, ARB_RIN, ARB_GOR -> R.drawable.ic_ethereum_l2

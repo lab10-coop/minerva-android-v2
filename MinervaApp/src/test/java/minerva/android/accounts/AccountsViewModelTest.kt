@@ -61,7 +61,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountRemoveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     private val loadingObserver: Observer<Event<Boolean>> = mock()
-    private val loadingCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
 
     private val ratesMapLiveData: LiveData<Event<Unit>> = mock()
     private val walletConfigLiveData: LiveData<Event<WalletConfig>> = mock()
@@ -456,7 +455,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `check creating new account flow`() {
         val error = Throwable("error")
-        NetworkManager.initialize(listOf(Network(chainId = 3, httpRpc = "some_rpc")))
+        NetworkManager.initialize(listOf(Network(chainId = 3)))
         whenever(accountManager.createOrUnhideAccount(any())).thenReturn(
             Single.just("Cookie Account"),
             Single.error(error)
@@ -499,7 +498,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `show pending account test test`() {
-        NetworkManager.initialize(listOf(Network(chainId = 99, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = 99)))
         val accounts = listOf(
             Account(1, address = "address1", chainId = 99),
             Account(2, address = "address2", chainId = 99)

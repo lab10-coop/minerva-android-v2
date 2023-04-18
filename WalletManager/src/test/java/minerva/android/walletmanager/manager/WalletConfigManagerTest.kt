@@ -137,7 +137,7 @@ class WalletConfigManagerTest {
     @Test
     fun `Create default walletConfig should return success`() {
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
-        NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 0)))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertSubscribed().awaitCount(1).assertComplete()
     }
@@ -311,7 +311,7 @@ class WalletConfigManagerTest {
     @Test
     fun `create default walletConfig should return success`() {
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
-        NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 0)))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertNoErrors()
     }
@@ -319,7 +319,7 @@ class WalletConfigManagerTest {
     @Test
     fun `create default walletConfig should return error`() {
         val throwable = Throwable()
-        NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 0)))
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(throwable))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertSubscribed().awaitCount(1).assertError(throwable)

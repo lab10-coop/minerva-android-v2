@@ -13,7 +13,6 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.NftContent
-import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
@@ -43,10 +42,6 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         NftCollectionViewModel(accountManager, tokenManager, transactionRepository, walletActionsRepository, accountId, collectionAddressToJson, isGroup).apply {
             transaction = Transaction()
         }
-
-
-    private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
-    private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
     private val transactionCompletedObserver: Observer<Event<Any>> = mock()
     private val transactionCompletedCaptor: KArgumentCaptor<Event<Any>> = argumentCaptor()
@@ -154,7 +149,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
         viewModel.selectedItem = NftItem(isERC1155 = false)
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             account
@@ -173,7 +168,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
         viewModel.selectedItem = NftItem(isERC1155 = false, balance = BigDecimal(13))
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             account
@@ -193,7 +188,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
         viewModel.selectedItem = NftItem(isERC1155 = true)
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             account
@@ -212,7 +207,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
         viewModel.selectedItem = NftItem(isERC1155 = true, balance = BigDecimal(13))
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             account
@@ -232,7 +227,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
             Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
 
         viewModel.selectedItem = NftItem(isERC1155 = true)
         viewModel.run {
@@ -253,7 +248,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
         viewModel.selectedItem = NftItem(isERC1155 = true)
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             account

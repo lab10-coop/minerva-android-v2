@@ -45,7 +45,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_16
-import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POLYGON
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
@@ -63,6 +63,16 @@ import minerva.android.walletmanager.model.mappers.TokenDataToERCToken
 import minerva.android.walletmanager.model.mappers.TokenToAssetBalanceErrorMapper
 import minerva.android.walletmanager.model.mappers.TokensOwnedToERCToken
 import minerva.android.walletmanager.model.minervaprimitives.account.*
+import minerva.android.walletmanager.model.network.Network.Companion.ARB_ONE_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.ATS_SIGMA_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.AVA_C_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.BSC_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.CELO_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.ETH_MAIN_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.GNO_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.POLYGON_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.OPT_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.ZKS_ERA_SHORT_NAME
 import minerva.android.walletmanager.model.token.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
@@ -409,7 +419,7 @@ class TokenManagerImpl(
         when (account.chainId) {
             ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, GNO_CHAI, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI, LUKSO_16, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, OPT_GOR, OPT_BED, ZKS_ALPHA, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
-            GNO, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C, ZKS_ERA -> getTokensOwned(account)
+            GNO, POLYGON, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C, ZKS_ERA -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
@@ -662,7 +672,7 @@ class TokenManagerImpl(
     private fun getAPIKey(chainId: Int) =
         when (chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP -> ETHERSCAN_KEY
-            MATIC -> POLYGONSCAN_KEY
+            POLYGON -> POLYGONSCAN_KEY
             BSC, BSC_TESTNET -> BSCSCAN_KEY
             else -> throw NetworkNotFoundThrowable()
         }
@@ -690,7 +700,7 @@ class TokenManagerImpl(
             GNO -> GNO_TOKEN_BALANCE_URL
             GNO_CHAI -> GNO_CHAI_TOKEN_BALANCE_URL
             LUKSO_14 -> LUKSO_TOKEN_BALANCE_URL
-            MATIC -> POLYGON_TOKEN_BALANCE_URL
+            POLYGON -> POLYGON_TOKEN_BALANCE_URL
             BSC -> BINANCE_SMART_CHAIN_MAINNET_TOKEN_BALANCE_URL
             BSC_TESTNET -> BINANCE_SMART_CHAIN_TESTNET_TOKEN_BALANCE_URL
             else -> throw NetworkNotFoundThrowable()
@@ -698,16 +708,16 @@ class TokenManagerImpl(
 
     @VisibleForTesting
     override fun getTokensOwnedURL(chainId: Int, menuCase: Boolean): String = when (chainId) {
-        GNO -> String.format(TOKENSOWNED_BASE_API_ADDRESS, GNO_SHORT_NAME)
-        MATIC -> String.format(TOKENSOWNED_BASE_API_ADDRESS, MATIC_SHORT_NAME)
-        ATS_SIGMA -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ATS_SIGMA_SHORT_NAME)
-        BSC -> String.format(TOKENSOWNED_BASE_API_ADDRESS, BSC_SHORT_NAME)
-        ETH_MAIN -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ETH_MAIN_SHORT_NAME)
-        ARB_ONE -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ARB_ONE_SHORT_NAME)
-        OPT -> String.format(TOKENSOWNED_BASE_API_ADDRESS, OPT_SHORT_NAME)
-        CELO -> String.format(TOKENSOWNED_BASE_API_ADDRESS, CELO_SHORT_NAME)
-        AVA_C -> String.format(TOKENSOWNED_BASE_API_ADDRESS, AVA_C_SHORT_NAME)
-        ZKS_ERA -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ZKS_ERA_SHORT_NAME)
+        GNO -> String.format(TOKENSOWNED_BASE_API_URL, GNO_SHORT_NAME)
+        POLYGON -> String.format(TOKENSOWNED_BASE_API_URL, POLYGON_SHORT_NAME)
+        ATS_SIGMA -> String.format(TOKENSOWNED_BASE_API_URL, ATS_SIGMA_SHORT_NAME)
+        BSC -> String.format(TOKENSOWNED_BASE_API_URL, BSC_SHORT_NAME)
+        ETH_MAIN -> String.format(TOKENSOWNED_BASE_API_URL, ETH_MAIN_SHORT_NAME)
+        ARB_ONE -> String.format(TOKENSOWNED_BASE_API_URL, ARB_ONE_SHORT_NAME)
+        OPT -> String.format(TOKENSOWNED_BASE_API_URL, OPT_SHORT_NAME)
+        CELO -> String.format(TOKENSOWNED_BASE_API_URL, CELO_SHORT_NAME)
+        AVA_C -> String.format(TOKENSOWNED_BASE_API_URL, AVA_C_SHORT_NAME)
+        ZKS_ERA -> String.format(TOKENSOWNED_BASE_API_URL, ZKS_ERA_SHORT_NAME)
         else -> if (menuCase) { "" } else { throw NetworkNotFoundThrowable() }
     }
 
@@ -1112,16 +1122,5 @@ class TokenManagerImpl(
         private const val ERC721_TX_ACTION = "tokennfttx"
         private const val TOKEN_ADDRESS_SEPARATOR = ","
         private const val TOKEN_LIMIT_PER_CALL = 25
-        private const val TOKENSOWNED_BASE_API_ADDRESS = "https://tokensowned-api.minerva.digital/%s/v1/"
-        private const val GNO_SHORT_NAME = "xdai"
-        private const val MATIC_SHORT_NAME = "matic"
-        private const val ATS_SIGMA_SHORT_NAME = "artis_s1"
-        private const val BSC_SHORT_NAME = "bsc"
-        private const val ETH_MAIN_SHORT_NAME = "eth"
-        private const val ARB_ONE_SHORT_NAME = "arbitrum"
-        private const val OPT_SHORT_NAME = "optimism"
-        private const val CELO_SHORT_NAME = "celo"
-        private const val AVA_C_SHORT_NAME = "avalanche"
-        private const val ZKS_ERA_SHORT_NAME = "zksync"
     }
 }
