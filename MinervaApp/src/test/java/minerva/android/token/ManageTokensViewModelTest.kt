@@ -2,7 +2,6 @@ package minerva.android.token
 
 import com.nhaarman.mockitokotlin2.*
 import minerva.android.BaseViewModelTest
-import minerva.android.kotlinUtils.ONE
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -12,7 +11,6 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -26,9 +24,9 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         ManageTokensViewModel(accountManager, localStorage, tokenManager)
 
     private val networks = listOf(
-        Network(chainId = 1, httpRpc = "address", testNet = true),
-        Network(chainId = 2, httpRpc = "address", testNet = true),
-        Network(chainId = 3, httpRpc = "address", testNet = true, token = "cookie")
+        Network(chainId = 1, testNet = true),
+        Network(chainId = 2, testNet = true),
+        Network(chainId = 3, testNet = true, token = "cookie")
     )
 
     private val account = Account(

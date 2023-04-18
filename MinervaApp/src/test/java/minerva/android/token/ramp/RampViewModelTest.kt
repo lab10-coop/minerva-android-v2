@@ -72,7 +72,7 @@ class RampViewModelTest : BaseViewModelTest() {
     @Test
     fun `check Creating new Account flow`() {
         val error = Throwable("error")
-        NetworkManager.initialize(listOf(Network(chainId = 3, httpRpc = "some_rpc")))
+        NetworkManager.initialize(listOf(Network(chainId = 3)))
         whenever(accountManager.createOrUnhideAccount(any())).thenReturn(Single.just("Cookie Account"), Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.run {

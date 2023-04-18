@@ -42,9 +42,9 @@ class OrderManagerTest : RxTest() {
     )
 
     private val networks = listOf(
-        Network(chainId = 1, httpRpc = "some"),
-        Network(chainId = 2, httpRpc = "some"),
-        Network(chainId = 3, httpRpc = "some")
+        Network(chainId = 1),
+        Network(chainId = 2),
+        Network(chainId = 3)
     )
 
     private val walletConfig = WalletConfig(0, identities, values, services)

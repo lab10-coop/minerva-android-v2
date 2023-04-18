@@ -176,8 +176,8 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
     fun `get available for test networks test`() {
         NetworkManager.initialize(
             listOf(
-                Network(name = "Groli", chainId = 5, testNet = true, httpRpc = "url"),
-                Network(name = "xDai", chainId = 2, testNet = true, httpRpc = "url")
+                Network(name = "Groli", chainId = 5, testNet = true),
+                Network(name = "xDai", chainId = 2, testNet = true)
             )
         )
         whenever(accountManager.areMainNetworksEnabled).thenReturn(false)
@@ -203,8 +203,8 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
     fun `get available for main networks test`() {
         NetworkManager.initialize(
             listOf(
-                Network(name = "Ethereum", chainId = 1, testNet = false, httpRpc = "url"),
-                Network(name = "xDai", chainId = 2, testNet = false, httpRpc = "url")
+                Network(name = "Ethereum", chainId = 1, testNet = false),
+                Network(name = "xDai", chainId = 2, testNet = false)
             )
         )
         whenever(accountManager.areMainNetworksEnabled).thenReturn(true)
@@ -256,7 +256,7 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `creating new account test`() {
-        NetworkManager.initialize(listOf(Network(chainId = 3, name = "xDai", httpRpc = "some_rpc")))
+        NetworkManager.initialize(listOf(Network(chainId = 3, name = "xDai")))
         whenever(accountManager.createOrUnhideAccount(any())).thenReturn(Single.just("Cookie Account"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.run {
@@ -278,7 +278,7 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `approve session test with close app state`() {
-        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false)))
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "key", "bridge")
         viewModel.account = Account(1, chainId = 2)

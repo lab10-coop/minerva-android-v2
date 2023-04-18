@@ -39,7 +39,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
-import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POLYGON
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ERA
@@ -374,7 +374,7 @@ class TransactionRepositoryImpl(
                 OPT -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
                 GNO -> fetchCoinRate(MarketIds.GNO).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
-                MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
+                POLYGON -> fetchCoinRate(MarketIds.POLYGON).map { markets -> markets.polygonFiatPrice?.getRate(currentFiat) }
                 BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
                 CELO -> fetchCoinRate(MarketIds.CELO).map { markets -> markets.celoFiatPrice?.getRate(currentFiat) }
                 AVA_C -> fetchCoinRate(MarketIds.AVAX).map { markets -> markets.avaxFiatPrice?.getRate(currentFiat) }

@@ -60,9 +60,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val dappCaptor: KArgumentCaptor<Event<Dapp>> = argumentCaptor()
 
     private val networks = listOf(
-        Network(chainId = 1, httpRpc = "address", testNet = true),
-        Network(chainId = 2, httpRpc = "address", testNet = true),
-        Network(chainId = 3, httpRpc = "address", testNet = true, token = "cookie")
+        Network(chainId = 1, testNet = true),
+        Network(chainId = 2, testNet = true),
+        Network(chainId = 3, testNet = true, token = "cookie")
     )
 
     @Before
@@ -102,7 +102,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             getAccount(0, String.Empty)
@@ -406,7 +406,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `is update fiat rate and recalculate fiat amount valid for coins`() {
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1, coinRate = 2.0))
         whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             getAccount(0, String.Empty)
             updateFiatRate()
@@ -427,7 +427,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         )
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1, coinRate = 2.0))
         whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.just(dappUIDetails))
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             sponsoredDappLiveData.observeForever(dappObserver)
             getAccount(0, String.Empty)
@@ -454,7 +454,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             )
         )
         whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
-        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        NetworkManager.initialize(listOf(Network(chainId = 1)))
         viewModel.run {
             getAccount(0, String.Empty)
             updateTokenAddress(1)

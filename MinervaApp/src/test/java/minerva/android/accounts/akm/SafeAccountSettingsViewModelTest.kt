@@ -36,10 +36,10 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     }
 
     val networks = listOf(
-        Network(chainId = 1, httpRpc = "address", testNet = true),
-        Network(chainId = 2, httpRpc = "address", testNet = true),
-        Network(chainId = 3, httpRpc = "address", testNet = true),
-        Network(chainId = 4, httpRpc = "address", testNet = true)
+        Network(chainId = 1, testNet = true),
+        Network(chainId = 2, testNet = true),
+        Network(chainId = 3, testNet = true),
+        Network(chainId = 4, testNet = true)
     )
 
     @Test
