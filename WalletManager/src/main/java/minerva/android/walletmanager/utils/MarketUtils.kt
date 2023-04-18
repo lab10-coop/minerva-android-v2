@@ -11,7 +11,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
-import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POLYGON
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
@@ -64,7 +64,7 @@ object MarketUtils {
             ARB_ONE -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
             OPT -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
             GNO -> markets.daiFiatPrice?.getRate(currentFiatCurrency)
-            MATIC -> markets.maticFiatPrice?.getRate(currentFiatCurrency)
+            POLYGON -> markets.polygonFiatPrice?.getRate(currentFiatCurrency)
             BSC -> markets.bscFiatPrice?.getRate(currentFiatCurrency)
             RSK_MAIN -> markets.rskFiatPrice?.getRate(currentFiatCurrency)
             CELO -> markets.celoFiatPrice?.getRate(currentFiatCurrency)
@@ -79,7 +79,7 @@ object MarketUtils {
             ETH_MAIN -> MarketIds.ETHEREUM
             POA_CORE -> MarketIds.POA_NETWORK
             GNO -> MarketIds.GNO
-            MATIC -> MarketIds.MATIC
+            POLYGON -> MarketIds.POLYGON
             BSC -> MarketIds.BSC_COIN
             RSK_MAIN -> MarketIds.RSK
             ARB_ONE -> MarketIds.ETHEREUM

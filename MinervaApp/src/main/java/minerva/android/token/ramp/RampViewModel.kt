@@ -102,11 +102,11 @@ class RampViewModel(
                     isSelected = true
                 ),
                 RampCrypto(
-                    ChainId.MATIC,
+                    ChainId.POLYGON,
                     "MATIC",
                     "MATIC_MATIC",
                     R.drawable.ic_polygon_matic_token,
-                    getNetworkName(ChainId.MATIC)
+                    getNetworkName(ChainId.POLYGON)
                 ),
                 RampCrypto(
                     ChainId.GNO,
@@ -182,25 +182,25 @@ class RampViewModel(
                 ),
 
                 RampCrypto(
-                    ChainId.MATIC,
+                    ChainId.POLYGON,
                     "DAI",
                     "MATIC_DAI",
                     R.drawable.ic_dai_token,
-                    getNetworkName(ChainId.MATIC)
+                    getNetworkName(ChainId.POLYGON)
                 ),
                 RampCrypto(
-                    ChainId.MATIC,
+                    ChainId.POLYGON,
                     "USDC",
                     "MATIC_USDC",
                     R.drawable.ic_usdc_token,
-                    getNetworkName(ChainId.MATIC)
+                    getNetworkName(ChainId.POLYGON)
                 ),
                 RampCrypto(
-                    ChainId.MATIC,
+                    ChainId.POLYGON,
                     "ETH",
                     "MATIC_ETH",
                     R.drawable.ic_ethereum_token,
-                    getNetworkName(ChainId.MATIC)
+                    getNetworkName(ChainId.POLYGON)
                 ),
                 RampCrypto(
                     ChainId.OPT,

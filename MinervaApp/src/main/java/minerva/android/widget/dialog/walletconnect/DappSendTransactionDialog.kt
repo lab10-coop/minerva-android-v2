@@ -80,9 +80,9 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
     }
 
 
-    private fun getDefaultTxType(chainId: Int?) = if (isMaticNetwork(chainId)) TxType.STANDARD else TxType.FAST
+    private fun getDefaultTxType(chainId: Int?) = if (isPolygonNetwork(chainId)) TxType.STANDARD else TxType.FAST
 
-    private fun isMaticNetwork(chainId: Int?) = chainId == ChainId.MATIC
+    private fun isPolygonNetwork(chainId: Int?) = chainId == ChainId.POLYGON
 
     private fun prepareTransactions(transaction: WalletConnectTransaction, account: Account?) = with(binding) {
         when (transaction.transactionType) {

@@ -85,7 +85,7 @@ class MarketUtilsTest {
             listOf(
                 Markets(ethFiatPrice = FiatPrice(eur = 1.0)),
                 Markets(poaFiatPrice = FiatPrice(gbp = 3.0)),
-                Markets(maticFiatPrice = FiatPrice(pln = 2.0))
+                Markets(polygonFiatPrice = FiatPrice(pln = 2.0))
             )
 
         val result1 = MarketUtils.getRate(1, markets[0], "EUR")

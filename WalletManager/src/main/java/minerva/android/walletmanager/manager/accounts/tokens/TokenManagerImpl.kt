@@ -45,7 +45,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_16
-import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POLYGON
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
@@ -70,7 +70,7 @@ import minerva.android.walletmanager.model.network.Network.Companion.BSC_SHORT_N
 import minerva.android.walletmanager.model.network.Network.Companion.CELO_SHORT_NAME
 import minerva.android.walletmanager.model.network.Network.Companion.ETH_MAIN_SHORT_NAME
 import minerva.android.walletmanager.model.network.Network.Companion.GNO_SHORT_NAME
-import minerva.android.walletmanager.model.network.Network.Companion.MATIC_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.POLYGON_SHORT_NAME
 import minerva.android.walletmanager.model.network.Network.Companion.OPT_SHORT_NAME
 import minerva.android.walletmanager.model.network.Network.Companion.ZKS_ERA_SHORT_NAME
 import minerva.android.walletmanager.model.token.*
@@ -419,7 +419,7 @@ class TokenManagerImpl(
         when (account.chainId) {
             ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, GNO_CHAI, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI, LUKSO_16, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, OPT_GOR, OPT_BED, ZKS_ALPHA, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
-            GNO, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C, ZKS_ERA -> getTokensOwned(account)
+            GNO, POLYGON, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C, ZKS_ERA -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
@@ -672,7 +672,7 @@ class TokenManagerImpl(
     private fun getAPIKey(chainId: Int) =
         when (chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP -> ETHERSCAN_KEY
-            MATIC -> POLYGONSCAN_KEY
+            POLYGON -> POLYGONSCAN_KEY
             BSC, BSC_TESTNET -> BSCSCAN_KEY
             else -> throw NetworkNotFoundThrowable()
         }
@@ -700,7 +700,7 @@ class TokenManagerImpl(
             GNO -> GNO_TOKEN_BALANCE_URL
             GNO_CHAI -> GNO_CHAI_TOKEN_BALANCE_URL
             LUKSO_14 -> LUKSO_TOKEN_BALANCE_URL
-            MATIC -> POLYGON_TOKEN_BALANCE_URL
+            POLYGON -> POLYGON_TOKEN_BALANCE_URL
             BSC -> BINANCE_SMART_CHAIN_MAINNET_TOKEN_BALANCE_URL
             BSC_TESTNET -> BINANCE_SMART_CHAIN_TESTNET_TOKEN_BALANCE_URL
             else -> throw NetworkNotFoundThrowable()
@@ -709,7 +709,7 @@ class TokenManagerImpl(
     @VisibleForTesting
     override fun getTokensOwnedURL(chainId: Int, menuCase: Boolean): String = when (chainId) {
         GNO -> String.format(TOKENSOWNED_BASE_API_URL, GNO_SHORT_NAME)
-        MATIC -> String.format(TOKENSOWNED_BASE_API_URL, MATIC_SHORT_NAME)
+        POLYGON -> String.format(TOKENSOWNED_BASE_API_URL, POLYGON_SHORT_NAME)
         ATS_SIGMA -> String.format(TOKENSOWNED_BASE_API_URL, ATS_SIGMA_SHORT_NAME)
         BSC -> String.format(TOKENSOWNED_BASE_API_URL, BSC_SHORT_NAME)
         ETH_MAIN -> String.format(TOKENSOWNED_BASE_API_URL, ETH_MAIN_SHORT_NAME)

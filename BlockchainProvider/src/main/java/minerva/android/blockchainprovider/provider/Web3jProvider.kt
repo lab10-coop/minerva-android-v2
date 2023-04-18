@@ -9,7 +9,7 @@ import org.web3j.utils.Async
 object Web3jProvider {
 
     private const val ENS = 303303303
-    private const val CHAIN_ID_MATIC = 137
+    private const val CHAIN_ID_POLYGON = 137
     private const val CHAIN_ID_GNO = 100
     private const val API_KEY_HEADER = "X-API-KEY"
 
@@ -20,7 +20,7 @@ object Web3jProvider {
             Async.run {
                 Web3j.build(HttpService(blockchainUrl.value).apply {
                     when (blockchainUrl.key) {
-                        CHAIN_ID_MATIC, CHAIN_ID_GNO -> addHeader(API_KEY_HEADER, BuildConfig.X_API_KEY)
+                        CHAIN_ID_POLYGON, CHAIN_ID_GNO -> addHeader(API_KEY_HEADER, BuildConfig.X_API_KEY)
                     }
                 })
             }.join()

@@ -3,6 +3,41 @@ package minerva.android.walletmanager.model.network
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.BuildConfig
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_RIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_FUJ
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_ALF
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_BAK
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
+import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_16
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POLYGON
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_BED
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ALPHA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ERA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
+import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO_CHAI
+
 import minerva.android.walletmanager.model.token.ERCToken
 import java.math.BigInteger
 
@@ -26,30 +61,31 @@ data class Network(
     val httpRpc: String get() =
         when (chainId) {
             // mainnets
-            1, 100, 137, 10, 324, 42161, 43114, 56, 42220, 30 -> String.format(BuildConfig.RPC_HTTP_URL, shortName())
-            246529 -> "https://rpc.sigma1.artis.network"
-            99 -> "https://core.poanetwork.dev"
+            ETH_MAIN, GNO, POLYGON, OPT, ZKS_ERA, ARB_ONE, AVA_C, BSC, CELO, RSK_MAIN ->
+                String.format(BuildConfig.RPC_HTTP_URL, shortName())
+            ATS_SIGMA -> ATS_SIGMA_HTTP_RPC_URL
+            POA_CORE -> POA_CORE_HTTP_RPC_URL
 
             // testnets
-            11155111 -> "https://rpc.sepolia.org/"
-            5, 42, 4, 3 -> String.format(INFURA_HTTP_RPC_URL, shortName(), BuildConfig.INFURA_API_KEY)
-            10200 -> "https://rpc.chiadochain.net"
-            80001 -> "https://matic-mumbai.chainstacklabs.com"
-            69 -> "https://kovan.optimism.io"
-            420 -> "https://goerli.optimism.io"
-            28528 -> "https://alpha-1-replica-2.bedrock-goerli.optimism.io/"
-            280 -> "https://zksync2-testnet.zksync.dev"
-            421613 -> "https://goerli-rollup.arbitrum.io/rpc"
-            43113 -> "https://api.avax-test.network/ext/bc/C/rpc"
-            97 -> "https://data-seed-prebsc-1-s1.binance.org:8545/"
-            44787 -> "https://alfajores-forno.celo-testnet.org"
-            62320 -> "https://baklava-forno.celo-testnet.org"
-            2828 -> "https://rpc.l16.lukso.network"
-            246785 -> "https://rpc.tau1.artis.network"
-            421611 -> "https://rinkeby.arbitrum.io/rpc"
-            22 -> "https://rpc.l14.lukso.network"
-            77 -> "https://sokol.poa.network"
-            31 -> "https://public-node.testnet.rsk.co"
+            ETH_SEP -> ETH_SEP_HTTP_RPC_URL
+            ETH_GOR, ETH_KOV, ETH_RIN, ETH_ROP -> String.format(INFURA_HTTP_RPC_URL, shortName(), BuildConfig.INFURA_API_KEY)
+            GNO_CHAI -> GNO_CHIA_HTTP_RPC_URL
+            MUMBAI -> MUMBAI_HTTP_RPC_URL
+            OPT_KOV -> OPT_KOV_HTTP_RPC_URL
+            OPT_GOR -> OPT_GOR_HTTP_RPC_URL
+            OPT_BED -> OPT_BED_HTTP_RPC_URL
+            ZKS_ALPHA -> ZKS_ALPHA_HTTP_RPC_URL
+            ARB_GOR -> ARB_GOR_HTTP_RPC_URL
+            AVA_FUJ -> AVA_FUJ_HTTP_RPC_URL
+            BSC_TESTNET -> BSC_TESTNET_HTTP_RPC_URL
+            CELO_ALF -> CELO_ALF_HTTP_RPC_URL
+            CELO_BAK -> CELO_BAK_HTTP_RPC_URL
+            LUKSO_16 -> LUKSO_16_HTTP_RPC_URL
+            ATS_TAU -> ATS_TAU_HTTP_RPC_URL
+            ARB_RIN -> ARB_RIN_HTTP_RPC_URL
+            LUKSO_14 -> LUKSO_14_HTTP_RPC_URL
+            POA_SKL -> POA_SKL_HTTP_RPC_URL
+            RSK_TEST -> RSK_MAIN_HTTP_RPC_URL
 
             else -> ""
         }
@@ -57,14 +93,14 @@ data class Network(
     val wsRpc: String get() =
         when (chainId) {
             // mainnets
-            1, 100, 137, 10, 324, 42161, 43114, 56, 42220 -> String.format(BuildConfig.RPC_WS_URL, shortName())
-            246529 -> "wss://ws.sigma1.artis.network"
+            ETH_MAIN, GNO, POLYGON, OPT, ZKS_ERA, 42161, 43114, 56, 42220 -> String.format(BuildConfig.RPC_WS_URL, shortName())
+            ATS_SIGMA -> ATS_SIGMA_WS_RPC_URL
 
             // testnets
-            5, 42, 4, 3 -> String.format(INFURA_WS_RPC_URL, shortName(), BuildConfig.INFURA_API_KEY)
-            69 -> "wss://ws-kovan.optimism.io"
-            246785 -> "wss://ws.tau1.artis.network"
-            77 -> "ws://sokol.poa.network:8546"
+            ETH_GOR, ETH_KOV, ETH_RIN, ETH_ROP -> String.format(INFURA_WS_RPC_URL, shortName(), BuildConfig.INFURA_API_KEY)
+            OPT_KOV -> ETH_KOV_WS_RPC_URL
+            ATS_TAU -> ATS_TAU_WS_RPC_URL
+            POA_SKL -> POA_SKL_WS_RPC_URL
 
             else -> ""
         }
@@ -72,30 +108,63 @@ data class Network(
     private fun shortName() =
         when (chainId) {
             // mainnets
-            1 -> ETH_MAIN_SHORT_NAME
-            100 -> GNO_SHORT_NAME
-            137 -> MATIC_SHORT_NAME
-            10 -> OPT_SHORT_NAME
-            324 -> ZKS_ERA_SHORT_NAME
-            42161 -> ARB_ONE_SHORT_NAME
-            43114 -> AVA_C_SHORT_NAME
-            56 -> BSC_SHORT_NAME
-            42220 -> CELO_SHORT_NAME
-            30 -> RSK_SHORT_NAME
+            ETH_MAIN -> ETH_MAIN_SHORT_NAME
+            GNO -> GNO_SHORT_NAME
+            POLYGON -> POLYGON_SHORT_NAME
+            OPT -> OPT_SHORT_NAME
+            ZKS_ERA -> ZKS_ERA_SHORT_NAME
+            ARB_ONE -> ARB_ONE_SHORT_NAME
+            AVA_C -> AVA_C_SHORT_NAME
+            BSC -> BSC_SHORT_NAME
+            CELO -> CELO_SHORT_NAME
+            RSK_MAIN -> RSK_MAIN_SHORT_NAME
 
             // testnets
-            5 -> ETH_GOR_SHORT_NAME
-            42 -> ETH_KOV_SIGMA_SHORT_NAME
-            4 -> ETH_RIN_SHORT_NAME
-            3 -> ETH_ROP_SHORT_NAME
+            ETH_GOR -> ETH_GOR_SHORT_NAME
+            ETH_KOV -> ETH_KOV_SIGMA_SHORT_NAME
+            ETH_RIN -> ETH_RIN_SHORT_NAME
+            ETH_ROP -> ETH_ROP_SHORT_NAME
 
             else -> throw Error("ShortName not defined for $chainId")
         }
 
     companion object {
         // mainnets
+        const val ATS_SIGMA_HTTP_RPC_URL = "https://rpc.sigma1.artis.network"
+        const val POA_CORE_HTTP_RPC_URL = "https://core.poanetwork.dev"
+
+        // testnets
+        const val ETH_SEP_HTTP_RPC_URL = "https://rpc.sepolia.org/"
+        const val GNO_CHIA_HTTP_RPC_URL = "https://rpc.chiadochain.net"
+        const val MUMBAI_HTTP_RPC_URL = "https://matic-mumbai.chainstacklabs.com"
+        const val OPT_KOV_HTTP_RPC_URL = "https://kovan.optimism.io"
+        const val OPT_GOR_HTTP_RPC_URL = "https://goerli.optimism.io"
+        const val OPT_BED_HTTP_RPC_URL = "https://alpha-1-replica-2.bedrock-goerli.optimism.io/"
+        const val ZKS_ALPHA_HTTP_RPC_URL = "https://zksync2-testnet.zksync.dev"
+        const val ARB_GOR_HTTP_RPC_URL = "https://goerli-rollup.arbitrum.io/rpc"
+        const val AVA_FUJ_HTTP_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
+        const val BSC_TESTNET_HTTP_RPC_URL = "https://data-seed-prebsc-1-s1.binance.org:8545/"
+        const val CELO_ALF_HTTP_RPC_URL = "https://alfajores-forno.celo-testnet.org"
+        const val CELO_BAK_HTTP_RPC_URL = "https://baklava-forno.celo-testnet.org"
+        const val LUKSO_16_HTTP_RPC_URL = "https://rpc.l16.lukso.network"
+        const val ATS_TAU_HTTP_RPC_URL = "https://rpc.tau1.artis.network"
+        const val ARB_RIN_HTTP_RPC_URL = "https://rinkeby.arbitrum.io/rpc"
+        const val LUKSO_14_HTTP_RPC_URL = "https://rpc.l14.lukso.network"
+        const val POA_SKL_HTTP_RPC_URL = "https://sokol.poa.network"
+        const val RSK_MAIN_HTTP_RPC_URL = "https://public-node.testnet.rsk.co"
+
+        // mainnets
+        const val ATS_SIGMA_WS_RPC_URL = "wss://ws.sigma1.artis.network"
+
+        // testnets
+        const val ETH_KOV_WS_RPC_URL = "wss://ws-kovan.optimism.io"
+        const val ATS_TAU_WS_RPC_URL = "wss://ws.tau1.artis.network"
+        const val POA_SKL_WS_RPC_URL = "ws://sokol.poa.network:8546"
+
+
+        // mainnets
         const val GNO_SHORT_NAME = "xdai"
-        const val MATIC_SHORT_NAME = "matic"
+        const val POLYGON_SHORT_NAME = "matic"
         const val BSC_SHORT_NAME = "bsc"
         const val ETH_MAIN_SHORT_NAME = "eth"
         const val ARB_ONE_SHORT_NAME = "arbitrum"
@@ -105,7 +174,7 @@ data class Network(
         const val ZKS_ERA_SHORT_NAME = "zksync"
 
         // testnets
-        const val RSK_SHORT_NAME = "rsk"
+        const val RSK_MAIN_SHORT_NAME = "rsk"
         const val ETH_GOR_SHORT_NAME = "goerli"
         const val ETH_KOV_SIGMA_SHORT_NAME = "kovan"
         const val ETH_RIN_SHORT_NAME = "rinkeby"
