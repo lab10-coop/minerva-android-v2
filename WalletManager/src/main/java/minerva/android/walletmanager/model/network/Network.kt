@@ -37,6 +37,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO_CHAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZK_EVM
 
 import minerva.android.walletmanager.model.token.ERCToken
 import java.math.BigInteger
@@ -61,7 +62,7 @@ data class Network(
     val httpRpc: String get() =
         when (chainId) {
             // mainnets
-            ETH_MAIN, GNO, POLYGON, OPT, ZKS_ERA, ARB_ONE, AVA_C, BSC, CELO, RSK_MAIN ->
+            ETH_MAIN, GNO, POLYGON, OPT, ZKS_ERA, ZK_EVM, ARB_ONE, AVA_C, BSC, CELO, RSK_MAIN ->
                 String.format(BuildConfig.RPC_HTTP_URL, shortName())
             ATS_SIGMA -> ATS_SIGMA_HTTP_RPC_URL
             POA_CORE -> POA_CORE_HTTP_RPC_URL
@@ -93,7 +94,7 @@ data class Network(
     val wsRpc: String get() =
         when (chainId) {
             // mainnets
-            ETH_MAIN, GNO, POLYGON, OPT, ZKS_ERA, 42161, 43114, 56, 42220 -> String.format(BuildConfig.RPC_WS_URL, shortName())
+            ETH_MAIN, GNO, POLYGON, OPT, ZKS_ERA, ZK_EVM, ARB_ONE, AVA_C, BSC, CELO -> String.format(BuildConfig.RPC_WS_URL, shortName())
             ATS_SIGMA -> ATS_SIGMA_WS_RPC_URL
 
             // testnets
@@ -113,6 +114,7 @@ data class Network(
             POLYGON -> POLYGON_SHORT_NAME
             OPT -> OPT_SHORT_NAME
             ZKS_ERA -> ZKS_ERA_SHORT_NAME
+            ZK_EVM -> ZK_EVM_SHORT_NAME
             ARB_ONE -> ARB_ONE_SHORT_NAME
             AVA_C -> AVA_C_SHORT_NAME
             BSC -> BSC_SHORT_NAME
@@ -172,6 +174,7 @@ data class Network(
         const val CELO_SHORT_NAME = "celo"
         const val AVA_C_SHORT_NAME = "avalanche"
         const val ZKS_ERA_SHORT_NAME = "zksync"
+        const val ZK_EVM_SHORT_NAME = "zkevm"
 
         // testnets
         const val RSK_MAIN_SHORT_NAME = "rsk"

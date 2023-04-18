@@ -43,6 +43,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POLYGON
 import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ERA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZK_EVM
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.ERCToken
@@ -379,6 +380,7 @@ class TransactionRepositoryImpl(
                 CELO -> fetchCoinRate(MarketIds.CELO).map { markets -> markets.celoFiatPrice?.getRate(currentFiat) }
                 AVA_C -> fetchCoinRate(MarketIds.AVAX).map { markets -> markets.avaxFiatPrice?.getRate(currentFiat) }
                 ZKS_ERA -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
+                ZK_EVM -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
                 else -> Single.just(ZERO_FIAT_VALUE)
             }
         }
