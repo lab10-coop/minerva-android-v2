@@ -1112,6 +1112,7 @@ class TokenManagerImpl(
         private const val ERC721_TX_ACTION = "tokennfttx"
         private const val TOKEN_ADDRESS_SEPARATOR = ","
         private const val TOKEN_LIMIT_PER_CALL = 25
+        // todo: move to local.properties
         private const val TOKENSOWNED_BASE_API_ADDRESS = "https://tokensowned-api.minerva.digital/%s/v1/"
         private const val GNO_SHORT_NAME = "xdai"
         private const val MATIC_SHORT_NAME = "matic"

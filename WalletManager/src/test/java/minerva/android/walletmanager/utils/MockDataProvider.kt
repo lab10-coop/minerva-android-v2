@@ -36,7 +36,7 @@ object MockDataProvider {
 
     val networks = listOf(
         Network(
-            chainId = ATS_TAU, httpRpc = "address", testNet = true,
+            chainId = ATS_TAU, testNet = true,
             tokens = listOf(
                 ERCToken(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13", type = TokenType.ERC20),
                 ERCToken(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32", type = TokenType.ERC20),
@@ -46,17 +46,17 @@ object MockDataProvider {
             superfluid = SuperFluid("host", "netFlow")
         ),
         Network(
-            chainId = ETH_RIN, httpRpc = "address", testNet = true,
+            chainId = ETH_RIN, testNet = true,
             tokens = listOf(
                 ERCToken(ETH_RIN, "CookieTokenDETH", "Cookie", "0xC00k1e", "13", type = TokenType.ERC20),
                 ERCToken(ETH_RIN, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13", type = TokenType.ERC20)
             ),
             superfluid = SuperFluid("host", "netFlow")
         ),
-        Network(chainId = ATS_SIGMA, httpRpc = "address", testNet = true),
-        Network(chainId = POA_CORE, httpRpc = "address", testNet = true),
+        Network(chainId = ATS_SIGMA, testNet = true),
+        Network(chainId = POA_CORE, testNet = true),
         Network(
-            chainId = ETH_MAIN, httpRpc = "address", testNet = false,
+            chainId = ETH_MAIN, testNet = false,
             tokens = listOf(
                 ERCToken(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13", type = TokenType.ERC20),
                 ERCToken(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32", type = TokenType.ERC20)

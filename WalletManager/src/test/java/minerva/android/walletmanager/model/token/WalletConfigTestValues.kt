@@ -18,14 +18,6 @@ object WalletConfigTestValues {
         "Some Key 4" to "Some value"
     )
 
-    val identity = listOf(
-        Identity(0, "IdentityName1", "publicKey", "privateKey", "address", identityData, false)
-    )
-
-    val onlineIdentity = listOf(
-        Identity(0, "OnlineIdentityName1", "publicKey", "privateKey", "address", identityData, false)
-    )
-
     val identityResponse = listOf(
         IdentityPayload(0, "IdentityName1", identityData, false)
     )
@@ -56,8 +48,8 @@ object WalletConfigTestValues {
 
 
     val networks = listOf(
-        Network(chainId = 246785, httpRpc = "httpRpc"),
-        Network(chainId = 4, httpRpc = "httpRpc")
+        Network(chainId = 246785),
+        Network(chainId = 4)
     )
 
     val accounts = listOf(

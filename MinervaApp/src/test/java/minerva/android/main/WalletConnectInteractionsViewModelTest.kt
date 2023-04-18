@@ -64,7 +64,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     @Before
     fun setUp() {
         val networks = listOf(
-            Network(chainId = ETH_MAIN, httpRpc = "url")
+            Network(chainId = ETH_MAIN)
         )
         NetworkManager.initialize(networks)
 
@@ -91,7 +91,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSessionV1(address = "address1"), DappSessionV1(address = "address2")))
         )
         val account = Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(accountManager.getAllAccounts()).thenReturn(listOf( account))
         whenever(accountManager.createHiddenAccount(any(), any())).thenReturn(Single.just(account.name))
@@ -176,7 +176,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         val tx = WalletConnectTransaction("from", "to", value = "0x100000000", data = "0x0")
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(tx, "peerId"))
         )
@@ -245,7 +245,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 ),
                 address = "address1"
             )
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -304,7 +304,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -361,7 +361,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -418,7 +418,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -469,7 +469,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -515,7 +515,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         val transition = WalletConnectTransaction("from", "to", value = null, data = "203DASCS3UE   DBDJHF DFSDFD")
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -566,7 +566,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -743,7 +743,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, address = "address1")
-        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN)))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransactionV1(transition, "peerId"))
         )
@@ -898,7 +898,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `check creating new account flow`() {
-        NetworkManager.initialize(listOf(Network(chainId = 3, name = "xDai", httpRpc = "some_rpc")))
+        NetworkManager.initialize(listOf(Network(chainId = 3, name = "xDai")))
         whenever(accountManager.createOrUnhideAccount(any())).thenReturn(Single.just("Cookie Account"))
         whenever(walletActionsRepository.saveWalletActions(com.nhaarman.mockitokotlin2.any())).thenReturn(Completable.complete())
         viewModel.run {
@@ -949,7 +949,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `approve session test and close app state `() {
-        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false)))
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "key", "bridge")
         viewModel.account = Account(1, chainId = 2)
@@ -971,7 +971,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `approve session test and close dialog state `() {
-        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
+        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false)))
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "key", "bridge")
         viewModel.account = Account(1, chainId = 2)

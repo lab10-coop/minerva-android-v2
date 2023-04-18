@@ -18,8 +18,8 @@ import kotlin.test.assertEquals
 
 class MarketUtilsTest {
 
-    private val poaNetwork = Network(testNet = false, chainId = POA_CORE, httpRpc = "some")
-    private val xdaiNetwork = Network(testNet = false, chainId = GNO, httpRpc = "some")
+    private val poaNetwork = Network(testNet = false, chainId = POA_CORE)
+    private val xdaiNetwork = Network(testNet = false, chainId = GNO)
 
     private val xdaiTestNetwork = Network(testNet = true, chainId = GNO)
     private val markets = Markets(poaFiatPrice = FiatPrice(eur = 0.5), daiFiatPrice = FiatPrice(2.0))
@@ -53,9 +53,9 @@ class MarketUtilsTest {
     fun `get market ids test`() {
         NetworkManager.initialize(
             listOf(
-                Network(chainId = 1, httpRpc = "some"),
-                Network(chainId = 99, httpRpc = "some"),
-                Network(chainId = 100, httpRpc = "some")
+                Network(chainId = 1),
+                Network(chainId = 99),
+                Network(chainId = 100)
             )
         )
         val accounts =

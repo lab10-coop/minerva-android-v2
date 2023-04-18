@@ -41,6 +41,8 @@ android {
         buildConfigField "String", "BSCSCAN_KEY", System.env.BSCSCAN_KEY ?: localProperty("bscscan.key")
         buildConfigField "String", "WALLETCONNECT_PROJECT_ID", System.env.WALLETCONNECT_PROJECT_ID ?: localProperty("walletconnect.project.id")
         buildConfigField "String", "WALLETCONNECT_RELAY_URL", System.env.WALLETCONNECT_RELAY_URL ?: localProperty("walletconnect.relay.url")
+        buildConfigField "String", "RPC_HTTP_URL", System.env.RPC_HTTP_URL ?: localProperty("rpc.http.url")
+        buildConfigField "String", "RPC_WS_URL", System.env.RPC_WS_URL ?: localProperty("rpc.ws.url")
     }
 
     buildTypes {
