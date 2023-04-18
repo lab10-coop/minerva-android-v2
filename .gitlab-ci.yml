@@ -17,6 +17,7 @@ validateBranch:
       - master
       - production
   script:
+    - echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > MinervaApp/google-services.json
     - java -version
     - ./gradlew test
 
@@ -27,6 +28,7 @@ validateLint:
       - master
       - production
   script:
+    - echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > MinervaApp/google-services.json
     - java -version
     - ./gradlew lint
 
@@ -37,6 +39,7 @@ distributeStagingBuild:
       - master
 
   script:
+    - echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > MinervaApp/google-services.json
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
@@ -63,6 +66,7 @@ alphaGooglePlayStore:
       - production
 
   script:
+    - echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > MinervaApp/google-services.json
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
