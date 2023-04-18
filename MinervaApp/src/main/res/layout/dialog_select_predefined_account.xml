@@ -10,7 +10,8 @@
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp" >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -66,7 +67,7 @@
                 android:id="@+id/predefined_network_list"
                 android:visibility="visible"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="206dp"
                 android:layout_marginStart="@dimen/margin_normal"
                 android:layout_marginTop="@dimen/margin_xxlarge"
                 android:layout_marginEnd="@dimen/margin_normal"
@@ -75,19 +76,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/header_msg_2" >
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/predefined_network_list_recycler_view"
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/predefined_network_pager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:listitem="@layout/predefined_network_list_item"
-                    tools:itemCount="2" />
+                    android:layout_weight="1"/>
             </LinearLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/predefined_network_page_count_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_big"
+                android:layout_gravity="bottom"
+                android:background="@color/white"
+                android:layout_marginTop="@dimen/margin_xbig"
+                app:layout_constraintTop_toBottomOf="@+id/predefined_network_list"
+                app:tabBackground="@drawable/tab_selector"
+                app:tabGravity="center"
+                app:tabIndicatorHeight="@dimen/no_elevation"
+                app:tabMode="fixed" />
 
             <TextView
                 android:id="@+id/info_mgs_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_xlarge"
+                android:layout_marginTop="@dimen/margin_xbig"
                 android:fontFamily="@font/rubik_regular"
                 android:gravity="center"
                 android:text="@string/info_mgs_1"
@@ -95,7 +108,7 @@
                 android:textSize="@dimen/text_small"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/predefined_network_list" />
+                app:layout_constraintTop_toBottomOf="@id/predefined_network_page_count_indicator" />
 
             <TextView
                 android:id="@+id/info_mgs_2"
