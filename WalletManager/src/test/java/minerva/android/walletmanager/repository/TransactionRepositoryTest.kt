@@ -81,7 +81,7 @@ class TransactionRepositoryTest : RxTest() {
     @Before
     fun initialize() {
         NetworkManager.initialize(MockDataProvider.networks)
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
@@ -610,12 +610,12 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    chainId = 1
+                    chainId = 12345
                 )
             )
         )
         whenever(blockchainTransactionRepository.getTransactionCosts(any(), eq(null))).doReturn(Single.error(error))
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 12345))
             .test()
             .assertError(error)
     }
@@ -892,7 +892,7 @@ class TransactionRepositoryTest : RxTest() {
             ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1", type = TokenType.ERC20),
             ERCToken(ChainId.ETH_RIN, tag = "tag2", accountAddress = "address2", type = TokenType.ERC20)
         )
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         repository.updateTokens()
             .test()
