@@ -63,6 +63,16 @@ import minerva.android.walletmanager.model.mappers.TokenDataToERCToken
 import minerva.android.walletmanager.model.mappers.TokenToAssetBalanceErrorMapper
 import minerva.android.walletmanager.model.mappers.TokensOwnedToERCToken
 import minerva.android.walletmanager.model.minervaprimitives.account.*
+import minerva.android.walletmanager.model.network.Network.Companion.ARB_ONE_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.ATS_SIGMA_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.AVA_C_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.BSC_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.CELO_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.ETH_MAIN_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.GNO_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.MATIC_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.OPT_SHORT_NAME
+import minerva.android.walletmanager.model.network.Network.Companion.ZKS_ERA_SHORT_NAME
 import minerva.android.walletmanager.model.token.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
@@ -1112,15 +1122,5 @@ class TokenManagerImpl(
         private const val ERC721_TX_ACTION = "tokennfttx"
         private const val TOKEN_ADDRESS_SEPARATOR = ","
         private const val TOKEN_LIMIT_PER_CALL = 25
-        private const val GNO_SHORT_NAME = "xdai"
-        private const val MATIC_SHORT_NAME = "matic"
-        private const val ATS_SIGMA_SHORT_NAME = "artis_s1"
-        private const val BSC_SHORT_NAME = "bsc"
-        private const val ETH_MAIN_SHORT_NAME = "eth"
-        private const val ARB_ONE_SHORT_NAME = "arbitrum"
-        private const val OPT_SHORT_NAME = "optimism"
-        private const val CELO_SHORT_NAME = "celo"
-        private const val AVA_C_SHORT_NAME = "avalanche"
-        private const val ZKS_ERA_SHORT_NAME = "zksync"
     }
 }

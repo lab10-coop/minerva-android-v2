@@ -72,27 +72,46 @@ data class Network(
     private fun shortName() =
         when (chainId) {
             // mainnets
-            1 -> "eth"
-            100 -> "xdai"
-            137 -> "matic"
-            10 -> "optimism"
-            324 -> "zksync"
-            42161 -> "arbitrum"
-            43114 -> "avalanche"
-            56 -> "bsc"
-            42220 -> "celo"
-            30 -> "rsk"
+            1 -> ETH_MAIN_SHORT_NAME
+            100 -> GNO_SHORT_NAME
+            137 -> MATIC_SHORT_NAME
+            10 -> OPT_SHORT_NAME
+            324 -> ZKS_ERA_SHORT_NAME
+            42161 -> ARB_ONE_SHORT_NAME
+            43114 -> AVA_C_SHORT_NAME
+            56 -> BSC_SHORT_NAME
+            42220 -> CELO_SHORT_NAME
+            30 -> RSK_SHORT_NAME
 
             // testnets
-            5 -> "goerli"
-            42 -> "kovan"
-            4 -> "rinkeby"
-            3 -> "ropsten"
+            5 -> ETH_GOR_SHORT_NAME
+            42 -> ETH_KOV_SIGMA_SHORT_NAME
+            4 -> ETH_RIN_SHORT_NAME
+            3 -> ETH_ROP_SHORT_NAME
 
             else -> throw Error("ShortName not defined for $chainId")
         }
 
     companion object {
+        // mainnets
+        const val GNO_SHORT_NAME = "xdai"
+        const val MATIC_SHORT_NAME = "matic"
+        const val BSC_SHORT_NAME = "bsc"
+        const val ETH_MAIN_SHORT_NAME = "eth"
+        const val ARB_ONE_SHORT_NAME = "arbitrum"
+        const val OPT_SHORT_NAME = "optimism"
+        const val CELO_SHORT_NAME = "celo"
+        const val AVA_C_SHORT_NAME = "avalanche"
+        const val ZKS_ERA_SHORT_NAME = "zksync"
+
+        // testnets
+        const val RSK_SHORT_NAME = "rsk"
+        const val ETH_GOR_SHORT_NAME = "goerli"
+        const val ETH_KOV_SIGMA_SHORT_NAME = "kovan"
+        const val ETH_RIN_SHORT_NAME = "rinkeby"
+        const val ETH_ROP_SHORT_NAME = "ropsten"
+        const val ATS_SIGMA_SHORT_NAME = "artis_s1"
+
         const val INFURA_HTTP_RPC_URL = "https://%s.infura.io/v3/%s"
         const val INFURA_WS_RPC_URL = "https://%s.infura.io/v3/%s"
     }
