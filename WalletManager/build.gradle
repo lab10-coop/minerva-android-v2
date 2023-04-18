@@ -43,6 +43,7 @@ android {
         buildConfigField "String", "WALLETCONNECT_RELAY_URL", System.env.WALLETCONNECT_RELAY_URL ?: localProperty("walletconnect.relay.url")
         buildConfigField "String", "RPC_HTTP_URL", System.env.RPC_HTTP_URL ?: localProperty("rpc.http.url")
         buildConfigField "String", "RPC_WS_URL", System.env.RPC_WS_URL ?: localProperty("rpc.ws.url")
+        buildConfigField "String", "TOKENSOWNED_BASE_API_URL", System.env.TOKENSOWNED_BASE_API_URL ?: localProperty("tokensowned.base.api.url")
     }
 
     buildTypes {

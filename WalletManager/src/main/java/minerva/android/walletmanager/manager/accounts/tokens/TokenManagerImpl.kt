@@ -698,16 +698,16 @@ class TokenManagerImpl(
 
     @VisibleForTesting
     override fun getTokensOwnedURL(chainId: Int, menuCase: Boolean): String = when (chainId) {
-        GNO -> String.format(TOKENSOWNED_BASE_API_ADDRESS, GNO_SHORT_NAME)
-        MATIC -> String.format(TOKENSOWNED_BASE_API_ADDRESS, MATIC_SHORT_NAME)
-        ATS_SIGMA -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ATS_SIGMA_SHORT_NAME)
-        BSC -> String.format(TOKENSOWNED_BASE_API_ADDRESS, BSC_SHORT_NAME)
-        ETH_MAIN -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ETH_MAIN_SHORT_NAME)
-        ARB_ONE -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ARB_ONE_SHORT_NAME)
-        OPT -> String.format(TOKENSOWNED_BASE_API_ADDRESS, OPT_SHORT_NAME)
-        CELO -> String.format(TOKENSOWNED_BASE_API_ADDRESS, CELO_SHORT_NAME)
-        AVA_C -> String.format(TOKENSOWNED_BASE_API_ADDRESS, AVA_C_SHORT_NAME)
-        ZKS_ERA -> String.format(TOKENSOWNED_BASE_API_ADDRESS, ZKS_ERA_SHORT_NAME)
+        GNO -> String.format(TOKENSOWNED_BASE_API_URL, GNO_SHORT_NAME)
+        MATIC -> String.format(TOKENSOWNED_BASE_API_URL, MATIC_SHORT_NAME)
+        ATS_SIGMA -> String.format(TOKENSOWNED_BASE_API_URL, ATS_SIGMA_SHORT_NAME)
+        BSC -> String.format(TOKENSOWNED_BASE_API_URL, BSC_SHORT_NAME)
+        ETH_MAIN -> String.format(TOKENSOWNED_BASE_API_URL, ETH_MAIN_SHORT_NAME)
+        ARB_ONE -> String.format(TOKENSOWNED_BASE_API_URL, ARB_ONE_SHORT_NAME)
+        OPT -> String.format(TOKENSOWNED_BASE_API_URL, OPT_SHORT_NAME)
+        CELO -> String.format(TOKENSOWNED_BASE_API_URL, CELO_SHORT_NAME)
+        AVA_C -> String.format(TOKENSOWNED_BASE_API_URL, AVA_C_SHORT_NAME)
+        ZKS_ERA -> String.format(TOKENSOWNED_BASE_API_URL, ZKS_ERA_SHORT_NAME)
         else -> if (menuCase) { "" } else { throw NetworkNotFoundThrowable() }
     }
 
@@ -1112,8 +1112,6 @@ class TokenManagerImpl(
         private const val ERC721_TX_ACTION = "tokennfttx"
         private const val TOKEN_ADDRESS_SEPARATOR = ","
         private const val TOKEN_LIMIT_PER_CALL = 25
-        // todo: move to local.properties
-        private const val TOKENSOWNED_BASE_API_ADDRESS = "https://tokensowned-api.minerva.digital/%s/v1/"
         private const val GNO_SHORT_NAME = "xdai"
         private const val MATIC_SHORT_NAME = "matic"
         private const val ATS_SIGMA_SHORT_NAME = "artis_s1"
