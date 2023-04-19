@@ -81,6 +81,19 @@
     "explore": "https://explorer.zksync.io/"
   },
   {
+    "name": "Polygon zkEVM",
+    "isActive": true,
+    "token": "ETH",
+    "isSafeAccountAvailable": "false",
+    "gasPrice": "20000000000",
+    "minGasPrice": "0",
+    "tokens": [],
+    "color": "#8247e5",
+    "testNet": false,
+    "chainId": 1101,
+    "explore": "https://zkevm.polygonscan.com/"
+  },
+  {
     "name": "Arbitrum One",
     "isActive": true,
     "token": "ETH",

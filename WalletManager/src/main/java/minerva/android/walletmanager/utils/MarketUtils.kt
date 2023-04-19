@@ -17,6 +17,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.GNO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ZKS_ERA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ZK_EVM
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinCryptoBalance
 import minerva.android.walletmanager.model.transactions.Balance
@@ -70,6 +71,7 @@ object MarketUtils {
             CELO -> markets.celoFiatPrice?.getRate(currentFiatCurrency)
             AVA_C -> markets.avaxFiatPrice?.getRate(currentFiatCurrency)
             ZKS_ERA -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
+            ZK_EVM -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
             else -> null
         }
 
@@ -85,6 +87,7 @@ object MarketUtils {
             ARB_ONE -> MarketIds.ETHEREUM
             OPT -> MarketIds.ETHEREUM
             ZKS_ERA -> MarketIds.ETHEREUM
+            ZK_EVM -> MarketIds.ETHEREUM
             CELO -> MarketIds.CELO
             AVA_C -> MarketIds.AVAX
             else -> String.Empty
