@@ -80,6 +80,7 @@ abstract class BaseWalletConnectScannerViewModel(
         .filter { account -> account.shouldShow }
         .map { account -> AddressWrapper(account.id, account.address, AddressStatus.ALREADY_IN_USE) }
         .distinct()
+        .sortedBy { it.index }
 
     private fun prepareAvailableNetworks(): List<NetworkDataSpinnerItem> =
         mutableListOf<NetworkDataSpinnerItem>().apply {
