@@ -455,6 +455,17 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.8.5 (20 Apr 2023)</item>
+        <item> * WalletConnect 2.0 support</item>
+        <item> * WalletConnect 1.0: DApp triggered change account</item>
+        <item> * New onboarding network selection screen</item>
+        <item> * Fiat price for SuperTokens, wrapped tokens and LP tokens</item>
+        <item> * Added Polygon zkEVM support</item>
+        <item> * Added Arbitrum Görli testnet support</item>
+        <item> * Added Lukso L16 testnet support</item>
+        <item> * Added zkSync Era testnet support</item>
+        <item> * Set Optimism Bedrock, Lukso L14 and Arbitrum Rinkeby testnet as unmaintained network</item>
+        <item> * UI adjustments, security updates &amp; bug fixes</item>
         <item>1.8.1 (4 Jan 2023)</item>
         <item>* Added Gnosis Chiado testnet support</item>
         <item>* Added Optimism Bedrock &amp; Görli testnet support</item>
