@@ -151,14 +151,6 @@ class RampViewModel(
                     R.drawable.ic_ethereum_l2,
                     getNetworkName(ChainId.OPT)
                 ),
-
-                RampCrypto(
-                    ChainId.ZKS_ERA,
-                    "ETH",
-                    "ZKSYNCERA_ETH",
-                    R.drawable.ic_ethereum_l2,
-                    getNetworkName(ChainId.ZKS_ERA)
-                ),
                 RampCrypto(
                     ChainId.ETH_MAIN,
                     "DAI",
@@ -208,14 +200,6 @@ class RampViewModel(
                     "OPTIMISM_DAI",
                     R.drawable.ic_dai_token,
                     getNetworkName(ChainId.OPT)
-                ),
-
-                RampCrypto(
-                    ChainId.ZKS_ERA,
-                    "USDC",
-                    "ZKSYNCERA_USDC",
-                    R.drawable.ic_usdc_token,
-                    getNetworkName(ChainId.ZKS_ERA)
                 ),
                 RampCrypto(
                     ChainId.CELO,
