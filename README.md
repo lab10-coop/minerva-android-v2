@@ -1,62 +1,81 @@
-# About
+# Minerva Wallet
 
-Minerva is a Digital Wallet for Android phones.  
-It uses emerging standards for Self Sovereign Identity (SSI) for identity management and supports multiple Blockchain networks for handling of digital assets (currently supported: native tokens, ERC-20 tokens and [Gnosis Safe](https://gnosis-safe.io/) accounts).  
-Development was co-sponsored by [Sitra](https://www.sitra.fi/en/) as an [IHAN pilot project](https://www.sitra.fi/en/projects/ihan-proof-concept-pilots/) "Minerva MVP".
+Minerva Wallet is a community-governed mobile EVM Android wallet designed for the next generation of real-world applications connected to the thriving DeFi world. The wallet supports multiple blockchain networks, including native tokens, ERC-20 tokens, and NFTs. Think of it as a digital version of your regular wallet, able to manage all the things you have in it, but in a digital, tamper-proof, and highly secure format.
+
+Created in 2019, Minerva gives users their sovereignty back and allows them to join the blockchain revolution by eliminating middlemen like banks and exchanges, identity providers, and data aggregators while assuring privacy-by-design.
+
+Visit us at https://minerva.digital or Twitter @MinervaWallet to learn more.
+
+## Supported Networks
+
+Minerva can be used to interact with Ethereum, Gnosis Chain (former xDai Chain), Polygon, Optimism, Arbitrum, Avalanche, BNB Chain, and Celo, as well as many test networks. You can manage all coins and tokens on each of these networks.
+
+## Features
+
+Minerva is packed with features that make it easy to manage your digital assets, interact with DeFi applications, and more. Some of the key features of Minerva include:
+
+- Interact with DeFi and DApps via WalletConnect integration
+- Move coins and tokens between different networks with ease
+- Secure management of digital assets on multiple blockchain networks
+- Create unique Decentralized Identifiers (DIDs) and receive credentials for them
+- Easy backup and restoration of wallet data
+- Open-source wallet code for public auditability and security
+- Non-extractive and transparent fee collection through the Minerva DAO
+- Community-governed via Snapshot when it comes to features and revenue generation
+- NFT support for all main networks (ERC-721 & ERC-1155) and support for all NFT media types
+- Automated token discovery (e.g. LP tokens)
+
+## Roadmap
+
+You can find all the feature suggestions on our [website](https://minerva.digital). Some of the upcoming highlights are:
+
+- Supporting the latest chains, e.g. Polygon zkEVM or zkSync Era
+- Providing WalletConnect v2 support and boosting DApp interaction
+- Allowing up to 99 accounts for every supported chain
+- Adding watch accounts so that they can be easily monitored
+- Enabling tokens Swap and Bridge between all supported EVM chains via Li.Fi
+
+
+## How We Are Different
+
+Wallets are the gateway to Web3, and it is essential to have open-source, non-extractive, community-governed wallets available for everyone. Minerva Wallet has been such a wallet for years now and intends to be always at the forefront of new features, e.g. Superfluid support, combined with simple usability and a quick setup.
+
+We give the power to our users via three core principles:
+
+- Open-source our wallet code for public auditability and security
+- Non-extractive and transparent fee collection through the Minerva DAO
+- Community-governed via Snapshot when it comes to features and revenue generation
+
+The $MIVA Super Token plays a central role in this, and as we have been diving through the crypto winter, we are now much more prepared to start significant distributions.
+
+Because Minerva Wallet is a mobile EVM Android wallet, we focus on enabling booming emerging P2P markets (e.g. Nigeria) to use a mobile-only approach for making money and managing crypto on the go. With the derived account structure, the wallet is fully compatible with Metamask or Rabby, which helps to tap also into the desktop world, without a compromise to the usability.
+
 
 ## Modules
 
-Minerva App Project is divided into several modules:
+Minerva Wallet consists of several modules:
 
-MinervaApp - the main application module. All UI etc. This module is connected with WalletManager only.
+- `MinervaApp`: The main application module that contains the user interface and connects to the WalletManager.
+- `WalletManager`: Manages data preparation required for the MinervaApp to function properly, including the KeyStore, which stores the encryption key for encoding the MasterKey.
+- `ApiProvider`: Interaction with external APIs.
+- `WalletConnect`: WalletConnect 1.0 and 2.0 support.
+- `BlockchainProvider`: Facilitates communication with the blockchain for simple operations and smart contracts.
+- `CryptographyProvider`: Performs all cryptographic calculations, such as public/private keys, addresses, and mnemonics, using the MasterKey.
+- `WalletConfigProvider`: Handles save/load operations for the raw WalletConfig file, both in local storage and on an external server.
+- `KotlinUtils` and `UiExtension`: Helper modules containing universal code, widgets, and extensions to improve code readability.
 
-`WalletManager` - module, which is responsible preparing data which is needed for proper MinarvaApp working. Important part of this module is KeyStore, which is responsible for storing encryptionKey for encoding MasterKey. All rest data (private/public keys, addresses, mnemonic) are calculating on the application start. Another important part of this module is WalletConfigRepository. This part of code is responsible for building the wallet using WalletConfig file.
+## Architecture
 
-`WalletConfigRepository` - module which is responsible for managing saving and loading WalletConfig file localy and on the server.
+The application architecture utilizes dependency injection through Koin. Modules and view models are defined in the AppModule.kt file. Communication between modules is performed using streams via RxKotlin, and communication between view models and views uses LiveData. Screens that require WalletConfig data observe `walletConfigLiveData`, eliminating the need for manual screen refreshing after changing wallet data.
 
-`ExchangeMarketsProvider` - module which is responsible for downloading current cryptocurrency to traditional currency ratio (ETH-EUR).
+## Building the App
 
-`BlockchainProvider` - this module is responsible for communication with blockchain. There is communication for simple blockchain operations (BlockchainRepository) and for SmartContracts (SmartContractRepository).
-
-`CryptographyProvider` - module which is responsible for all cryptography calculations - public/private keys, addresses, mnemonic using MasterKey. All this calculations are made with every application start.
-
-`ServiceApiProvider` - ServiceApiProvider was created in order to integrate 3rd party login using deep link mechanism.
-
-`WalletConfigProvider` - module where we make save/load operations of WalletConfig raw file. Data is saved in local storage and on the external server. The application is able to run without internet connection (restore walletConfig from local storage).
-
-`KotlinUtils`, `UiExtension` - helpers modules - some universal code, widgets and extension to create application code more readable.
-
-`WalletConfig` - json file which is uploaded/downloaded form the server (saved localy too). This is kind of map of the account. Using this file, the app is able to recreate user account and data. In this file you can find identities (with data) and wallet structure.
-
-![Diagram Image](MinervaDiagram.jpg)
-
-## Description
-
-Application architecture uses dependency injection - Koin. All modules and viewModels are described in file AppModule.kt. All between modules communication is made using streams - RxKotlin. Communication between viewModels and views are made using LiveData. All screens which need WalletConfig data are observing `walletConfigLiveData`, so there is no need to refresh screens manually, after changing wallet data.
-
-All hacks and pleaces which need refactor are described in the code with `TODO` comments
-
-All Networks are described in Network.kt enum class, ie:
-
-```
-ETHEREUM(NetworkFullName.ETH, NetworkShortName.ETH, BuildConfig.ETH_ADDRESS, ETHEREUM_GAS_PRICE)
-```
-
-### Adding new Network
-
-1. Add Network as new element in Network enum class
-2. Add correct shot (which is id), long name, Network default gas price and Network address (build.gradle file) in the same way, as others Networks.
-3. Add missing Network Materials in NetworkMaterialRepository (colors, icons, etc)
-
-##Build
-Build is done via docker. If you want to build an app and have docker installed just type:
+The app is built using Docker. To build the app with Docker installed, use the following commands:
 
 ### Debug
-- `docker-compose up`
-### Release
-- `docker-compose run builder ./gradlew assembleRelease`
 
-How to eth gas station api key:
-1. Create a free account at data.defipulse.com to obtain an API-key or go to git and copy value of ETH_GAS_STATION_API_KEY
-2. in local.properties paste: eth.gas.station.api.key="<value of eth gas station api key>"
-3. Sync project
+- `docker-compose up`
+
+### Release
+
+- `docker-compose run builder ./gradlew assembleRelease`
