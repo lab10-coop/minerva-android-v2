@@ -82,7 +82,7 @@
   },
   {
     "name": "Polygon zkEVM",
-    "isActive": true,
+    "isActive": false,
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "gasPrice": "20000000000",
