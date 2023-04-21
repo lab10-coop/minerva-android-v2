@@ -89,7 +89,7 @@ data class Network(
 
             else -> ""
         }
-    val gasPriceOracle: String = httpRpc
+    val gasPriceOracle: String get() = httpRpc
     val wsRpc: String get() =
         when (chainId) {
             // mainnets
